@@ -1,21 +1,11 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs } from 'firebase/firestore/lite';
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
 
-//note: this is starter code from firebase documentation
+const app = express();
 
-// TODO: Replace the following with your app's Firebase configuration
-const firebaseConfig = {
-  //...
-};
+app.use(cors);
+app.use(express.json());
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/*
-// Get a list of cities from your database
-async function getCities(db) {
-  const citiesCol = collection(db, 'cities');
-  const citySnapshot = await getDocs(citiesCol);
-  const cityList = citySnapshot.docs.map(doc => doc.data());
-  return cityList;
-} */
+app.listen(process.env.PORT || 8080, ()=>
+  console.log(`Server running on port ${process.env.PORT || 8080}`));
