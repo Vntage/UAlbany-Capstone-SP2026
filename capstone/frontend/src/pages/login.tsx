@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth"
+import type { ChangeEvent, SubmitEvent } from "react";
 import { auth } from "../config/firebase"
 
 export default function Login() {
@@ -9,11 +10,11 @@ export default function Login() {
         password: ""
     });
 
-    const handleChange = (e) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form,[e.target.name]: e.target.value})
     }
 
-    const handleLogin = async (e) => {
+    const handleLogin = async (e: SubmitEvent) => {
         e.preventDefault();
 
         try{
