@@ -5,6 +5,9 @@ import pool from "./config/db"
 import admin from "./config/firebase"
 import { Auth } from "firebase-admin/lib/auth/auth";
 import { Message } from "protobufjs";
+import { Result } from "range-parser";
+import { emitWarning } from "node:process";
+import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 
 const app = express();
 app.use(cors());
@@ -15,11 +18,7 @@ app.use(express.json());
 interface AuthenticatedRequest extends Request {
     user?: admin.auth.DecodedIdToken;
 }
-const verifyToken = async(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-) => {
+const verifyToken = async(req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if(!authHeader || !authHeader.startsWith("Bearer ")){
         return res.status(401).json({ message : "Unauthorized" })
@@ -58,7 +57,42 @@ app.get("/api/users/user", verifyToken, async(req: AuthenticatedRequest, res: Re
         res.json(user);
     }catch(error){
         console.log(error);
-        res.status(401).json({ message: "Server Error" })
+        res.status(401).json({ message: "Server Error" });
+    }
+})
+
+app.post("/api/users/signup", verifyToken, async(req: AuthenticatedRequest, res: Response) => {
+    try{
+        const { username, firstName, lastName } = req.body;
+
+        if(!username || !firstName || !lastName || !req.user){
+            res.status(401).json({ message: "Unauthorized" })
+        }
+
+        const firebaseID = req.user;
+
+        try{
+            const query = `INSERT INTO users (firebase_uid, username, first_name, last_name)
+            VALUES($1, $2, $3, $4)
+            RETURNING *;'`;
+            const values = [firebaseID, username, firstName, lastName];
+
+            const result = await pool.query(query, values);
+
+            res.status(201).json({
+                message: "User created successfully",
+                user: result.rows[0]
+            });
+        }catch(error){
+            console.log(error)
+            res.status(401).json({ message: "Server Error" });
+        }
+
+
+
+    }catch(error){
+        console.log(error);
+        res.status(401).json({ message: "Server Error" });
     }
 })
 
