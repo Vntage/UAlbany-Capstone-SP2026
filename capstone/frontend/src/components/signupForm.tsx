@@ -13,7 +13,25 @@ const signupForm = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signup(firstName, lastName, username, email, password);
+      const user = await signup(email, password);
+      const token = await user.user.getIdToken(true);
+
+      const res = await fetch("http://localhost:8080/api/users/signup", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type' : "application/json"
+        },
+        body: JSON.stringify({
+          username: username,
+          firstName: firstName,
+          lastName: lastName,
+        })
+      });
+
+      if(!res.ok){
+        console.log("Error in server");
+      }
       alert("Account created successfully!");
       navigate("/"); // redirect to home
     } catch (error: any) {

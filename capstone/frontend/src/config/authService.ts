@@ -5,9 +5,6 @@ import { doc, setDoc } from "firebase/firestore";
 
 // Signup function with extra fields
 export const signup = async (
-  firstName: string,
-  lastName: string,
-  username: string,
   email: string,
   password: string
 ): Promise<UserCredential> => {
@@ -16,9 +13,6 @@ export const signup = async (
 
   // 2️⃣ Save extra info to Firestore
   await setDoc(doc(db, "users", userCredential.user.uid), {
-    firstName,
-    lastName,
-    username,
     email,
     createdAt: new Date(),
   });
