@@ -47,7 +47,7 @@ app.get("/api/users/user", verifyToken, async(req: AuthenticatedRequest, res: Re
         
         const uid = req.user;
 
-        const result = await pool.query("SELECT * FROM users WHERE uid = $1", [uid]);
+        const result = await pool.query("SELECT * FROM users WHERE firebase_uid = $1", [uid]);
         let user = result.rows[1];
 
         if(!user){
