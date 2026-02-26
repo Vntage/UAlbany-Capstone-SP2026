@@ -38,10 +38,10 @@ const verifyToken = async(req: AuthenticatedRequest, res: Response, next: NextFu
 app.get("/api/users/user", verifyToken, async(req: AuthenticatedRequest, res: Response) => {
     try{
         if(!req.user){
-           return  res.status(401).json({ message: "Unauthorized" })
+           return  res.status(401).json({ message: "Unauthorized User" })
         }
-        
-        const uid = req.user;
+
+        const uid = req.user.uid;
 
         const result = await pool.query("SELECT * FROM users WHERE firebase_uid = $1", [uid]);
         let user = result.rows[0];
