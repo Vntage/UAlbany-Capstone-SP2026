@@ -31,7 +31,7 @@ const verifyToken = async(req: AuthenticatedRequest, res: Response, next: NextFu
         req.user = decodedToken
         next();
     }catch(error){
-        res.status(401).json({ message: "Invalid token" })
+        return res.status(401).json({ message: "Invalid token" })
     }
 }
 
