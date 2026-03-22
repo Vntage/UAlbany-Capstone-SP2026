@@ -27,7 +27,7 @@ export default function Login() {
             const token = await cred.user.getIdToken();
 
             //finish api
-            const res = await fetch("http://localhost:8080/api/users/user", {
+            const res = await fetch("http://localhost:8080/api/users/login", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -35,7 +35,9 @@ export default function Login() {
 
             const userData = await res.json();
 
-            localStorage.setItem("user", JSON.stringify(userData))
+            localStorage.setItem("user", JSON.stringify(userData
+                
+            ))
 
 
             alert("Login successful");
