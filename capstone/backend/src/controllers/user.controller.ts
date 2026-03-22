@@ -1,37 +1,32 @@
 import { Request, Response } from "express"
 import admin from "../config/firebase"
 import pool from "../config/db"
+import { AuthenticatedRequest } from "../middleware/verifySession"
 
-//authenticates token and creates session cookie
-export const login = async(req: Request, res: Response) => {
-    const idToken = req.body;
-
-    const expiresIn = 60 * 60 *1000;
-
+export const user = async(req: AuthenticatedRequest, res: Response) => {
     try{
-        const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-        const uid = decodedIdToken.uid;
+        if(!req.user){
+            return res.status(401).json({ message: "Unauthorized" })
+        }
+        const uid = req.user.uid;
 
-        const result = await pool.query("SELECT * FROM users WHERE firebase_uid = $1", [uid]);
-        let user = result.rows[0];
+        const result = await pool.query(
+            `SELECT firebase_uid, first_name, last_name
+            FROM users
+            WHERE uid = $1`,
+            [uid]
+        );
 
-        if(!user){
-            return res.status(401).json({ message: "Unknown user" });
+        if (result.rows.length === 0){
+            return res.status(404).json({ message: "User not found" })
         }
 
-        const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn });
 
-        res.cookie("session", sessionCookie, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
-            maxAge: expiresIn,
-        });
-
-        res.json(user);
-    }catch(error){
+        return res.status(200).json(result.rows[0]);
+    }
+    catch(error){
         console.log(error);
-        return res.status(401).json({ message: "Server Error" });
+        return res.status(500).json({ message: "Server Error" })
     }
 }
 
@@ -59,11 +54,11 @@ export const signup = async(req: Request, res: Response) => {
             });
         }catch(error){
             console.log(error)
-            return res.status(401).json({ message: "Server Error" });
+            return res.status(500).json({ message: "Server Error" });
         }
     }catch(error){
         console.log(error);
-        return res.status(401).json({ message: "Server Error" });
+        return res.status(500).json({ message: "Server Error" });
     }
 
 }

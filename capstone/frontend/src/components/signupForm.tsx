@@ -19,10 +19,10 @@ const signupForm = () => {
       const res = await fetch("http://localhost:8080/api/users/signup", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type' : "application/json"
         },
         body: JSON.stringify({
+          idToken: token,
           username: username,
           firstName: firstName,
           lastName: lastName,

@@ -1,10 +1,11 @@
 import  express  from "express"
-import { login, signup } from "../controllers/user.controller"
+import { user, signup } from "../controllers/user.controller"
+import { verifySession } from "../middleware/verifySession"
 
 const router = express.Router();
 
 router.post("/signup", signup);
 
-router.get("/login", login);
+router.post("/user", verifySession, user);
 
 export default router;

@@ -1,4 +1,38 @@
 import { Request, Response } from "express"
+import admin from "../config/firebase"
+import pool from "../config/db"
+
+//authenticates token and creates session cookie
+export const login = async(req: Request, res: Response) => {
+    const { token } = req.body;
+    console.log(req.body)
+    console.log(token)
+    if(!token){
+        return res.status(400).json({ message: "No Token Provided" });
+    }
+
+    try{
+        const decodedIdToken = await admin.auth().verifyIdToken(token);
+        const uid = decodedIdToken.uid;
+
+        const expiresIn = 60 * 60 *1000;
+
+        const sessionCookie = await admin.auth().createSessionCookie(token, { expiresIn });
+
+        res.cookie("session", sessionCookie, {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+            maxAge: expiresIn,
+        });
+
+        return res.status(200).json({ message: "Session Cookie Created" });
+
+    }catch(error){
+        console.log(error);
+        return res.status(401).json({ message: "Server Error" });
+    }
+}
 
 //logout function
 export const logout = async(req: Request, res: Response) => {

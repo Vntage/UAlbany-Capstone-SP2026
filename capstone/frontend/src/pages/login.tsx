@@ -27,26 +27,25 @@ export default function Login() {
             const token = await cred.user.getIdToken();
 
             //finish api
-            const res = await fetch("http://localhost:8080/api/users/login", {
+            const res = await fetch("http://localhost:8080/api/auth/login", {
+                method: "POST",
                 headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({ token })
             });
 
-            const userData = await res.json();
-
-            localStorage.setItem("user", JSON.stringify(userData
-                
-            ))
-
-
-            alert("Login successful");
+            if(res.ok){
+                alert("Login successful");
+            }
+            else{
+                console.log(await res.json())
+            }
         }
         catch(error){
             console.log(error)
-
         }
-        
     };
     return(
         <form onSubmit={handleLogin}>
