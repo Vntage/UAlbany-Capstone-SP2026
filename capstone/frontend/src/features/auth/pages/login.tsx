@@ -50,11 +50,11 @@ export default function Login() {
     return (
     <div className="min-h-screen flex items-center justify-center bg-surface">
       <div className="bg-surface-container-lowest rounded-xl shadow-ambient p-12 w-full max-w-md">
-        <h1 className="text-3xl font-headline font-extrabold text-primary mb-6 text-center">
+        <h1 className="text-3xl font-headline font-extrabold text-black mb-6 text-center">
           Login
         </h1>
 
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+        <form onSubmit={handleLogin} className="flex flex-col gap-4 text-black">
           <input
             name="email"
             type="email"
@@ -75,13 +75,13 @@ export default function Login() {
 
           <button
             type="submit"
-            className="cta-gradient text-on-primary font-bold py-3 rounded shadow-ambient hover:brightness-110 transition-all mt-2"
+            className="cta-gradient text-on-primary font-bold py-3 rounded shadow-ambient hover:brightness-110 transition-all mt-2 text-white"
           >
             Login
           </button>
         </form>
 
-        <p className="text-center text-on-surface-variant mt-6">
+        <p className="text-center text-on-surface-variant mt-6 text-black">
           Don’t have an account?{" "}
           <a href="/signup" className="text-secondary font-bold hover:underline">
             Signup

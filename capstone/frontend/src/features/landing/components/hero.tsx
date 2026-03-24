@@ -1,23 +1,24 @@
-
-export default function hero() {
+export default function Hero() {
   return (
-    <section className="relative pt-32 pb-32 overflow-hidden mx-auto">
-      <div className="max-w-[1440px] mx-auto px-12 grid grid-cols-12 gap-12 items-center">
+    <section className="relative pt-32 pb-32 bg-sky-50 overflow-hidden mt-25">
+      {/* Center content horizontally with max width */}
+      <div className="max-w-6xl mx-auto px-6 md:px-12 grid grid-cols-12 gap-12 items-center">
+        
         {/* Text */}
-        <div className="col-span-12 lg:col-span-5">
-          <h1 className="font-headline font-extrabold text-[4.5rem] leading-[1.1] text-primary mb-8 tracking-tighter">
+        <div className="col-span-12 lg:col-span-5 text-center lg:text-left">
+          <h1 className="font-headline font-extrabold text-5xl md:text-[4.5rem] leading-tight text-sky-900 mb-6 tracking-tight">
             Your Wealth, <br />
-            <span className="text-secondary italic">Perfectly</span> Deciphered.
+            <span className="text-sky-600 italic">Perfectly</span> Deciphered.
           </h1>
-          <p className="text-on-surface-variant text-xl mb-10 max-w-md leading-relaxed">
+          <p className="text-sky-800 text-lg md:text-xl mb-8 max-w-md mx-auto lg:mx-0 leading-relaxed">
             The editorial-first financial ledger designed for small business
             leaders who demand clarity over clutter.
           </p>
-          <div className="flex gap-4">
-            <button className="cta-gradient text-on-primary px-10 py-4 rounded font-bold text-lg shadow-ambient hover:brightness-110 transition-all">
+          <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+            <button className="bg-sky-600 text-white px-8 py-4 rounded-lg font-bold text-lg shadow hover:bg-sky-700 transition-all">
               Get Started
             </button>
-            <button className="px-10 py-4 rounded font-bold text-lg text-primary bg-surface-container-high hover:bg-surface-container-highest transition-all">
+            <button className="px-8 py-4 rounded-lg font-bold text-sky-700 bg-white border border-sky-300 hover:bg-sky-100 transition-all">
               View Demo
             </button>
           </div>
@@ -25,18 +26,18 @@ export default function hero() {
 
         {/* Dashboard Mockup */}
         <div className="col-span-12 lg:col-span-7 relative">
-          <div className="bg-surface-container-lowest rounded-xl p-6 shadow-ambient border-outline-variant/15 border-[1px]">
-            <div className="flex justify-between items-end mb-12">
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+            <div className="flex justify-between items-end mb-8">
               <div>
-                <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant font-semibold">
+                <span className="font-label text-xs uppercase tracking-widest text-sky-500 font-semibold">
                   Total Revenue Portfolio
                 </span>
-                <div className="font-headline text-5xl font-extrabold text-primary mt-2">
+                <div className="font-headline text-4xl md:text-5xl font-extrabold text-sky-900 mt-2">
                   $842,910.42
                 </div>
               </div>
               <div className="text-right">
-                <span className="inline-flex items-center gap-1 text-secondary font-bold bg-secondary-container px-3 py-1 rounded-full text-sm">
+                <span className="inline-flex items-center gap-1 text-green-700 font-bold bg-green-100 px-3 py-1 rounded-full text-sm">
                   <span className="material-symbols-outlined text-sm">
                     trending_up
                   </span>
@@ -45,34 +46,34 @@ export default function hero() {
               </div>
             </div>
 
-            <div className="h-32 w-full bg-surface-container-low rounded-lg relative overflow-hidden mb-8">
+            <div className="h-32 w-full bg-sky-100 rounded-lg relative overflow-hidden mb-6">
               <div className="absolute inset-0 flex items-end">
-                {/* Sparkline SVG omitted for brevity */}
+                {/* Sparkline SVG or mockup goes here */}
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 gap-6 text-center lg:text-left">
               <div className="space-y-1">
-                <span className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">
+                <span className="font-label text-[10px] uppercase tracking-widest text-sky-500">
                   Operating Margin
                 </span>
-                <div className="font-headline text-xl font-bold text-primary">
+                <div className="font-headline text-xl font-bold text-sky-900">
                   34.2%
                 </div>
               </div>
               <div className="space-y-1">
-                <span className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">
+                <span className="font-label text-[10px] uppercase tracking-widest text-sky-500">
                   Cash Reserve
                 </span>
-                <div className="font-headline text-xl font-bold text-primary">
+                <div className="font-headline text-xl font-bold text-sky-900">
                   $124.5k
                 </div>
               </div>
               <div className="space-y-1">
-                <span className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">
+                <span className="font-label text-[10px] uppercase tracking-widest text-red-500">
                   Burn Rate
                 </span>
-                <div className="font-headline text-xl font-bold text-error">
+                <div className="font-headline text-xl font-bold text-red-700">
                   $12.2k
                 </div>
               </div>
@@ -81,5 +82,5 @@ export default function hero() {
         </div>
       </div>
     </section>
-  );
+  )
 }

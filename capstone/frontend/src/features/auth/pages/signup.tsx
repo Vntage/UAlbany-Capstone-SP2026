@@ -40,7 +40,7 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface">
-      <div className="bg-surface-container-lowest rounded-xl shadow-ambient p-12 w-full max-w-md">
+      <div className="bg-surface-container-lowest rounded-xl shadow-ambient p-12 w-full max-w-md text-black">
         <h1 className="text-3xl font-headline font-extrabold text-primary mb-6 text-center">
           Create an Account
         </h1>
@@ -88,7 +88,7 @@ export default function Signup() {
           />
           <button
             type="submit"
-            className="cta-gradient text-on-primary font-bold py-3 rounded shadow-ambient hover:brightness-110 transition-all mt-2"
+            className="cta-gradient text-on-primary font-bold py-3 rounded shadow-ambient hover:brightness-110 transition-all mt-2 text-white"
           >
             Sign Up
           </button>
