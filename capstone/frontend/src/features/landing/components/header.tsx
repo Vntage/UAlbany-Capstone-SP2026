@@ -55,41 +55,42 @@ export default function Header() {
 
       {/* Secondary Nav */}
       <nav
-        ref={secondaryNavRef}
-        id="secondary-nav"
-        className="w-full bg-sky-100 border-b border-gray-200 relative z-10 transition-transform duration-400 ease-in-out"
-      >
-        <div className="flex justify-start items-center w-full px-8 md:px-12 py-3 gap-8 max-w-[1440px] mx-auto">
-          <a
-            className="font-label uppercase tracking-widest text-sky-700 font-bold text-sm border-b-2 border-sky-600 pb-1 opacity-80 hover:opacity-100 transition-opacity"
-            href="#"
-          >
-            Solutions
-          </a>
-          <a
-            className="font-label uppercase tracking-widest text-sky-600 opacity-80 hover:opacity-100 transition-opacity"
-            href="#"
-          >
-            Outreach
-          </a>
-          <a
-            className="font-label uppercase tracking-widest text-sky-600 opacity-80 hover:opacity-100 transition-opacity"
-            href="#"
-          >
-            Company
-          </a>
-        </div>
-      </nav>
+  ref={secondaryNavRef}
+  id="secondary-nav"
+  className="w-full bg-sky-100 border-b border-gray-200 relative z-10 transition-all duration-300 ease-in-out"
+>
+  <div className="flex justify-start items-center w-full px-8 md:px-12 py-3 gap-8 max-w-[1440px] mx-auto">
+    <a
+      className="font-label uppercase tracking-widest text-sky-700 font-bold text-sm border-b-2 border-sky-600 pb-1 opacity-80 hover:opacity-100 transition-opacity"
+      href="#"
+    >
+      Solutions
+    </a>
+    <a
+      className="font-label uppercase tracking-widest text-sky-600 opacity-80 hover:opacity-100 transition-opacity"
+      href="#"
+    >
+      Outreach
+    </a>
+    <a
+      className="font-label uppercase tracking-widest text-sky-600 opacity-80 hover:opacity-100 transition-opacity"
+      href="#"
+    >
+      Company
+    </a>
+  </div>
+</nav>
 
-      <style>
-        {`
-          .nav-hidden {
-            transform: translateY(-100%);
-            opacity: 0;
-            pointer-events: none;
-          }
-        `}
-      </style>
+<style>
+  {`
+    .nav-hidden {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    }
+  `}
+</style>
     </header>
   )
 }
