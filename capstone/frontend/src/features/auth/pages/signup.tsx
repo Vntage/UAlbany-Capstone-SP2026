@@ -88,7 +88,7 @@ export default function Signup() {
           />
           <button
             type="submit"
-            className="cta-gradient text-on-primary font-bold py-3 rounded shadow-ambient hover:brightness-110 transition-all mt-2 text-white"
+            className="bg-black text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-700 transition-all duration-300 w-full cursor-pointer"
           >
             Sign Up
           </button>
