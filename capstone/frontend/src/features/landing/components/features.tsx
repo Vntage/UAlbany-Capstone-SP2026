@@ -1,7 +1,7 @@
 // Features.tsx
-import AlertsImg from "../../../assets/Alerts.png";
-import DashboardImg from "../../../assets/Dashboard.png";
-import FinanceImg from "../../../assets/Finance.png";
+import AlertsImg from "../../../assets/landingPage/Alerts.png";
+import DashboardImg from "../../../assets/landingPage/Dashboard.png";
+import FinanceImg from "../../../assets/landingPage/Finance.png";
 
 export default function Features() {
   return (

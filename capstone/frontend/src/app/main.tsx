@@ -7,6 +7,13 @@ import Landing from '../features/landing/pages/landingpage.tsx'
 import Login from '../features/auth/pages/login.tsx'
 import Signup from '../features/auth/pages/signup.tsx'
 import { AuthProvider } from './AuthContext'
+import Dashboard from '../features/dashboard/pages/dashboard.tsx'
+import Budget from '../features/dashboard/pages/budget.tsx'
+import Report from '../features/dashboard/pages/report.tsx'
+import Settings from '../features/dashboard/pages/setting.tsx'
+import Support from '../features/dashboard/pages/support.tsx'
+import Users from '../features/dashboard/pages/users.tsx'
+
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -14,8 +21,14 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Routes>
           <Route path='/' element= {<Landing/>}></Route>
-          <Route path="/Login" element= {<Login/>}></Route>
-          <Route path="/Signup" element= {<Signup/>}></Route>
+          <Route path="/login" element= {<Login/>}></Route>
+          <Route path="/signup" element= {<Signup/>}></Route>
+          <Route path="/dashboard" element= {<Dashboard/>}></Route>
+          <Route path="/budget" element= {<Budget/>}></Route>
+          <Route path="/reports" element= {<Report/>}></Route>
+          <Route path="/settings" element= {<Settings/>}></Route>
+          <Route path="/support" element= {<Support/>}></Route>
+          <Route path="/users" element= {<Users/>}></Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
