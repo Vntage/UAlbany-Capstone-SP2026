@@ -11,8 +11,18 @@ export const getBusiness = async(req: AuthenticatedRequest, res: Response) => {
         return res.status(401).json({ message: "Business not found" });
     }
 
-    res.json(business.rows[0])
+    return res.status(201).json(business.rows[0])
+}
 
+export const getUserBusinesses = async(req: AuthenticatedRequest, res: Response) => {
+    const uid = req.user
+    
+    const business = await pool.query(`SELECT business_id FROM businesses where user_id = $1`, [uid]);
+
+    if(!business.rows.length){
+        return res.status(401).json({ message: "Business not found" });
+    }
+    return res.status(201).json(business.rows)
 }
 
 export const createBusiness = async(req: AuthenticatedRequest, res: Response) => {
