@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function Footer() {
   return (
     <footer className="w-full border-t border-sky-200 bg-white">
@@ -14,30 +16,30 @@ export default function Footer() {
 
         {/* Links */}
         <div className="flex flex-wrap justify-center gap-6">
-          <a
-            href="#"
+          <Link
+            to="#"
             className="text-sky-600 hover:text-sky-800 transition-colors duration-300"
           >
             Privacy Policy
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="#"
             className="text-sky-600 hover:text-sky-800 transition-colors duration-300"
           >
             Terms of Service
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="#"
             className="text-sky-600 hover:text-sky-800 transition-colors duration-300"
           >
             Security
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="#"
             className="text-sky-600 hover:text-sky-800 transition-colors duration-300"
           >
             Status
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

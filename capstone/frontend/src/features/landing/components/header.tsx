@@ -60,24 +60,24 @@ export default function Header() {
   className="w-full bg-sky-100 border-b border-gray-200 relative z-10 transition-all duration-300 ease-in-out"
 >
   <div className="flex justify-start items-center w-full px-8 md:px-12 py-3 gap-8 max-w-[1440px] mx-auto">
-    <a
+    <Link
       className="font-label uppercase tracking-widest text-sky-700 font-bold text-sm border-b-2 border-sky-600 pb-1 opacity-80 hover:opacity-100 transition-opacity"
-      href="#"
+      to="#"
     >
       Solutions
-    </a>
-    <a
+    </Link>
+    <Link
       className="font-label uppercase tracking-widest text-sky-600 opacity-80 hover:opacity-100 transition-opacity"
-      href="#"
+      to="#"
     >
       Outreach
-    </a>
-    <a
+    </Link>
+    <Link
       className="font-label uppercase tracking-widest text-sky-600 opacity-80 hover:opacity-100 transition-opacity"
-      href="#"
+      to="#"
     >
       Company
-    </a>
+    </Link>
   </div>
 </nav>
 

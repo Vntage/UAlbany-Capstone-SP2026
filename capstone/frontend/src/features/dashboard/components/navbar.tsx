@@ -136,7 +136,7 @@ export default function Navbar() {
                   isHovered ? "opacity-100" : "opacity-0"
                 }`}
               >
-                Logout
+                Log out
               </span>
             </button>
           </li>
