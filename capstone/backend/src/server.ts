@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser"
 import router from "./routes/router"
+import { initDB } from "./config/dbInit";
 
 dotenv.config();
 
@@ -20,6 +21,8 @@ app.use(cors({
 
 //api calls
 app.use("/api", router)
+
+initDB();
 
 //server setup
 app.listen(process.env.PORT || 8080, () =>{

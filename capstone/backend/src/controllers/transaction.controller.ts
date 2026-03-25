@@ -19,7 +19,7 @@ export const getTransaction = async(req: AuthenticatedRequest, res: Response) =>
 
 export const createTransaction = async(req: AuthenticatedRequest, res: Response) => {
     const businessID = req.params;
-    const userID = req.user;
+    const userID = req.user?.uid;
     const { name, date, description, type, categoryID, amount } = req.body;
 
     if(!businessID || !name || !date || !type || !amount || !userID){

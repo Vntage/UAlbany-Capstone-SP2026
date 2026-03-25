@@ -15,7 +15,7 @@ export const getBusiness = async(req: AuthenticatedRequest, res: Response) => {
 }
 
 export const getUserBusinesses = async(req: AuthenticatedRequest, res: Response) => {
-    const uid = req.user
+    const uid = req.user?.uid
     
     const business = await pool.query(`SELECT business_id FROM businesses where user_id = $1`, [uid]);
 
@@ -27,9 +27,9 @@ export const getUserBusinesses = async(req: AuthenticatedRequest, res: Response)
 
 export const createBusiness = async(req: AuthenticatedRequest, res: Response) => {
     try{
-        const { name, type, currency } = req.body
-        const uid = req.user;
-        if(!name || !type || currency){
+        const { name, type, currency, date_month, date_year } = req.body
+        const uid = req.user?.uid;
+        if(!name || !type || !currency){
             return res.status(400).json({ message: "Missing fields" })
         }
 
@@ -38,7 +38,7 @@ export const createBusiness = async(req: AuthenticatedRequest, res: Response) =>
         const businessResult = await pool.query(`INSERT INTO businesses 
             (name, type, currency, created_month, created_year)
             VALUES ($1, $2, $3, $4, $5) RETURNING *;`, 
-            [name, type, currency, date.getMonth(), date.getFullYear()]);
+            [name, type, currency, date_month || date.getMonth() + 1, date_year || date.getFullYear()]);
         
         const business = businessResult.rows[0];
 
@@ -70,7 +70,7 @@ export const getBusinessMember = async(req: AuthenticatedRequest, res: Response)
 export const createBusinessMember = async(req: AuthenticatedRequest, res: Response) => {
     const business_id = req.params;
     const role = req.body
-    const user_id = req.user
+    const user_id = req.user?.uid
 
     if(!business_id || !role || user_id){
         return res.status(400).json({ message: "Missing fields" })
