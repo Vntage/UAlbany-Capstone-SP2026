@@ -8,11 +8,11 @@ import Login from '../features/auth/pages/login.tsx'
 import Signup from '../features/auth/pages/signup.tsx'
 import { AuthProvider } from './AuthContext'
 import Dashboard from '../features/dashboard/pages/dashboard.tsx'
-import Budget from '../features/dashboard/pages/budget.tsx'
-import Report from '../features/dashboard/pages/report.tsx'
-import Settings from '../features/dashboard/pages/setting.tsx'
-import Support from '../features/dashboard/pages/support.tsx'
-import Users from '../features/dashboard/pages/users.tsx'
+import Budget from '../features/budget/pages/budget.tsx'
+import Report from '../features/reports/pages/report.tsx'
+import Settings from '../features/settings/pages/setting.tsx'
+import Support from '../features/support/pages/support.tsx'
+import Users from '../features/users/pages/users.tsx'
 
 
 createRoot(document.getElementById('root')!).render(

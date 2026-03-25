@@ -1,14 +1,14 @@
-import Navbar from "../components/navbar";
+import Navbar from "../../../components/navbar";
 
-export default function budget() {
+export default function settings() {
   return (
     <div className="flex h-screen bg-surface">
             <Navbar />
 
       <main className="flex-1 p-8 overflow-auto">
-        <h1 className="text-3xl font-bold text-primary mb-6">Welcome to Budgets</h1>
+        <h1 className="text-3xl font-bold text-primary mb-6">Welcome to Settings</h1>
         <p className="text-on-surface-variant">
-          Budgets Area
+          Settings Area
         </p>
       </main>
     </div>
