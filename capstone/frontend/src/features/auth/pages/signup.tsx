@@ -16,7 +16,8 @@ export default function Signup() {
       const user = await signup(email, password);
       const token = await user.user.getIdToken(true);
 
-      const res = await fetch("http://localhost:8080/api/users/signup", {
+      const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
+      const res = await fetch(api_url + "/api/users/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

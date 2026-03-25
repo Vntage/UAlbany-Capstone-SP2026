@@ -1,12 +1,9 @@
 import { Request, Response } from "express"
 import admin from "../config/firebase"
-import pool from "../config/db"
 
 //authenticates token and creates session cookie
 export const login = async(req: Request, res: Response) => {
     const { token } = req.body;
-    console.log(req.body)
-    console.log(token)
     if(!token){
         return res.status(400).json({ message: "No Token Provided" });
     }
@@ -15,6 +12,7 @@ export const login = async(req: Request, res: Response) => {
         const decodedIdToken = await admin.auth().verifyIdToken(token);
         const uid = decodedIdToken.uid;
 
+        //1 hour expiration 
         const expiresIn = 60 * 60 *1000;
 
         const sessionCookie = await admin.auth().createSessionCookie(token, { expiresIn });
