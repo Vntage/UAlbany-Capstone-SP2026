@@ -49,7 +49,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await auth.signOut();
-    navigate("/login");
+    navigate("/");
   };
 
   const renderLink = (link: typeof mainLinks[0]) => {
