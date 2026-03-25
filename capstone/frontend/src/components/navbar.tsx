@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import DashboardIcon from "../../../assets/navbar/dashboard.png";
-import UsersIcon from "../../../assets/navbar/users.png";
-import ReportIcon from "../../../assets/navbar/report.png";
-import BudgetIcon from "../../../assets/navbar/budget.png";
-import SettingsIcon from "../../../assets/navbar/setting.png";
-import SupportIcon from "../../../assets/navbar/support.png";
-import LogoutIcon from "../../../assets/navbar/logout.png";
+import DashboardIcon from "../assets/navbar/dashboard.png";
+import UsersIcon from "../assets/navbar/users.png";
+import ReportIcon from "../assets/navbar/report.png";
+import BudgetIcon from "../assets/navbar/budget.png";
+import SettingsIcon from "../assets/navbar/setting.png";
+import SupportIcon from "../assets/navbar/support.png";
+import LogoutIcon from "../assets/navbar/logout.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { auth } from "../../../config/firebase";
+import { auth } from "../config/firebase";
 
 export default function Navbar() {
   const [isHovered, setIsHovered] = useState(() => {
