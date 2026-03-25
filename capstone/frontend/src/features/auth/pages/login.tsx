@@ -31,7 +31,7 @@ export default function Login() {
 
             const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
             //finish api
-            const res = await fetch(api_url + "api/auth/login", {
+            const res = await fetch(api_url + "/api/auth/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
