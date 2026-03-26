@@ -39,22 +39,22 @@ export default function Dashboard() {
             (data.metrics.prev_revenue ?? 0) - (data.metrics.prev_expenses ?? 0));
           setMetrics([
             {
-              title: "Total Revenue",
+              title: "Change in Revenue",
               value: data.metrics.current_revenue - data.metrics.prev_revenue,
               change: revChange,
               trend: revChange > 0 ? "up" : "down",
               isPositiveDesired: true
             },
             {
-              title: "Total Expenses",
+              title: "Change in Expenses",
               value: data.metrics.current_expenses - data.metrics.prev_expenses,
               change: expChange,
               trend: expChange > 0 ? "up" : "down",
               isPositiveDesired: false
             },
             {
-              title: "Net Profit",
-              value: (data.metrics.current_revenue ?? 0) - (data.metrics.current_expenses ?? 0),
+              title: "Change in Net Profit",
+              value: (data.metrics.current_revenue ?? 0) - (data.metrics.current_expenses ?? 0) - ((data.metrics.prev_revenue ?? 0) - (data.metrics.prev_expenses ?? 0)),
               change: netChange,
               trend: netChange > 0 ? "up" : "down",
               isPositiveDesired: true
