@@ -40,6 +40,7 @@ app.get("/api/dashboard_data", authenticateToken, async (req, res) => {
     }   
     const uid = req.user.uid;
 
+    //you only get data from the user you are logged in as
     try {
     const businesses = await pool.query(
       `SELECT b.uid, b.name, b.currency, b.status
