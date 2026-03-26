@@ -128,12 +128,15 @@ export default function Dashboard() {
               <div key={metric.title} className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="text-sm text-gray-600">{metric.title}</div>
-                  <div className={`flex items-center gap-1 text-sm ${metric.trend === "up"
-                    ? metric.isPositiveDesired
-                      ? "text-green-600"
-                      : "text-red-600"
-                    : "text-green-600"
-                    }`}>
+                  <div
+                    className={`flex items-center gap-1 text-sm ${metric.trend === "up"
+                        ? metric.isPositiveDesired
+                          ? "text-green-600"
+                          : "text-red-600"
+                        : metric.isPositiveDesired
+                          ? "text-red-600"
+                          : "text-green-600"
+                      }`}>
                     {metric.trend === "up" ? (
                       <TrendingUp className="w-4 h-4" />
                     ) : (
