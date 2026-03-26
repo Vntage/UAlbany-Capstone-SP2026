@@ -21,10 +21,15 @@ export default function Budget() {
             </div>
 
             <div className="flex gap-3">
-              <button className="px-4 py-2 bg-surface-container-high rounded-lg text-sm shadow-sm hover:shadow">
+              <button className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm shadow 
+                     hover:bg-gray-900 hover:scale-105 hover:shadow-md 
+                     transition-all duration-200 cursor-pointer">
                 Export
               </button>
-              <button className="px-4 py-2 bg-primary text-on-primary rounded-lg text-sm shadow hover:opacity-90">
+
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm shadow 
+                     hover:bg-blue-700 hover:scale-105 hover:shadow-md 
+                     transition-all duration-200 cursor-pointer">
                 Adjust Targets
               </button>
             </div>
@@ -53,7 +58,7 @@ export default function Budget() {
             </div>
 
             {/* Runway */}
-            <div className="col-span-4 bg-primary text-white rounded-2xl p-6 shadow-lg">
+            <div className="col-span-4 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-2xl p-6 shadow-lg">
               <p className="text-sm opacity-80">Available Runway</p>
               <h2 className="text-3xl font-bold mt-2">--</h2>
             </div>

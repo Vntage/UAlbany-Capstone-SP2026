@@ -22,12 +22,17 @@ export default function Reports() {
             </div>
 
             <div className="flex gap-3">
-              <button className="px-4 py-2 bg-surface-container-highest rounded-lg text-sm shadow-sm">
-                Export PDF
-              </button>
-              <button className="px-4 py-2 bg-primary text-on-primary rounded-lg text-sm shadow">
-                Export Excel
-              </button>
+              <div className="flex gap-3">
+                <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm shadow 
+                     hover:bg-purple-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer">
+                  📄 Import PDF
+                </button>
+
+                <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm shadow 
+                     hover:bg-green-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer">
+                  📊 Import Excel
+                </button>
+              </div>
             </div>
           </div>
 

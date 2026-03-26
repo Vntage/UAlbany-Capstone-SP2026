@@ -2,6 +2,7 @@
 import AlertsImg from "../../../assets/landingPage/Alerts.png";
 import DashboardImg from "../../../assets/landingPage/Dashboard.png";
 import FinanceImg from "../../../assets/landingPage/Finance.png";
+import StatementImg from "../../../assets/landingPage/statement.png";
 
 export default function Features() {
   return (
@@ -37,9 +38,9 @@ export default function Features() {
               </div>
               <div className="mt-12">
                 <img
-                  className="w-full h-48 object-cover rounded shadow-inner"
+                  className="w-full max-h-64 md:max-h-80 object-contain rounded shadow-inner"
                   src={FinanceImg}
-                  alt="Automated bank integration"
+                   alt="Automated bank integration"
                 />
               </div>
             </div>
@@ -49,7 +50,7 @@ export default function Features() {
           <div className="col-span-12 md:col-span-4 bg-primary text-on-primary rounded-xl p-10 shadow-ambient flex flex-col justify-between border border-outline-variant/30">
             <div className="mt-12">
               <img
-                className="w-full h-48 object-cover rounded shadow-inner"
+                className="w-full max-h-64 md:max-h-80 object-contain rounded shadow-inner"
                 src={AlertsImg}
                 alt="Insight alerts"
               />
@@ -66,7 +67,7 @@ export default function Features() {
           <div className="col-span-12 md:col-span-4 bg-secondary-container rounded-xl p-10 shadow-ambient flex flex-col justify-between border border-outline-variant/30">
             <div>
               <img
-                className="w-full h-48 object-cover rounded shadow-inner mb-6"
+                className="w-full max-h-64 md:max-h-80 object-contain rounded shadow-inner"
                 src={DashboardImg}
                 alt="Cash Flow Insights"
               />
@@ -89,11 +90,12 @@ export default function Features() {
                 Access all your bank statements in one dashboard. Download, categorize, and review your business transactions quickly, with zero hassle.
               </p>
             </div>
-            <div className="w-1/2 grid grid-cols-2 gap-4">
-              <div className="h-16 bg-surface-container rounded-lg border border-outline-variant/30"></div>
-              <div className="h-16 bg-surface-container rounded-lg border border-outline-variant/30"></div>
-              <div className="h-16 bg-surface-container rounded-lg border border-outline-variant/30"></div>
-              <div className="h-16 bg-surface-container rounded-lg border border-outline-variant/30"></div>
+            <div className="mt-12">
+              <img
+                className="w-full max-h-64 md:max-h-80 object-contain rounded shadow-inner"
+                src={StatementImg}
+                alt="Insight alerts"
+              />
             </div>
           </div>
         </div>
