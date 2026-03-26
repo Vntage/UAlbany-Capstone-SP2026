@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import DashboardIcon from "../assets/navbar/dashboard.png";
+import AlertsIcon from "../assets/navbar/alerts.png";
 import UsersIcon from "../assets/navbar/users.png";
 import ReportIcon from "../assets/navbar/report.png";
 import BudgetIcon from "../assets/navbar/budget.png";
@@ -37,6 +38,7 @@ export default function Navbar() {
 
   const mainLinks = [
     { name: "Dashboard", icon: DashboardIcon, path: "/dashboard" },
+    { name: "Alerts", icon: AlertsIcon, path: "/alerts" },
     { name: "Users", icon: UsersIcon, path: "/users" },
     { name: "Reports", icon: ReportIcon, path: "/reports" },
     { name: "Budget", icon: BudgetIcon, path: "/budget" },
