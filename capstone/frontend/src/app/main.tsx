@@ -8,6 +8,7 @@ import Login from '../features/auth/pages/login.tsx'
 import Signup from '../features/auth/pages/signup.tsx'
 import { AuthProvider } from './AuthContext'
 import Dashboard from '../features/dashboard/pages/dashboard.tsx'
+import Alerts from '../features/alerts/pages/alerts.tsx'
 import Budget from '../features/budget/pages/budget.tsx'
 import Report from '../features/reports/pages/report.tsx'
 import Settings from '../features/settings/pages/setting.tsx'
@@ -24,6 +25,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/login" element= {<Login/>}></Route>
           <Route path="/signup" element= {<Signup/>}></Route>
           <Route path="/dashboard" element= {<Dashboard/>}></Route>
+          <Route path="/alerts" element= {<Alerts/>}></Route>
           <Route path="/budget" element= {<Budget/>}></Route>
           <Route path="/reports" element= {<Report/>}></Route>
           <Route path="/settings" element= {<Settings/>}></Route>

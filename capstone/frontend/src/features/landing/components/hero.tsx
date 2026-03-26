@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function Hero() {
   return (
     <section className="relative pt-32 pb-32 bg-sky-50 overflow-hidden mt-25">
@@ -15,9 +17,13 @@ export default function Hero() {
             leaders who demand clarity over clutter.
           </p>
           <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+            
+            <Link to='/signup'>
             <button className="bg-sky-600 text-white px-8 py-4 rounded-lg font-bold text-lg shadow hover:bg-sky-700 transition-all">
               Get Started
             </button>
+            </Link>
+
             <button className="px-8 py-4 rounded-lg font-bold text-sky-700 bg-white border border-sky-300 hover:bg-sky-100 transition-all">
               View Demo
             </button>
