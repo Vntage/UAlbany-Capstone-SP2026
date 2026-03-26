@@ -6,7 +6,7 @@ import StatementImg from "../../../assets/landingPage/statement.png";
 
 export default function Features() {
   return (
-    <section className="py-32 bg-surface-container-low">
+    <section id="features" className="py-32 bg-surface-container-low">
       <div className="max-w-[1440px] mx-auto px-6 md:px-12">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
@@ -40,7 +40,7 @@ export default function Features() {
                 <img
                   className="w-full max-h-64 md:max-h-80 object-contain rounded shadow-inner"
                   src={FinanceImg}
-                   alt="Automated bank integration"
+                  alt="Automated bank integration"
                 />
               </div>
             </div>

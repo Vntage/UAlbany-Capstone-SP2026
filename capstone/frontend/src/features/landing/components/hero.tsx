@@ -19,12 +19,18 @@ export default function Hero() {
     return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
+  const scrollToFeatures = () => {
+    const featuresSection = document.getElementById("features");
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   if (svgWidth === null) {
-    // Don't render SVG until width is measured
+    // Placeholder until width measured
     return (
       <section className="relative pt-32 md:pt-40 lg:pt-48 pb-32 bg-sky-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-0 flex flex-col lg:flex-row items-center lg:items-center gap-y-20 lg:gap-y-0 lg:gap-x-32">
-          {/* Left Text Section */}
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left lg:flex-1">
             <h1 className="font-headline font-extrabold text-5xl md:text-[4.5rem] leading-tight text-sky-900 mb-12 tracking-tight">
               Your Wealth, <br />
@@ -39,13 +45,15 @@ export default function Hero() {
                   Get Started
                 </button>
               </Link>
-              <button className="px-8 py-4 rounded-lg font-bold text-sky-700 bg-white border border-sky-300 hover:bg-sky-100 transition-all">
+              <button
+                onClick={scrollToFeatures}
+                className="px-8 py-4 rounded-lg font-bold text-sky-700 bg-white border border-sky-300 hover:bg-sky-100 transition-all"
+              >
                 View Demo
               </button>
             </div>
           </div>
 
-          {/* Right Dashboard Section placeholder */}
           <div ref={containerRef} className="flex justify-center lg:justify-end w-full lg:flex-1">
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 w-full max-w-3xl h-48"></div>
           </div>
@@ -87,7 +95,10 @@ export default function Hero() {
                 Get Started
               </button>
             </Link>
-            <button className="px-8 py-4 rounded-lg font-bold text-sky-700 bg-white border border-sky-300 hover:bg-sky-100 transition-all">
+            <button
+              onClick={scrollToFeatures}
+              className="px-8 py-4 rounded-lg font-bold text-sky-700 bg-white border border-sky-300 hover:bg-sky-100 transition-all"
+            >
               View Demo
             </button>
           </div>
