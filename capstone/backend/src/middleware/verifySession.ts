@@ -6,6 +6,10 @@ export interface AuthenticatedRequest extends Request {
     user?: admin.auth.DecodedIdToken;
 }
 
+export interface BusinessParams {
+    businessID: string;
+}
+
 export const verifySession = async(req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const sessionCookie = req.cookies?.session
     if(!sessionCookie){

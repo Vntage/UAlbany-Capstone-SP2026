@@ -4,10 +4,10 @@ import { verifySession } from "../middleware/verifySession";
 
 const router = express.Router();
 
-router.get("/:businessID", verifySession, getTransaction)
-router.get("/:businessID/category", verifySession, getTransactionCategory)
+router.get("/:businessID", verifySession, getTransaction);
+router.get("/:businessID/category", verifySession, getTransactionCategory);
 
-router.post("/:businessID", verifySession, createTransaction)
-router.post("/:businessID/category", verifySession, createTransactionCategory)
+router.post("/:businessID", verifySession, createTransaction);
+router.post("/:businessID/category", verifySession, createTransactionCategory);
 
 export default router;

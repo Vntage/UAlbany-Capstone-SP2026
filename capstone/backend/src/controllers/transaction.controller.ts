@@ -1,8 +1,8 @@
 import { Request, Response } from "express"
-import { AuthenticatedRequest } from "../middleware/verifySession";
+import { AuthenticatedRequest, BusinessParams } from "../middleware/verifySession";
 import pool from "../config/db"
 
-export const getTransaction = async(req: AuthenticatedRequest, res: Response) => {
+export const getTransaction = async(req: AuthenticatedRequest & Request<BusinessParams>, res: Response) => {
     const businessID = req.params;
 
     const transactions = await pool.query(`SELECT * FROM transactions
@@ -17,7 +17,7 @@ export const getTransaction = async(req: AuthenticatedRequest, res: Response) =>
     return res.status(201).json(transactions.rows)
 }
 
-export const createTransaction = async(req: AuthenticatedRequest, res: Response) => {
+export const createTransaction = async(req: AuthenticatedRequest & Request<BusinessParams>, res: Response) => {
     const businessID = req.params;
     const userID = req.user?.uid;
     const { name, date, description, type, categoryID, amount } = req.body;
@@ -40,7 +40,7 @@ export const createTransaction = async(req: AuthenticatedRequest, res: Response)
 
 }
 
-export const getTransactionCategory = async(req: AuthenticatedRequest, res: Response) => {
+export const getTransactionCategory = async(req: AuthenticatedRequest & Request<BusinessParams>, res: Response) => {
     const businessID = req.params;
 
     const transaction_categories = await pool.query(`SELECT * FROM transaction_categories 
@@ -55,7 +55,7 @@ export const getTransactionCategory = async(req: AuthenticatedRequest, res: Resp
     return res.status(201).json(transaction_categories.rows)
 }
 
-export const createTransactionCategory = async(req: AuthenticatedRequest, res: Response) => {
+export const createTransactionCategory = async(req: AuthenticatedRequest & Request<BusinessParams>, res: Response) => {
     const businessID = req.params;
     const name = req.body;
 

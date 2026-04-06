@@ -49,7 +49,11 @@ export const signup = async(req: Request, res: Response) => {
 
             const result = await pool.query(query, values);
 
-            res.status(201).json({
+            if(!result.rows[0]){
+                return res.status(500).json({ message: "Database Error" })
+            }
+            
+            return res.status(201).json({
                 message: "User created successfully"
             });
         }catch(error){
