@@ -1,15 +1,16 @@
 import express from "express"
 import { getBudget, getBudgetedItem, newBudget, newBudgetedItem } from "../controllers/budget.controller"
 import { verifySession } from "../middleware/verifySession";
+import { verifyMember } from "../middleware/verifyMember";
 
 
 const router = express.Router();
 
-router.post("/:businessID", verifySession, newBudget);
-router.post("/:businessID/Item", verifySession, newBudgetedItem)
+router.post("/:businessID", verifySession, verifyMember, newBudget);
+router.post("/:businessID/Item", verifySession, verifyMember, newBudgetedItem);
 
-router.get("/:businessID", verifySession, getBudget);
-router.get("/:businessID/item", verifySession, getBudgetedItem)
+router.get("/:businessID", verifySession, verifyMember, getBudget);
+router.get("/:businessID/item", verifySession, verifyMember, getBudgetedItem);
 
 
 export default router;

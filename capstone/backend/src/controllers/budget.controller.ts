@@ -1,11 +1,15 @@
 import { Request, Response } from "express"
-import { AuthenticatedRequest, BusinessParams } from "../middleware/verifySession";
+import { BusinessParams } from "../types/common";
 import pool from "../config/db"
 
-export const newBudget = async (req: AuthenticatedRequest & Request<BusinessParams>, res: Response) => {
+export const newBudget = async (req: Request<BusinessParams>, res: Response) => {
     try{
         const { businessID } = req.params;
         const { name, periodStart, periodEnd } = req.body;
+        if(!req.user){
+            return res.status(401).json({ message: "Unauthorized" })
+        }
+
         if(!name || !periodStart || !periodEnd){
             return res.status(400).json({ message: "Missing required fields" })
         }
@@ -36,7 +40,7 @@ export const newBudget = async (req: AuthenticatedRequest & Request<BusinessPara
     }
 }
 
-export const newBudgetedItem = async (req: AuthenticatedRequest & Request<BusinessParams>, res: Response) => {
+export const newBudgetedItem = async (req: Request<BusinessParams>, res: Response) => {
     try{
         const businessID = req.params;
         const { budgetId, transactionCategoryId, allocatedAmount } = req.body;
@@ -72,7 +76,7 @@ export const newBudgetedItem = async (req: AuthenticatedRequest & Request<Busine
     }
 }
 
-export const getBudget = async (req: AuthenticatedRequest & Request<BusinessParams>, res: Response) => {
+export const getBudget = async (req: Request<BusinessParams>, res: Response) => {
     try{
         const businessID = req.params;
         const { periodStart, periodEnd } = req.body;
@@ -104,7 +108,7 @@ export const getBudget = async (req: AuthenticatedRequest & Request<BusinessPara
     }
 }
 
-export const getBudgetedItem = async (req: AuthenticatedRequest & Request<BusinessParams>, res: Response) => {
+export const getBudgetedItem = async (req: Request<BusinessParams>, res: Response) => {
     try{
         const businessID = req.params;
         const { transactionCategoryId, budgetId} = req.body;

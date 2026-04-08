@@ -1,8 +1,7 @@
 import { Request, Response } from "express"
-import { AuthenticatedRequest } from "../middleware/verifySession"
 import pool from "../config/db"
 
-export const getBusiness = async(req: AuthenticatedRequest, res: Response) => {
+export const getBusiness = async(req: Request, res: Response) => {
     const { business_id } = req.params;
 
     const business = await pool.query(`SELECT * FROM businesses WHERE uid = $1`, [business_id]);
@@ -14,7 +13,7 @@ export const getBusiness = async(req: AuthenticatedRequest, res: Response) => {
     return res.status(201).json(business.rows[0])
 }
 
-export const getUserBusinesses = async(req: AuthenticatedRequest, res: Response) => {
+export const getUserBusinesses = async(req: Request, res: Response) => {
     const uid = req.user?.uid
     
     const business = await pool.query(`SELECT business_id FROM businesses where user_id = $1`, [uid]);
@@ -25,7 +24,7 @@ export const getUserBusinesses = async(req: AuthenticatedRequest, res: Response)
     return res.status(201).json(business.rows)
 }
 
-export const createBusiness = async(req: AuthenticatedRequest, res: Response) => {
+export const createBusiness = async(req: Request, res: Response) => {
     try{
         const { name, type, currency, date_month, date_year } = req.body
         const uid = req.user?.uid;
@@ -55,7 +54,7 @@ export const createBusiness = async(req: AuthenticatedRequest, res: Response) =>
     }
 }
 
-export const getBusinessMember = async(req: AuthenticatedRequest, res: Response) => {
+export const getBusinessMember = async(req: Request, res: Response) => {
     const business_id = req.params;
 
     const business_memberResult = await pool.query(`SELECT * FROM business_members WHERE business_id = $1`, [business_id]);
@@ -67,7 +66,7 @@ export const getBusinessMember = async(req: AuthenticatedRequest, res: Response)
     res.status(201).json(business_memberResult.rows)
 }
 
-export const createBusinessMember = async(req: AuthenticatedRequest, res: Response) => {
+export const createBusinessMember = async(req: Request, res: Response) => {
     const business_id = req.params;
     const role = req.body
     const user_id = req.user?.uid

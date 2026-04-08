@@ -1,9 +1,8 @@
 import { Request, Response } from "express"
 import admin from "../config/firebase"
 import pool from "../config/db"
-import { AuthenticatedRequest } from "../middleware/verifySession"
 
-export const user = async(req: AuthenticatedRequest, res: Response) => {
+export const user = async(req: Request, res: Response) => {
     try{
         if(!req.user){
             return res.status(401).json({ message: "Unauthorized" })

@@ -2,15 +2,22 @@ import { Request, Response, NextFunction } from "express";
 import admin from "../config/firebase"
 
 //used to authenticate requests
-export interface AuthenticatedRequest extends Request {
-    user?: admin.auth.DecodedIdToken;
+declare global{
+    namespace Express {
+        interface Request {
+            user?: admin.auth.DecodedIdToken;
+            businessMember?: {
+                uid: string;
+                business_id: string;
+                user_id: string;
+                role: string;
+                joined_at: string;
+            };
+        }
+    }
 }
 
-export interface BusinessParams {
-    businessID: string;
-}
-
-export const verifySession = async(req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const verifySession = async(req: Request, res: Response, next: NextFunction) => {
     const sessionCookie = req.cookies?.session
     if(!sessionCookie){
         return res.status(401).json({ message : "No Session" })
@@ -21,6 +28,7 @@ export const verifySession = async(req: AuthenticatedRequest, res: Response, nex
         req.user = decode;
         next();
     }catch(error){
-        return res.status(401).json({ message: "Invalid Session" })
+        res.status(401).json({ message: "Invalid Session" });
+        return;
     }
 }
