@@ -7,7 +7,7 @@ import { verifyMember } from "../middleware/verifyMember";
 const router = express.Router();
 
 router.post("/:businessID", verifySession, verifyMember, newBudget);
-router.post("/:businessID/Item", verifySession, verifyMember, newBudgetedItem);
+router.post("/:businessID/item", verifySession, verifyMember, newBudgetedItem);
 
 router.get("/:businessID", verifySession, verifyMember, getBudget);
 router.get("/:businessID/item", verifySession, verifyMember, getBudgetedItem);

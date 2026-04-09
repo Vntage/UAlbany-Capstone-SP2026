@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { BusinessParams } from "../types/common";
+import { BusinessParams } from "../types/common.type";
 import pool from "../config/db"
 
 export const getTransaction = async(req: Request<BusinessParams>, res: Response) => {
