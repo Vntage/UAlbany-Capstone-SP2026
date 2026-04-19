@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import admin from "../config/firebase"
+import pool from "../config/db";
 
 //authenticates token and creates session cookie
 export const login = async(req: Request, res: Response) => {
@@ -11,6 +12,16 @@ export const login = async(req: Request, res: Response) => {
     try{
         const decodedIdToken = await admin.auth().verifyIdToken(token);
         const uid = decodedIdToken.uid;
+
+        if(!uid){
+            return res.status(400).json({ message: "User not found" })
+        }
+
+        const result = await pool.query(`SELECT * FROM users WHERE firebase_uid = $1`, [uid]);
+
+        if(!result.rows[0]){
+            return res.status(400).json({ message: "User not found" })
+        }
 
         //1 hour expiration 
         const expiresIn = 60 * 60 *1000;
@@ -28,7 +39,7 @@ export const login = async(req: Request, res: Response) => {
 
     }catch(error){
         console.log(error);
-        return res.status(401).json({ message: "Server Error" });
+        return res.status(500).json({ message: "Server Error" });
     }
 }
 

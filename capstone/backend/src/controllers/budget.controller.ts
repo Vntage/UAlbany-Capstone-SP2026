@@ -1,10 +1,11 @@
 import { Request, Response } from "express"
 import { BusinessParams } from "../types/common.type";
 import pool from "../config/db"
+import { Budget, BudgetedItem } from "../types/budget.type";
 
 export const newBudget = async (req: Request<BusinessParams>, res: Response) => {
     try{
-        const { businessID } = req.params;
+        const businessID = req.params.businessID;
         const { name, periodStart, periodEnd } = req.body;
         if(!req.user){
             return res.status(401).json({ message: "Unauthorized" })
@@ -27,7 +28,7 @@ export const newBudget = async (req: Request<BusinessParams>, res: Response) => 
             req.user?.uid
         ];
         
-        const { rows } = await pool.query(query, values);
+        const { rows } = await pool.query<Budget>(query, values);
 
         if(!rows[0]){
             return res.status(500).json({ message: "Database Error" });
@@ -42,7 +43,7 @@ export const newBudget = async (req: Request<BusinessParams>, res: Response) => 
 
 export const newBudgetedItem = async (req: Request<BusinessParams>, res: Response) => {
     try{
-        const businessID = req.params;
+        const businessID = req.params.businessID;
         const { budgetId, transactionCategoryId, allocatedAmount } = req.body;
 
         if(!budgetId || !transactionCategoryId || !allocatedAmount){
@@ -63,7 +64,7 @@ export const newBudgetedItem = async (req: Request<BusinessParams>, res: Respons
             Date.now()
         ];
 
-        const { rows } = await pool.query(query, values);
+        const { rows } = await pool.query<BudgetedItem>(query, values);
 
         if(!rows[0]){
             return res.status(500).json({ message: "Database Error" });
@@ -78,7 +79,7 @@ export const newBudgetedItem = async (req: Request<BusinessParams>, res: Respons
 
 export const getBudget = async (req: Request<BusinessParams>, res: Response) => {
     try{
-        const businessID = req.params;
+        const businessID = req.params.businessID;
         const { periodStart, periodEnd } = req.body;
 
         let query = `SELECT * FROM budgets WHERE business_id = $1 `;
@@ -95,7 +96,7 @@ export const getBudget = async (req: Request<BusinessParams>, res: Response) => 
 
         query += `ORDERED BY created_at DESC`;
 
-        const { rows } = await pool.query(query, values);
+        const { rows } = await pool.query<Budget>(query, values);
 
         if(!rows){
             return res.status(500).json({ message: "Database Error" });
@@ -110,7 +111,7 @@ export const getBudget = async (req: Request<BusinessParams>, res: Response) => 
 
 export const getBudgetedItem = async (req: Request<BusinessParams>, res: Response) => {
     try{
-        const businessID = req.params;
+        const businessID = req.params.businessID;
         const { transactionCategoryId, budgetId} = req.body;
 
         let query = `SELECT * FROM budgeted_items WHERE business_id = $1 `;
@@ -130,7 +131,7 @@ export const getBudgetedItem = async (req: Request<BusinessParams>, res: Respons
 
         query += `ORDER BY created_at DESC`;
 
-        const { rows } = await pool.query(query, values);
+        const { rows } = await pool.query<BudgetedItem>(query, values);
 
         if(!rows){
             return res.status(500).json({ message: "Database Error" })

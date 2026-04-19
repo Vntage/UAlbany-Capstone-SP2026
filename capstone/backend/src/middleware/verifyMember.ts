@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import pool from "../config/db";
+import { BusinessMember } from "../types/business.type";
 
 export const verifyMember = async (req: Request, res: Response, next: NextFunction) => {
     try{
@@ -14,15 +15,18 @@ export const verifyMember = async (req: Request, res: Response, next: NextFuncti
             res.status(400).json({ message: "Missing Parameter" });
             return;
         }
-        const result = await pool.query(`SELECT * FROM business_member 
+        const result = await pool.query<BusinessMember>(`SELECT * FROM business_member 
             WHERE business_id = $1 AND user_id = $2 
             LIMIT 1`, [businessID, userID]);
-        
-        if(!result.rows[0]){
+
+        const member = result.rows[0];
+
+        if(!member){
             res.status(403).json({ message: "Not a business member" });
             return;
         }
-        req.businessMember = result.rows[0];
+
+        req.businessMember = member;
 
         next();
     }

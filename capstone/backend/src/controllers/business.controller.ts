@@ -1,10 +1,12 @@
 import { Request, Response } from "express"
 import pool from "../config/db"
+import { Business, BusinessMember } from "../types/business.type";
+import { BusinessParams } from "../types/common.type";
 
-export const getBusiness = async(req: Request, res: Response) => {
-    const { business_id } = req.params;
+export const getBusiness = async(req: Request<BusinessParams>, res: Response) => {
+    const business_id = req.params.businessID;
 
-    const business = await pool.query(`SELECT * FROM businesses WHERE uid = $1`, [business_id]);
+    const business = await pool.query<Business>(`SELECT * FROM businesses WHERE uid = $1`, [business_id]);
 
     if(!business.rows.length){
         return res.status(401).json({ message: "Business not found" });
@@ -16,7 +18,7 @@ export const getBusiness = async(req: Request, res: Response) => {
 export const getUserBusinesses = async(req: Request, res: Response) => {
     const uid = req.user?.uid
     
-    const business = await pool.query(`SELECT business_id FROM businesses where user_id = $1`, [uid]);
+    const business = await pool.query<Business>(`SELECT business_id FROM businesses where user_id = $1`, [uid]);
 
     if(!business.rows.length){
         return res.status(401).json({ message: "Business not found" });
@@ -34,30 +36,34 @@ export const createBusiness = async(req: Request, res: Response) => {
 
         const date = new Date();
 
-        const businessResult = await pool.query(`INSERT INTO businesses 
+        const businessResult = await pool.query<Business>(`INSERT INTO businesses 
             (name, type, currency, created_month, created_year)
             VALUES ($1, $2, $3, $4, $5) RETURNING *;`, 
             [name, type, currency, date_month || date.getMonth() + 1, date_year || date.getFullYear()]);
         
         const business = businessResult.rows[0];
 
+        if(!business){
+            return res.status(500).json({ message: "Database Error" });
+        }
+
         const memberResult = await pool.query(`INSERT INTO business_member 
             (business_id, user_id, role)
             VALUE($1, $2, 'OWNER') RETURNING *;`,
-            [business.uid, uid]);
+            [business!.uid, uid]);
         
-        res.status(201).json({ message: "Successfully created business" })
+        return res.status(201).json({ message: "Successfully created business" })
     }
     catch(error){
         console.log(error)
-        res.status(500).json({ message: "Server Error" })
+        return res.status(500).json({ message: "Server Error" })
     }
 }
 
-export const getBusinessMember = async(req: Request, res: Response) => {
-    const business_id = req.params;
+export const getBusinessMember = async(req: Request<BusinessParams>, res: Response) => {
+    const business_id = req.params.businessID;
 
-    const business_memberResult = await pool.query(`SELECT * FROM business_members WHERE business_id = $1`, [business_id]);
+    const business_memberResult = await pool.query<BusinessMember>(`SELECT * FROM business_members WHERE business_id = $1`, [business_id]);
 
     if(!business_memberResult.rows.length){
         res.status(500).json({ message: "Server Error" })
@@ -66,8 +72,8 @@ export const getBusinessMember = async(req: Request, res: Response) => {
     res.status(201).json(business_memberResult.rows)
 }
 
-export const createBusinessMember = async(req: Request, res: Response) => {
-    const business_id = req.params;
+export const createBusinessMember = async(req: Request<BusinessParams>, res: Response) => {
+    const business_id = req.params.businessID;
     const role = req.body
     const user_id = req.user?.uid
 
@@ -76,7 +82,7 @@ export const createBusinessMember = async(req: Request, res: Response) => {
     }
 
     try{
-        const business_memberResult = await pool.query(`INSERT INTO business_members (business_id, user_id, role)
+        const business_memberResult = await pool.query<BusinessMember>(`INSERT INTO business_members (business_id, user_id, role)
             VALUES($1, $2, $3) RETURNING *`, 
             [business_id, user_id, role])
         

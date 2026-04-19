@@ -12,7 +12,7 @@ export const user = async(req: Request, res: Response) => {
         const result = await pool.query(
             `SELECT firebase_uid, first_name, last_name
             FROM users
-            WHERE uid = $1`,
+            WHERE firebase_uid = $1`,
             [uid]
         );
 

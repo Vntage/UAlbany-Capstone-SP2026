@@ -14,6 +14,6 @@ export type BusinessMember = {
     uid: UUID;
     business_id: UUID;
     user_id: UUID;
-    role: "owner" | "admin" | "member";
+    role: "owner" | "admin" | "member" | "disabled";
     joined_at: Timestamp;
 }
