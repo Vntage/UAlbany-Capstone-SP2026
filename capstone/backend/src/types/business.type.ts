@@ -3,9 +3,9 @@ import { Timestamp, UUID } from "./common.type";
 export type Business = {
     uid: UUID;
     name: string;
-    createdMonth?: number;
-    createdYear?: number;
-    type: string;
+    created_month?: number;
+    created_year?: number;
+    business_type: string;
     currency: string;
     status: "active" | "inactive" | "archived";
 }

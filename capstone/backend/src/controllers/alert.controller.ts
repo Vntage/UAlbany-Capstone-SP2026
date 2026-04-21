@@ -109,15 +109,15 @@ export const getRule = async(req: Request<BusinessParams>, res: Response) => {
 //create rule function
 export const createRule = async(req: Request<BusinessParams>, res: Response) => {
     try{
-        const { condition, type } = req.body;
+        const { title, condition, type } = req.body;
 
-        if(!condition || !type){
+        if(!title || !condition || !type){
             return res.status(400).json({ message: "Missing Fields" });
         }
 
-        const result = await pool.query(`INSERT INTO alert_rule (business_id, condition, type, is_active, created_by)
-            VALUES ($1, $2, $3, true, $4)
-            RETURNING *`, [req.params.businessID, condition, type, req.user!.uid]);
+        const result = await pool.query(`INSERT INTO alert_rule (business_id, title, condition, type, is_active, created_by)
+            VALUES ($1, $2, $3, $4, true, $5)
+            RETURNING *`, [req.params.businessID, title, condition, type, req.user!.uid]);
 
         if(!result.rows){
             return res.status(500).json({ message: "Database Error" });

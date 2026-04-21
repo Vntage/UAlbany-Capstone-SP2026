@@ -59,5 +59,5 @@ export type AlertRule = {
     condition: AlertCondition;
     type: "threshold" | "comparison";
     is_active: boolean;
-    created_by: string;
+    created_by: UUID;
 };

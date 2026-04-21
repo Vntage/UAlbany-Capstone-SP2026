@@ -6,7 +6,7 @@ import { requireRole } from "../middleware/requireRole";
 
 const router = express.Router();
 
-router.post("/business", verifySession, createBusiness);
+router.post("/", verifySession, createBusiness);
 router.post("/:businessID/member", verifySession, verifyMember, requireRole(['owner', 'admin']), createBusinessMember)
 
 //create update role 

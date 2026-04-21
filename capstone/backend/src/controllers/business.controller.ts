@@ -28,18 +28,23 @@ export const getUserBusinesses = async(req: Request, res: Response) => {
 
 export const createBusiness = async(req: Request, res: Response) => {
     try{
-        const { name, type, currency, date_month, date_year } = req.body
+        let { name, type, currency, date_month, date_year } = req.body
         const uid = req.user?.uid;
         if(!name || !type || !currency){
             return res.status(400).json({ message: "Missing fields" })
         }
 
-        const date = new Date();
-
-        const businessResult = await pool.query<Business>(`INSERT INTO businesses 
-            (name, type, currency, created_month, created_year)
+        
+        if(!date_month || !date_year ){
+            const date = new Date();
+            date_month = date.getMonth() + 1
+            date_year = date.getFullYear()
+        }
+        
+        const businessResult = await pool.query<Business>(`INSERT INTO business
+            (name, business_type, currency, created_month, created_year)
             VALUES ($1, $2, $3, $4, $5) RETURNING *;`, 
-            [name, type, currency, date_month || date.getMonth() + 1, date_year || date.getFullYear()]);
+            [name, type, currency, date_month , date_year]);
         
         const business = businessResult.rows[0];
 
@@ -49,8 +54,12 @@ export const createBusiness = async(req: Request, res: Response) => {
 
         const memberResult = await pool.query(`INSERT INTO business_member 
             (business_id, user_id, role)
-            VALUE($1, $2, 'OWNER') RETURNING *;`,
+            VALUES($1, $2, 'owner') RETURNING *;`,
             [business!.uid, uid]);
+
+        if(!memberResult.rows[0]){
+            return res.status(500).json({ message: "Database Error" });
+        }
         
         return res.status(201).json({ message: "Successfully created business" })
     }
@@ -95,4 +104,19 @@ export const createBusinessMember = async(req: Request<BusinessParams>, res: Res
         console.log(error)
         res.status(500).json({ message: "Server error" })
     }
+}
+
+//create invitation for users to join business
+export const createBusinessInvite = async(req: Request<BusinessParams>, res: Response) => {
+
+}
+
+//allow user to see if anyone invited them to join their business
+export const getBusinessInvite = async(req: Request<BusinessParams>, res: Response) => {
+
+}
+
+//accept or decline business invite
+export const updateBusinessInvite = async(req: Request<BusinessParams>, res: Response) => {
+
 }
