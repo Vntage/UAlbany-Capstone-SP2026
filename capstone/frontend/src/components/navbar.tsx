@@ -39,9 +39,9 @@ export default function Navbar() {
   const mainLinks = [
     { name: "Dashboard", icon: DashboardIcon, path: "/dashboard" },
     { name: "Alerts", icon: AlertsIcon, path: "/alerts" },
-    { name: "Users", icon: UsersIcon, path: "/users" },
     { name: "Reports", icon: ReportIcon, path: "/reports" },
     { name: "Budget", icon: BudgetIcon, path: "/budget" },
+    { name: "Users", icon: UsersIcon, path: "/users" },
   ];
 
   const bottomLinks = [
