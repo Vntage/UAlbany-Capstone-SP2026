@@ -93,8 +93,6 @@ const evaluateExpression = async (expr: Expression, business_id: string, budget:
             }   
         }
     }
-    
-    return 0;
 };
 
 const evaluateCondition = async(condition: AlertCondition, business_id: string, budget: Budget) => {

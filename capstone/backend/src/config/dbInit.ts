@@ -33,7 +33,7 @@ export async function initDB() {
             DO $$
             BEGIN
                 IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'business_role') THEN
-                    CREATE TYPE business_role AS ENUM ('owner', 'member', 'removed');
+                    CREATE TYPE business_role AS ENUM ('owner', 'admin', 'member', 'removed');
                 END IF;
             END$$
         `);
@@ -105,6 +105,7 @@ export async function initDB() {
             CREATE TABLE IF NOT EXISTS budget_item (
             uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             business_id UUID REFERENCES business(uid) ON DELETE CASCADE,
+            budget_id UUID REFERENCES budget(uid) ON DELETE CASCADE,
             category_id UUID REFERENCES transaction_category(uid),
             allocated_amount NUMERIC(12,2) NOT NULL,
             created_by VARCHAR(255) REFERENCES public.users(firebase_uid) ON DELETE CASCADE,
@@ -124,17 +125,52 @@ export async function initDB() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             created_by VARCHAR(255) REFERENCES public.users(firebase_uid) ON DELETE CASCADE
             );`)
+
+        await pool.query(`
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'alert_severity') THEN
+                    CREATE TYPE alert_severity AS ENUM ('low', 'medium', 'high');
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'alert_rule_type') THEN
+                    CREATE TYPE alert_rule_type AS ENUM ('threshold', 'comparison');
+                END IF;
+            END$$
+            `)
+        
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS alert_rule(
+            uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            business_id UUID REFERENCES business(uid) ON DELETE CASCADE,
+            title TEXT NOT NULL,
+            condition JSONB NOT NULL,
+            type alert_rule_type NOT NULL,
+            is_active BOOLEAN DEFAULT true,
+            created_by VARCHAR(255) REFERENCES public.users(firebase_uid) ON DELETE CASCADE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );`)
         
         //alert schema
         await pool.query(`
             CREATE TABLE IF NOT EXISTS alert (
             uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            business_id UUID REFERENCES business(uid) ON DELETE CASCADE,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            severity alert_severity NOT NULL,
+            alert_rule_id UUID REFERENCES alert_rules(uid) ON DELETE CASCADE,
+            triggered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );`)
+
+        //alert recipient schema
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS alert_recipient (
+            uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            alert_id UUID REFERENCES alert(uid) ON DELETE CASCADE,
             user_id VARCHAR(255) REFERENCES public.users(firebase_uid) ON DELETE CASCADE,
-            type TEXT,
-            description TEXT,
+            read_at TIMESTAMP NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );`)
+
         console.log("Successfully initiated db tables")
     }
     catch(error){
