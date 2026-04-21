@@ -18,7 +18,7 @@ export const getBusiness = async(req: Request<BusinessParams>, res: Response) =>
 export const getUserBusinesses = async(req: Request, res: Response) => {
     const uid = req.user?.uid
     
-    const business = await pool.query<Business>(`SELECT business_id FROM businesses where user_id = $1`, [uid]);
+    const business = await pool.query<Business>(`SELECT business_id FROM business_member where user_id = $1`, [uid]);
 
     if(!business.rows.length){
         return res.status(401).json({ message: "Business not found" });
@@ -34,13 +34,12 @@ export const createBusiness = async(req: Request, res: Response) => {
             return res.status(400).json({ message: "Missing fields" })
         }
 
-        
         if(!date_month || !date_year ){
             const date = new Date();
             date_month = date.getMonth() + 1
             date_year = date.getFullYear()
         }
-        
+
         const businessResult = await pool.query<Business>(`INSERT INTO business
             (name, business_type, currency, created_month, created_year)
             VALUES ($1, $2, $3, $4, $5) RETURNING *;`, 

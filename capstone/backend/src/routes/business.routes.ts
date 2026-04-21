@@ -13,7 +13,7 @@ router.post("/:businessID/member", verifySession, verifyMember, requireRole(['ow
 router.patch("/:businessID/role", verifySession, verifyMember, requireRole(['owner']))
 
 router.get("/:businessID", verifySession, verifyMember, getBusiness)
-router.get("/business", verifySession, getUserBusinesses)
+router.get("/", verifySession, getUserBusinesses)
 router.get("/:businessID/member", verifySession, verifyMember, requireRole(['owner', 'admin']), getBusinessMember)
 
 //create get role
