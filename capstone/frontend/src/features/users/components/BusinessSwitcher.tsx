@@ -26,14 +26,26 @@ export default function BusinessSwitcher({ onCreateClick }: Props) {
 
       const stored = localStorage.getItem("activeBusiness");
 
-      if (stored) {
-        setActiveBusiness(JSON.parse(stored));
-      } else if (data.length > 0) {
-        setActiveBusiness(data[0]);
-        localStorage.setItem("activeBusiness", JSON.stringify(data[0]));
+    if (stored) {
+      const parsed = JSON.parse(stored);
+
+      const exists = data.find((b: Business) => b.uid === parsed.uid);
+
+      if (exists) {
+        setActiveBusiness(parsed);
+        return; // stop here if valid
       }
     }
-  };
+
+    // fallback if invalid or doesn't exist
+    if (data.length > 0) {
+      setActiveBusiness(data[0]);
+      localStorage.setItem("activeBusiness", JSON.stringify(data[0]));
+    } else {
+      setActiveBusiness(null);
+      localStorage.removeItem("activeBusiness");
+    }
+  }};
 
   useEffect(() => {
     fetchBusinesses();

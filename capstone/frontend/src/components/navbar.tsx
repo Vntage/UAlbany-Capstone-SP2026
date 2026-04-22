@@ -51,6 +51,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await auth.signOut();
+    localStorage.removeItem("activeBusiness");
     navigate("/");
   };
 
