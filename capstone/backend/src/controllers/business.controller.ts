@@ -18,11 +18,17 @@ export const getBusiness = async(req: Request<BusinessParams>, res: Response) =>
 export const getUserBusinesses = async(req: Request, res: Response) => {
     const uid = req.user?.uid
     
-    const business = await pool.query<Business>(`SELECT business_id FROM business_member where user_id = $1`, [uid]);
+    const business = await pool.query(`
+        SELECT b.uid, b.name
+        FROM business_member bm
+        JOIN business b ON bm.business_id = b.uid
+        WHERE bm.user_id = $1
+        `, [uid]);
 
-    if(!business.rows.length){
-        return res.status(401).json({ message: "Business not found" });
+    if(!business.rows[0]){
+        return res.status(401).json({ message: "Businesses not found" });
     }
+    console.log(business.rows)
     return res.status(201).json(business.rows)
 }
 
