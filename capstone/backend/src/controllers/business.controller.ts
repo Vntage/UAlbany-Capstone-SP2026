@@ -77,7 +77,7 @@ export const createBusiness = async(req: Request, res: Response) => {
 export const getBusinessMember = async(req: Request<BusinessParams>, res: Response) => {
     const business_id = req.params.businessID;
 
-    const business_memberResult = await pool.query<BusinessMember>(`SELECT * FROM business_members WHERE business_id = $1`, [business_id]);
+    const business_memberResult = await pool.query<BusinessMember>(`SELECT * FROM business_member WHERE business_id = $1`, [business_id]);
 
     if(!business_memberResult.rows.length){
         res.status(500).json({ message: "Server Error" })
