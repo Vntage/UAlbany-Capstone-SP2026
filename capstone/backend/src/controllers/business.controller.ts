@@ -28,7 +28,6 @@ export const getUserBusinesses = async(req: Request, res: Response) => {
     if(!business.rows[0]){
         return res.status(401).json({ message: "Businesses not found" });
     }
-    console.log(business.rows)
     return res.status(201).json(business.rows)
 }
 
