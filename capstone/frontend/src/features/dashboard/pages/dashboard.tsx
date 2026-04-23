@@ -1,8 +1,8 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Navbar from "../../../components/navbar";
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { TrendingUp, TrendingDown, AlertCircle, DollarSign } from "lucide-react";
-import { mockMetrics, mockMonthlyTrend, mockRevenueByCategory, mockAlerts } from "../data/mockData";
+import { mockAlerts } from "../data/mockData";
 import { useState, useEffect } from "react";
 
 export default function Dashboard() {
@@ -10,6 +10,7 @@ export default function Dashboard() {
 
   const [data, setData] = useState<any>(null);
   const [metrics, setMetrics] = useState<any>(null); //metrics must be processed separately
+  const [total, setTotal] = useState(0); //for pie chart percentage calculation optimization
 
   useEffect(() => { //load and verify user session on dashboard load
     const auth = getAuth();
@@ -60,6 +61,7 @@ export default function Dashboard() {
               isPositiveDesired: true
             }
           ]);
+          setTotal(data.revenueByCategory.reduce((sum: number, entryValue: any) => sum + Number(entryValue.value), 0)); //entry is initially a number string
         } catch (error) {
           alert("Error fetching dashboard data.");
         }
@@ -183,20 +185,19 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={data.revenueByCategory.map(d => ({ ...d, value: Number(d.value) }))} // convert str to number for compat
+                    data={data.revenueByCategory.map((d: { category: string; value: string; }) => ({ ...d, value: Number(d.value) }))} // convert str to number for compat
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ category, value }) => {
-                      const total = data.revenueByCategory.reduce((sum, entryValue) => sum + Number(entryValue.value), 0);
+                    label={({ payload, value }) => {
                       const percentage = ((Number(value) / total) * 100).toFixed(1);
-                      return `${category} ${percentage}%`; }}
+                      return `${payload.category} ${percentage}%`; }}
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="category"
                   >
-                    {data.revenueByCategory.map((entry, index) => (
+                    {data.revenueByCategory.map((_: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
