@@ -48,7 +48,7 @@ export function ImportModal({
 
             const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-            const res = await fetch(api_url + `/${businessID}`, {
+            const res = await fetch(api_url + `/api/transaction/${businessID}`, {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -88,7 +88,7 @@ export function ImportModal({
 
             const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-            const res = await fetch(api_url + `/${businessID}/csv/validate`, {
+            const res = await fetch(api_url + `/api/transaction/${businessID}/csv/validate`, {
                 method: "POST",
                 body: formData,
             })
@@ -114,7 +114,7 @@ export function ImportModal({
             try{
                 const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-                const res = await fetch(api_url + `/${businessID}/category`, {
+                const res = await fetch(api_url + `/api/transaction/${businessID}/category`, {
                     method: "GET",
                 })
 

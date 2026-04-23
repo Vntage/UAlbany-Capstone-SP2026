@@ -26,11 +26,11 @@ export function CategoryDropDown({
     refreshCategories
 }: Props) {
     const handleCreateCategory = async() => {
+        console.log(newCategory)
         if(!newCategory) return;
-
         const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-            const res = await fetch(api_url + `/${businessID}/category`, {
+            const res = await fetch(api_url + `/api/transaction/${businessID}/category`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name: newCategory })
@@ -42,7 +42,7 @@ export function CategoryDropDown({
 
                 const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-                const res = await fetch(api_url + `/${businessID}/category`, {
+                const res = await fetch(api_url + `/api/transaction/${businessID}/category`, {
                     method: "GET",
                 })
 
