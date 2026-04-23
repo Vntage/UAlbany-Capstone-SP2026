@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import cookieParser from "cookie-parser"
+import cookieParser from "cookie-parser";
 import router from "./routes/router"
 import { initDB } from "./config/dbInit";
 import pool from "./config/db";

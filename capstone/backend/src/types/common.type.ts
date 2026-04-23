@@ -13,6 +13,14 @@ declare global{
     }
 }
 
+export type CsvRows = {
+    date: string,
+    name: string,
+    amount: number,
+    category: string,
+    description?: string,
+}
+
 export type BusinessParams = {
     businessID: string
 }
