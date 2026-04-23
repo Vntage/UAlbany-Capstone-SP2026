@@ -10,6 +10,7 @@ export default function Dashboard() {
 
   const [data, setData] = useState<any>(null);
   const [metrics, setMetrics] = useState<any>(null); //metrics must be processed separately
+  const [total, setTotal] = useState(0); //for pie chart percentage calculation optimization
 
   useEffect(() => { //load and verify user session on dashboard load
     const auth = getAuth();
@@ -60,6 +61,7 @@ export default function Dashboard() {
               isPositiveDesired: true
             }
           ]);
+          setTotal(data.revenueByCategory.reduce((sum: number, entryValue: any) => sum + Number(entryValue.value), 0)); //entry is initially a number string
         } catch (error) {
           alert("Error fetching dashboard data.");
         }
@@ -188,7 +190,6 @@ export default function Dashboard() {
                     cy="50%"
                     labelLine={false}
                     label={({ payload, value }) => {
-                      const total = data.revenueByCategory.reduce((sum: number, entryValue: any) => sum + Number(entryValue.value), 0); //entry is initially a number string
                       const percentage = ((Number(value) / total) * 100).toFixed(1);
                       return `${payload.category} ${percentage}%`; }}
                     outerRadius={100}
