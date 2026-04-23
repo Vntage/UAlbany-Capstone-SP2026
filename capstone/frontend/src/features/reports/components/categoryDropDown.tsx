@@ -56,13 +56,13 @@ export function CategoryDropDown({
             <ul className="py-2 max-h-60 overflow-auto">
 
                 {/* Category List */}
-                {categories.map((cat) => (
+                {(categories ?? []).map((cat) => (
                     <li key={cat.uid}>
                         <button
-                        onClick={() => onSelect(cat)}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                        >
-                        {cat.name}
+                            onClick={() => onSelect(cat)}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                            >
+                            {cat.name}
                         </button>
                     </li>
                 ))}

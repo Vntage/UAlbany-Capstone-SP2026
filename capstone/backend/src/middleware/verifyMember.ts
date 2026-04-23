@@ -1,14 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 import pool from "../config/db";
 import { BusinessMember } from "../types/business.type";
+import { BusinessParams } from "../types/common.type";
 
-export const verifyMember = async (req: Request, res: Response, next: NextFunction) => {
+export const verifyMember = async (req: Request<BusinessParams>, res: Response, next: NextFunction) => {
     try{
         if(!req.user){
             res.status(401).json({ message: "Unauthorized" });
             return;
         }
-        const { businessID } = req.params;
+        const businessID = req.params.businessID;
         const userID = req.user.uid;
 
         if(!businessID){
