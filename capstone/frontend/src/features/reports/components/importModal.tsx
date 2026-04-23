@@ -148,14 +148,18 @@ export function ImportModal({
                         onChange={(e) => setForm({ ...form, amount: e.target.value })}
                     />
 
-                        <div className="px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        <div className="flex gap-2">
                             {["expense", "income"].map((t) => (
                                 <button
                                 key={t}
                                 onClick={() =>
                                     setForm({ ...form, type: t as "income" | "expense" })
                                 }
-                                className={` ${form.type === t}`}
+                                className={`flex-1 py-2 rounded border ${
+                                    form.type === t
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-gray-100"
+                                }`}
                                 >
                                 {t}
                                 </button>
