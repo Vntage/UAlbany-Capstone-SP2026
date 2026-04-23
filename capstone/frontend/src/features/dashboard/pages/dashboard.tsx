@@ -183,16 +183,19 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={mockRevenueByCategory}
+                    data={data.revenueByCategory.map(d => ({ ...d, value: Number(d.value) }))} // convert str to number for compat
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percentage }) => `${name} ${percentage}%`}
+                    label={({ category, value }) => {
+                      const total = data.revenueByCategory.reduce((sum, entryValue) => sum + Number(entryValue.value), 0);
+                      const percentage = ((Number(value) / total) * 100).toFixed(1);
+                      return `${category} ${percentage}%`; }}
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {mockRevenueByCategory.map((entry, index) => (
+                    {data.revenueByCategory.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
