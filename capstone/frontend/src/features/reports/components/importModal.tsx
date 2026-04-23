@@ -188,10 +188,28 @@ export function ImportModal({
                         onChange={(e) => setForm({ ...form, amount: e.target.value })}
                     />
 
+                    <div className="flex gap-2">
+                    {["expense", "income"].map((t) => (
+                        <button
+                        key={t}
+                        onClick={() =>
+                            setForm({ ...form, type: t as TransactionType })
+                        }
+                        className={`flex-1 py-2 rounded-lg border text-sm transition ${
+                            form.type === t
+                            ? "bg-black text-white"
+                            : "bg-white hover:bg-gray-50"
+                        }`}
+                        >
+                        {t}
+                        </button>
+                    ))}
+                    </div>
+
                     <div>
                         <button
                             onClick= {() => setCatOpen(!catOpen)}
-                            className="bg-white border px-4 py-2 rounded-lg shadow-sm flex items-center gap-2"
+                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         >
                             {selectedCategory?.name || "Select Category"}
                         </button>
@@ -213,42 +231,10 @@ export function ImportModal({
                         )}
                     </div>
 
-                    <div className="flex gap-2">
-                    {["expense", "income"].map((t) => (
-                        <button
-                        key={t}
-                        onClick={() =>
-                            setForm({ ...form, type: t as TransactionType })
-                        }
-                        className={`flex-1 py-2 rounded-lg border text-sm transition ${
-                            form.type === t
-                            ? "bg-black text-white"
-                            : "bg-white hover:bg-gray-50"
-                        }`}
-                        >
-                        {t}
-                        </button>
-                    ))}
-                    </div>
-                    
-                    <select
-                        className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                        value={form.category}
-                        onChange={(e) =>
-                            setForm({ ...form, category: e.target.value })
-                        }
-                    >
-                        <option value="other">Other</option>
-                        <option value="food">Revenue</option>
-                        <option value="rent">Profit</option>
-                        <option value="salary">Gross</option>
-                        <option value="marketing">Marketing</option>
-                    </select>
-
                     <button
                         onClick={handleManualSubmit}
                         disabled={loading}
-                        className="bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition cursor-pointer"
+                        className="w-full bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition cursor-pointer"
                     >
                         {loading ? "Saving..." : "Add Transaction"}
                     </button>
