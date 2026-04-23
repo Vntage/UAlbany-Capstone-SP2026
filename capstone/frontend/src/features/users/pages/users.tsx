@@ -15,7 +15,7 @@ export default function Users() {
   const [showCreate, setShowCreate] = useState(false);
   const [business, setBusiness] = useState<any>(null);
 
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   const fetchUsers = async (businessID: string) => {
@@ -45,25 +45,71 @@ export default function Users() {
     }
   };
 
+  const loadBusiness = () => {
+    const stored = localStorage.getItem("activeBusiness");
 
-  useEffect(() => {
-    const loadBusiness = () => {
-      const stored = localStorage.getItem("activeBusiness");
-      if (stored) {
+    if (!stored) {
+      setBusiness(null);
+      setUsers([]);
+      return;
+    }
+
+    try {
       const parsed = JSON.parse(stored);
       setBusiness(parsed);
-      fetchUsers(parsed.uid);
-    } else {
+
+      if (parsed?.uid) {
+        fetchUsers(parsed.uid);
+      }
+    } catch (err) {
+      console.error("Invalid activeBusiness:", err);
       setBusiness(null);
       setUsers([]);
     }
   };
 
+  useEffect(() => {
     loadBusiness();
 
     window.addEventListener("businessChanged", loadBusiness);
-    return () => window.removeEventListener("businessChanged", loadBusiness);
+    return () =>
+      window.removeEventListener("businessChanged", loadBusiness);
   }, []);
+
+  const updateUserRole = async (userId: string, newRole: string) => {
+    if (!business?.uid) return;
+
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/business/${business.uid}/member/${userId}/role`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ role: newRole }),
+        }
+      );
+
+      if (!res.ok) {
+        console.error("Failed to update role");
+        return;
+      }
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.firebase_uid === userId ? { ...u, role: newRole } : u
+        )
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const currentUserRole = "owner";
+  const canEditRoles =
+    currentUserRole === "owner" || currentUserRole === "admin";
 
   const totalUsers = users.length;
   const admins = users.filter(
@@ -77,17 +123,16 @@ export default function Users() {
       <main className="flex-1 overflow-y-auto p-10">
         <div className="max-w-7xl mx-auto">
 
+          {/* TOP BAR */}
           <div className="flex justify-between items-center mb-8">
             <BusinessSwitcher onCreateClick={() => setShowCreate(true)} />
 
-            <div className="flex gap-3">
-              <button className="px-4 py-2 bg-black text-white rounded-lg text-sm shadow hover:bg-gray-800">
-                Invite Member
-              </button>
-            </div>
+            <button className="px-4 py-2 bg-black text-white rounded-lg text-sm shadow hover:bg-gray-800">
+              Invite Member
+            </button>
           </div>
 
-          {/* Header */}
+          {/* HEADER */}
           <div className="mb-10">
             <h1 className="text-3xl font-bold">
               {business?.name || "Users & Permissions"}
@@ -105,7 +150,6 @@ export default function Users() {
 
           {business && (
             <>
-              {/* Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
                 <StatCard title="Total Users" value={totalUsers} sub="Members" />
                 <StatCard title="Admins" value={admins} sub="Elevated Access" />
@@ -113,14 +157,9 @@ export default function Users() {
                 <StatCard title="Pending Invites" value="--" sub="Coming Soon" />
               </div>
 
-              {/* Table */}
               <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
-                <div className="px-6 py-4 border-b flex justify-between items-center">
-                  <div className="flex gap-6">
-                    <button className="text-sm font-semibold text-black border-b-2 border-black pb-2">
-                      All
-                    </button>
-                  </div>
+                <div className="px-6 py-4 border-b">
+                  <span className="text-sm font-semibold">All Users</span>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -136,46 +175,74 @@ export default function Users() {
                     <tbody className="divide-y">
                       {loadingUsers ? (
                         <tr>
-                          <td
-                            colSpan={3}
-                            className="text-center py-10 text-gray-400"
-                          >
+                          <td colSpan={3} className="text-center py-10 text-gray-400">
                             Loading users...
                           </td>
                         </tr>
                       ) : users.length === 0 ? (
                         <tr>
-                          <td
-                            colSpan={3}
-                            className="text-center py-10 text-gray-400"
-                          >
+                          <td colSpan={3} className="text-center py-10 text-gray-400">
                             No users yet
                           </td>
                         </tr>
                       ) : (
                         users.map((user) => (
                           <tr key={user.firebase_uid}>
+
+                            {/* NAME */}
                             <td className="px-6 py-4">
                               {user.first_name} {user.last_name}
                             </td>
-                            <td className="px-6 py-4 capitalize">
-                              {user.role || "member"}
+
+                            {/* ROLE */}
+                            <td className="px-6 py-4">
+                              {canEditRoles ? (
+                                <select
+                                  value={user.role || "member"}
+                                  onChange={(e) =>
+                                    updateUserRole(
+                                      user.firebase_uid,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="
+                                    border rounded-lg px-2 py-1 text-sm
+                                    bg-white hover:border-gray-400
+                                    focus:outline-none focus:ring-2 focus:ring-blue-500
+                                  "
+                                >
+                                  <option value="member">Member</option>
+                                  <option value="admin">Admin</option>
+                                  <option value="owner">Owner</option>
+                                </select>
+                              ) : (
+                                <span className="capitalize">
+                                  {user.role || "member"}
+                                </span>
+                              )}
                             </td>
+
+                            {/* EMAIL */}
                             <td className="px-6 py-4">
                               {user.username || "—"}
                             </td>
+
                           </tr>
                         ))
                       )}
+
                     </tbody>
                   </table>
                 </div>
+
               </div>
             </>
           )}
+
         </div>
       </main>
 
+      {/* CREATE BUSINESS MODAL */}
       {showCreate && (
         <CreateBusinessForm
           onClose={() => setShowCreate(false)}
@@ -188,9 +255,11 @@ export default function Users() {
   );
 }
 
-/* Components */
-function StatCard({ title, value, sub }:
-  {
+function StatCard({
+  title,
+  value,
+  sub,
+}: {
   title: string;
   value: string | number;
   sub: string;
