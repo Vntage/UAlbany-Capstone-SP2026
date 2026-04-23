@@ -252,7 +252,7 @@ export function ImportModal({
                     <button
                         onClick={handleCSVUpload}
                         disabled={loading}
-                        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+                        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition cursor-pointer"
                     >
                         {loading ? "Uploading..." : "Validate CSV"}
                     </button>

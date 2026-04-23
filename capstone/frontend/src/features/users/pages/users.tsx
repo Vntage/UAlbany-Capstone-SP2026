@@ -81,9 +81,6 @@ export default function Users() {
             <BusinessSwitcher onCreateClick={() => setShowCreate(true)} />
 
             <div className="flex gap-3">
-              <button className="px-4 py-2 border rounded-lg text-sm bg-white shadow-sm">
-                Export CSV
-              </button>
               <button className="px-4 py-2 bg-black text-white rounded-lg text-sm shadow hover:bg-gray-800">
                 Invite Member
               </button>
