@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { CategoryDropDown } from "./categoryDropDown";
 
 type TransactionType = "income" | "expense";
 
@@ -7,6 +8,11 @@ type ImportModal = {
     setMode: (m: "manual" | "csv") => void;
     onClose: () => void;
     businessID: string;
+}
+
+type TransactionCategory = {
+    uid: string;
+    name: string;
 }
 
 export function ImportModal({
@@ -26,6 +32,12 @@ export function ImportModal({
 
     const[loading, setLoading] = useState(false);
     const[result, setResult] = useState<any>(null);
+
+    const[catOpen, setCatOpen] = useState(false);
+    const[categories, setCategories] = useState<TransactionCategory[]>([]);
+    const[selectedCategory, setSelectedCategory] = useState<TransactionCategory | null>(null);
+    const[newCategory, setNewCategory] = useState("");
+    const[creating, setCreating] = useState(false);
 
     if (businessID === "") return;
 
@@ -95,6 +107,26 @@ export function ImportModal({
         }
     }
 
+    useEffect(() => {
+        const fetchCategories = async() => {
+            try{
+                const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+                const res = await fetch(api_url + `/${businessID}/category`, {
+                    method: "GET",
+                })
+
+                const data = await res.json();
+
+                setCategories(data);
+            }
+            catch(error){
+                console.error(error);
+            }
+        };
+        if(businessID) fetchCategories();
+    }, [businessID]);
+
     return(
         <div className = "fixed inset-0 bg-black/40 flex items-center justify-center z-50">
             <div className = "bg-white rounded-2xl shadow-xl w-full max-w-lg p-8">
@@ -148,23 +180,48 @@ export function ImportModal({
                         onChange={(e) => setForm({ ...form, amount: e.target.value })}
                     />
 
-                        <div className="flex gap-2">
-                            {["expense", "income"].map((t) => (
-                                <button
-                                key={t}
-                                onClick={() =>
-                                    setForm({ ...form, type: t as "income" | "expense" })
-                                }
-                                className={`flex-1 py-2 rounded border ${
-                                    form.type === t
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-gray-100"
-                                }`}
-                                >
-                                {t}
-                                </button>
-                            ))}
-                            </div>
+                    <div>
+                        <button
+                            onClick= {() => setCatOpen(!catOpen)}
+                            className="bg-white border px-4 py-2 rounded-lg shadow-sm flex items-center gap-2"
+                        >
+                            {selectedCategory?.name || "Select Category"}
+                        </button>
+
+                        {catOpen && (
+                            <CategoryDropDown
+                                categories={categories}
+                                onSelect={(cat) => {
+                                    setSelectedCategory(cat);
+                                    setCatOpen(false)
+                                }}
+                                creating= {creating}
+                                setCreating = {setCreating}
+                                newCategory = {newCategory}
+                                setNewCategory = {setNewCategory}
+                                businessID = {businessID}
+                                refreshCategories = {setCategories}
+                            />
+                        )}
+                    </div>
+
+                    <div className="flex gap-2">
+                        {["expense", "income"].map((t) => (
+                            <button
+                            key={t}
+                            onClick={() =>
+                                setForm({ ...form, type: t as "income" | "expense" })
+                            }
+                            className={`flex-1 py-2 rounded border ${
+                                form.type === t
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-100"
+                            }`}
+                            >
+                            {t}
+                            </button>
+                        ))}
+                    </div>
 
                     <button
                         onClick={handleManualSubmit}

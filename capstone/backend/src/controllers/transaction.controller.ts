@@ -57,17 +57,13 @@ export const getTransactionCategory = async(req: Request<BusinessParams>, res: R
         WHERE business_id = $1
         ORDER BY name;`,
         [businessID])
-    
-    if(!transaction_categories.rows.length){
-        return res.status(500).json({ message: "Server Error" })
-    }
 
     return res.status(201).json(transaction_categories.rows)
 }
 
 export const createTransactionCategory = async(req: Request<BusinessParams>, res: Response) => {
     const businessID = req.params.businessID;
-    const name = req.body;
+    const { name } = req.body;
 
     if(!businessID || !name){
         return res.status(400).json({ message: "Missing fields" })
