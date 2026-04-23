@@ -6,7 +6,8 @@ export default function Reports() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [mode, setMode] = useState<"manual" | "csv">("manual");
 
-  const businessID = localStorage.getItem("activeBusiness")
+  const business = localStorage.getItem("activeBusiness");
+  const businessID =  business ? JSON.parse(business).uid : null;
 
   return (
     <div className="flex h-screen bg-surface">
