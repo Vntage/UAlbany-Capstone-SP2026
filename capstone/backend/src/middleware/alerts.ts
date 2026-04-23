@@ -16,7 +16,7 @@ const getCurrentBudget = async(business_id: string) => {
         WHERE business_id = $1
         AND period_start <= NOW()
         AND period_end >= NOW()
-        ORDERED BY period_start DESC
+        ORDER BY period_start DESC
         LIMIT 1`,
         [business_id]
     );

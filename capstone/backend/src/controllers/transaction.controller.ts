@@ -30,7 +30,7 @@ export const createTransaction = async(req: Request<BusinessParams>, res: Respon
         return res.status(400).json({ message: "Missing required fields" })
     }
     try{
-        const result = await pool.query<Transaction>(`INSERT INTO transaction
+        const result = await pool.query<Transaction>(`INSERT INTO transactions
             (business_id, name, date, description, type, category_id, amount, created_by)
             VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;`,
             [businessID, name, date, description, type, categoryID, amount, userID]);
