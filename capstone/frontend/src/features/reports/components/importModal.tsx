@@ -91,6 +91,7 @@ export function ImportModal({
             const res = await fetch(api_url + `/api/transaction/${businessID}/csv/validate`, {
                 method: "POST",
                 body: formData,
+                credentials: "include",
             })
 
             const data = await res.json();
@@ -116,6 +117,7 @@ export function ImportModal({
 
                 const res = await fetch(api_url + `/api/transaction/${businessID}/category`, {
                     method: "GET",
+                    credentials: "include",
                 })
 
                 const data = await res.json();

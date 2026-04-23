@@ -53,7 +53,7 @@ export const createTransaction = async(req: Request<BusinessParams>, res: Respon
 export const getTransactionCategory = async(req: Request<BusinessParams>, res: Response) => {
     const businessID = req.params.businessID;
 
-    const transaction_categories = await pool.query<TransactionCategory>(`SELECT * FROM transaction_categories 
+    const transaction_categories = await pool.query<TransactionCategory>(`SELECT * FROM transaction_category 
         WHERE business_id = $1
         ORDER BY name;`,
         [businessID])
@@ -64,12 +64,13 @@ export const getTransactionCategory = async(req: Request<BusinessParams>, res: R
 export const createTransactionCategory = async(req: Request<BusinessParams>, res: Response) => {
     const businessID = req.params.businessID;
     const { name } = req.body;
+    console.log("")
 
     if(!businessID || !name){
         return res.status(400).json({ message: "Missing fields" })
     }
 
-    const transctionResult = await pool.query<TransactionCategory>(`INSERT INTO transaction_categories (business_id, name)
+    const transctionResult = await pool.query<TransactionCategory>(`INSERT INTO transaction_category (business_id, name)
         VALUES($1, $2) RETURNING *;`,
         [businessID, name])
     
@@ -239,7 +240,7 @@ export const commitCSV = async(req: Request<BusinessParams>, res: Response) => {
         const user = req.user?.uid;
         const { rows } = req.body;
 
-        const categories = await pool.query(`SELECT uid, name FROM transaction_categories WHERE business_id = $1`, [business_id]);
+        const categories = await pool.query(`SELECT uid, name FROM transaction_category WHERE business_id = $1`, [business_id]);
 
         const categoryMap = new Map();
         categories.rows.forEach(c => {

@@ -9,6 +9,7 @@ export const verifyMember = async (req: Request<BusinessParams>, res: Response, 
             res.status(401).json({ message: "Unauthorized" });
             return;
         }
+        req.params.businessID = String(req.params.businessID).replace(/"/g, "");
         const businessID = req.params.businessID;
         const userID = req.user.uid;
 
@@ -16,6 +17,7 @@ export const verifyMember = async (req: Request<BusinessParams>, res: Response, 
             res.status(400).json({ message: "Missing Parameter" });
             return;
         }
+
         const result = await pool.query<BusinessMember>(`SELECT * FROM business_member 
             WHERE business_id = $1 AND user_id = $2 
             LIMIT 1`, [businessID, userID]);

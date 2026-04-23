@@ -13,8 +13,10 @@ export const verifySession = async(req: Request, res: Response, next: NextFuncti
     try{
         const decode = await admin.auth().verifySessionCookie(sessionCookie);
         req.user = decode;
+
         next();
     }catch(error){
+        console.log(error)
         res.status(401).json({ message: "Invalid Session" });
         return;
     }

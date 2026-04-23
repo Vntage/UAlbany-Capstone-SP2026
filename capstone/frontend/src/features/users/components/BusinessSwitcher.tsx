@@ -20,7 +20,6 @@ export default function BusinessSwitcher({ onCreateClick }: Props) {
     });
 
     const data = await res.json();
-
     if (res.ok) {
       setBusinesses(data);
 
@@ -32,15 +31,15 @@ export default function BusinessSwitcher({ onCreateClick }: Props) {
       const exists = data.find((b: Business) => b.uid === parsed.uid);
 
       if (exists) {
-        setActiveBusiness(parsed);
+        setActiveBusiness(parsed.uid);
         return; // stop here if valid
       }
     }
 
     // fallback if invalid or doesn't exist
     if (data.length > 0) {
-      setActiveBusiness(data[0]);
-      localStorage.setItem("activeBusiness", JSON.stringify(data[0]));
+      setActiveBusiness(data[0].uid);
+      localStorage.setItem("activeBusiness", JSON.stringify(data[0].uid));
     } else {
       setActiveBusiness(null);
       localStorage.removeItem("activeBusiness");
@@ -53,7 +52,7 @@ export default function BusinessSwitcher({ onCreateClick }: Props) {
 
   const handleSelect = (biz: Business) => {
     setActiveBusiness(biz);
-    localStorage.setItem("activeBusiness", JSON.stringify(biz));
+    localStorage.setItem("activeBusiness", JSON.stringify(biz.uid));
     window.dispatchEvent(new Event("businessChanged"));
     setOpen(false);
   };

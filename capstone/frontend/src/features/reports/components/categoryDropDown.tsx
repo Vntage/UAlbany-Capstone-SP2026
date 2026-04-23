@@ -32,6 +32,7 @@ export function CategoryDropDown({
 
             const res = await fetch(api_url + `/api/transaction/${businessID}/category`, {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name: newCategory })
             })
@@ -44,6 +45,7 @@ export function CategoryDropDown({
 
                 const res = await fetch(api_url + `/api/transaction/${businessID}/category`, {
                     method: "GET",
+                    credentials: "include",
                 })
 
                 const update = await res.json();
@@ -56,7 +58,7 @@ export function CategoryDropDown({
             <ul className="py-2 max-h-60 overflow-auto">
 
                 {/* Category List */}
-                {(categories ?? []).map((cat) => (
+                {categories.map((cat) => (
                     <li key={cat.uid}>
                         <button
                             onClick={() => onSelect(cat)}
