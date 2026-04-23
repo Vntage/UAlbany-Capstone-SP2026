@@ -21,6 +21,7 @@ export function ImportModal({
         date: "",
         amount: "",
         type: "expense" as TransactionType,
+        category: "other",
     });
     const [error, setError] = useState("");
 
@@ -44,8 +45,9 @@ export function ImportModal({
                 body: JSON.stringify({
                     name: form.name,
                     date: form.date,
-                    amount: Number(form.date),
+                    amount: Number(form.amount),
                     type: form.type,
+                    category: form.category,
                 })
             });
             const data = await res.json();
@@ -96,20 +98,20 @@ export function ImportModal({
     }
 
     return(
-        <div className = "fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className = "bg-white rounded-2xl shadow-xl w-full max-w-lg p-8">
+        <div className = "fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className = "bg-white rounded-2xl w-full max-w-lg p-6">
 
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-5">
                     <h2 className="text-xl font-bold">Import Data</h2>
-                    <button className="text-gray-400 hover:text-black text-lg" onClick={onClose}>✕</button>
+                    <button className="text-gray-400 hover:text-black text-xl" onClick={onClose}>✕</button>
                 </div>
 
                 {/* Tabs */}
-                <div className="">
+                <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
                     <button
                         onClick={() => setMode("manual")}
-                        className={`px-3 py-1 rounded ${
-                            mode === "manual" ? "bg-blue-600 text-white" : "bg-gray-100"
+                        className={`px-4 py-1 rounded-md text-sm transition ${
+                            mode === "manual" ? "bg-white shadow font-medium" : "text-gray-600"
                         }`}
                     >
                         Manual
@@ -117,13 +119,19 @@ export function ImportModal({
 
                     <button
                         onClick={() => setMode("csv")}
-                        className={`px-3 py-1 rounded ${
-                            mode === "csv" ? "bg-blue-600 text-white" : "bg-gray-100"
+                        className={`px-4 py-1 rounded-md text-sm transition ${
+                            mode === "csv" ? "bg-white shadow font-medium" : "text-gray-600"
                         }`}
                     >
                         CSV Upload
                     </button>
                 </div>
+
+                {error && (
+                <div className="mb-4 text-sm text-red-600 bg-red-50 p-2 rounded">
+                    {error}
+                </div>
+                )}
 
                 {/* 🔁 SWITCH CONTENT */}
                 {mode === "manual" ? (
@@ -131,37 +139,55 @@ export function ImportModal({
 
                     <input
                         placeholder="Name"
-                        className="px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         onChange={(e) => setForm({ ...form, name: e.target.value })}
                     />
 
                     <input
                         type="date"
-                        className="px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         onChange={(e) => setForm({ ...form, date: e.target.value })}
                     />
 
                     <input
                         placeholder="Amount"
                         type="number"
-                        className="px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         onChange={(e) => setForm({ ...form, amount: e.target.value })}
                     />
 
-                        <div className="px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-                            {["expense", "income"].map((t) => (
-                                <button
-                                key={t}
-                                onClick={() =>
-                                    setForm({ ...form, type: t as "income" | "expense" })
-                                }
-                                className={` ${form.type === t}`}
-                                >
-                                {t}
-                                </button>
-                            ))}
-                            </div>
-
+                    <div className="flex gap-2">
+                    {["expense", "income"].map((t) => (
+                        <button
+                        key={t}
+                        onClick={() =>
+                            setForm({ ...form, type: t as TransactionType })
+                        }
+                        className={`flex-1 py-2 rounded-lg border text-sm transition ${
+                            form.type === t
+                            ? "bg-black text-white"
+                            : "bg-white hover:bg-gray-50"
+                        }`}
+                        >
+                        {t}
+                        </button>
+                    ))}
+                    </div>
+                    
+                    <select
+                        className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        value={form.category}
+                        onChange={(e) =>
+                            setForm({ ...form, category: e.target.value })
+                        }
+                    >
+                        <option value="other">Other</option>
+                        <option value="food">Revenue</option>
+                        <option value="rent">Profit</option>
+                        <option value="salary">Gross</option>
+                        <option value="marketing">Marketing</option>
+                    </select>
+            
                     <button
                         onClick={handleManualSubmit}
                         disabled={loading}
@@ -177,19 +203,23 @@ export function ImportModal({
                         type="file"
                         accept=".csv"
                         onChange={(e) => setFile(e.target.files?.[0] || null)}
+                        className="w-full border p-3 rounded-lg"
                     />
 
                     <button
                         onClick={handleCSVUpload}
                         disabled={loading}
-                        className="w-full bg-blue-600 text-white py-2 rounded"
+                        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
                     >
                         {loading ? "Uploading..." : "Validate CSV"}
                     </button>
 
                     {/* 🧠 Preview results */}
                     {result && (
-                        <div className="text-xs bg-gray-50 p-3 rounded max-h-40 overflow-auto">
+                        <div className="bg-gray-50 border rounded-lg p-3 text-xs space-y-1 max-h-40 overflow-auto">
+                            <div className="font-semibold mb-2">
+                                CSV Summary
+                            </div>
                             <p>Total: {result.summary.total}</p>
                             <p>Valid: {result.summary.valid}</p>
                             <p>Invalid: {result.summary.invalid}</p>
