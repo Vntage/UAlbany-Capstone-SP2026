@@ -112,12 +112,76 @@ export const createBusinessMember = async(req: Request<BusinessParams>, res: Res
 
 //create invitation for users to join business
 export const createBusinessInvite = async(req: Request<BusinessParams>, res: Response) => {
+    try{
+        const business_id = req.params.businessID;
+        const { userID, role = "member", expiresAt } = req.body;
+        const invitedBy = req.user?.uid;
 
+        const member = req.businessMember;
+
+        if(!member){
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        if(member.role === "admin" && (role === "admin" || role === "owner")){
+            return res.status(403).json({ message: "Unauthorized (Admin)" })
+        }
+
+        const result = await pool.query(`
+            INSERT INTO business_invite (business_id, user_id, invited_by, role, expires_at)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING *`,
+            [business_id, userID, invitedBy, role, expiresAt || null]
+        );
+
+        if(!result.rows[0]){
+            return res.status(500).json({ message: "Database Error" });
+        }
+
+        return res.status(201).json({ message: "Created Successfully" });
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).json({ message: "Server Error" });
+    }
 }
 
 //allow user to see if anyone invited them to join their business
 export const getBusinessInvite = async(req: Request<BusinessParams>, res: Response) => {
+    try{
+        const user = req.user?.uid;
+        const { business_id, status } = req.body;
 
+        let query = `SELECT * FROM business_invite WHERE 1=1`;
+        const values: any[] = []
+
+        if(user){
+            values.push(user);
+            query += ` AND user_id = $${values.length}`;
+        }
+        if(business_id){
+            values.push(business_id);
+            query += ` AND business_id = $${values.length}`;
+        }
+        if(status){
+            values.push(status);
+            query += ` AND status = $${values.length}`;
+        }
+        
+        query += ` ORDER BY created_at DESC`;
+
+        const result = await pool.query(query, values);
+
+        if(!result.rows){
+            return res.status(500).json({ message: "Database Error" });
+        }
+
+        return res.status(200).json(result.rows)
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).json({ message: "Server Error" })
+    }
 }
 
 //accept or decline business invite

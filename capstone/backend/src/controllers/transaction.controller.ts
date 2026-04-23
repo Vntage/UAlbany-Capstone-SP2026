@@ -95,13 +95,19 @@ export const validatedCSV = async(req: Request<BusinessParams>, res: Response) =
         const csv = req.file?.buffer.toString();
 
         const records = parse(csv, {
-            columns: true,
+            columns: (header) => 
+                header.map((h)=> 
+                    h.trim().toLowerCase()
+                ),
             skip_empty_lines: true,
             trim: true,
         }) as CsvRows[];
 
         const valid: any[] = [];
         const invalid: any[] = [];
+        const duplicate: any[] = [];
+
+        const seen = new Set();
 
         records.forEach((row, index) => {
             const error = [];
@@ -116,6 +122,19 @@ export const validatedCSV = async(req: Request<BusinessParams>, res: Response) =
             }
 
             let { date, name, amount, category, description } = row;
+
+            const key = `${date}|${name.toLowerCase()}|${Number(amount)}`;
+
+            if(seen.has(key)){
+                duplicate.push({
+                    row: index + 1,
+                    data: row,
+                    error: ["Duplicate row in file"],
+                })
+                return;
+            }
+
+            seen.add(key);
 
             if(!date || isNaN(Date.parse(date))){
                 error.push("Invalid Date");
@@ -159,14 +178,45 @@ export const validatedCSV = async(req: Request<BusinessParams>, res: Response) =
             else{
                 valid.push(transaction)
             }
-
         });
+        const dbTransactions = await pool.query(`
+            SELECT date, name, amount 
+            FROM transactions 
+            WHERE business_id = $1 AND date = ANY($2)`, 
+            [businessID, valid.map((r)=> r.date)]);
+
+        const dbSet = new Set(
+            dbTransactions.rows.map((r: any) => 
+                `${r.date}|${r.name.toLowerCase()}|${Number(r.amount)}`
+            )
+        )
+
+        const finalValid: any[] = [];
+        const dbDuplicate: any[] = [];
+
+        for(const row of valid){
+            const key = `${row.date}|${row.name.trim().toLowerCase()}|${Number(row.amount)}`;
+
+            if(dbSet.has(key)){
+                dbDuplicate.push({
+                    data: row,
+                    error: ["Data already exists in Database"]
+                });
+            }
+            else{
+                finalValid.push(row)
+            }
+        }
+
         return res.status(201).json({
-            valid,
+            finalValid,
+            duplicate,
+            dbDuplicate,
             invalid,
             summary: {
                 total: records.length,
-                valid: valid.length,
+                valid: finalValid.length,
+                duplicate: duplicate.length + dbDuplicate.length,
                 invalid: invalid.length
             }
         });
@@ -201,14 +251,14 @@ export const commitCSV = async(req: Request<BusinessParams>, res: Response) => {
         });
 
         for(const row of rows){
-            const key = row.category_name.toLowerCase();
+            const key = row.category_name.trim().toLowerCase();
 
             if(!categoryMap.has(key)){
                 const newCategory = await pool.query<TransactionCategory>(`
                     INSERT INTO transaction_category (business_id, name)
                     VALUES ($1, $2)
                     RETURNING *`, 
-                    [business_id, row.category_name]
+                    [business_id, row.category_name.trim()]
                 );
                 categoryMap.set(key, newCategory.rows[0]?.uid);
             }

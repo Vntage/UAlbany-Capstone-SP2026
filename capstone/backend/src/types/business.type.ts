@@ -1,5 +1,8 @@
 import { Timestamp, UUID } from "./common.type";
 
+type InviteRole = "admin" | "member";
+type InviteStatus = "sent" | "accepted" | "declined";
+
 export type Business = {
     uid: UUID;
     name: string;
@@ -17,3 +20,15 @@ export type BusinessMember = {
     role: "owner" | "admin" | "member" | "disabled";
     joined_at: Timestamp;
 }
+
+export type BusinessInvite = {
+    uid: UUID;
+    business_id: UUID;
+    user_id: UUID;
+    role: InviteRole;
+    status: InviteStatus;
+    invited_by: UUID;
+    created_at: Timestamp;
+    expires_at: Timestamp;
+}
+
