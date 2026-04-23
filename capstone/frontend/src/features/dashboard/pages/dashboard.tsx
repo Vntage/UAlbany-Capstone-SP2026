@@ -20,7 +20,16 @@ export default function Dashboard() {
           const token = await user.getIdToken();
           const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
 
-          const res = await fetch(api_url + "/api/dashboard_data", {
+          const fetchBusinessOne = await fetch(api_url + "/api/fetchBusinessOne", { //FOR TESTING
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}` },
+            credentials: "include"
+          });
+          const businessOneData = await fetchBusinessOne.json();
+          const businessOneUID = businessOneData.uid; //for later fetching
+          console.log("Fetched business one: ", businessOneData); //END [FOR TESTING]
+
+          const res = await fetch(api_url + "/api/dashboard/" + businessOneUID, {
             method: "GET",
             headers: { "Authorization": `Bearer ${token}` },
             credentials: "include"
@@ -63,7 +72,7 @@ export default function Dashboard() {
           ]);
           setTotal(data.revenueByCategory.reduce((sum: number, entryValue: any) => sum + Number(entryValue.value), 0)); //entry is initially a number string
         } catch (error) {
-          alert("Error fetching dashboard data.");
+          alert("Error fetching dashboard data:" + (error instanceof Error ? error.message : String(error)));
         }
       } else {
         // User is signed out

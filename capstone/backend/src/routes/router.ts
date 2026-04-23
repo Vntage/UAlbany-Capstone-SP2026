@@ -6,6 +6,7 @@ import transactionRoutes from "./transaction.routes"
 import alertRoutes from "./alert.routes"
 import budgetRoutes from "./budget.routes"
 import reportRoutes from "./report.routes"
+import dashboardRoutes from "./dashboard.routes"
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use("/transaction", transactionRoutes)
 router.use("/alert", alertRoutes)
 router.use("/budget", budgetRoutes)
 router.use("/report", reportRoutes)
+router.use("/dashboard", dashboardRoutes)
 
 export default router;
