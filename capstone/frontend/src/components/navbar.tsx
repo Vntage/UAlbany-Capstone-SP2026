@@ -4,6 +4,7 @@ import AlertsIcon from "../assets/navbar/alerts.png";
 import UsersIcon from "../assets/navbar/users.png";
 import ReportIcon from "../assets/navbar/report.png";
 import BudgetIcon from "../assets/navbar/budget.png";
+import TransactionsIcon from "../assets/navbar/transactions.png";
 import SettingsIcon from "../assets/navbar/setting.png";
 import SupportIcon from "../assets/navbar/support.png";
 import LogoutIcon from "../assets/navbar/logout.png";
@@ -40,8 +41,10 @@ export default function Navbar() {
     { name: "Dashboard", icon: DashboardIcon, path: "/dashboard" },
     { name: "Alerts", icon: AlertsIcon, path: "/alerts" },
     { name: "Reports", icon: ReportIcon, path: "/reports" },
+    { name: "Transactions", icon: TransactionsIcon, path: "/transactions"},
     { name: "Budget", icon: BudgetIcon, path: "/budget" },
     { name: "Users", icon: UsersIcon, path: "/users" },
+
   ];
 
   const bottomLinks = [
