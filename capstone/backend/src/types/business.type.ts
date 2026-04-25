@@ -1,7 +1,7 @@
 import { Timestamp, UUID } from "./common.type";
 
 type InviteRole = "admin" | "member";
-type InviteStatus = "sent" | "accepted" | "declined";
+type InviteStatus = "sent" | "accepted" | "declined" | "canceled";
 
 export type Business = {
     uid: UUID;

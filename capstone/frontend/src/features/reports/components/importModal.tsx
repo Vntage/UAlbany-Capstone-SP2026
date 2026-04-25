@@ -26,6 +26,7 @@ export function ImportModal({
         name: "",
         date: "",
         amount: "",
+        description: "",
         type: "expense" as TransactionType,
         category: "other",
     });
@@ -58,6 +59,7 @@ export function ImportModal({
                     name: form.name,
                     date: form.date,
                     amount: Number(form.amount),
+                    description: form.description,
                     type: form.type,
                     category: form.category,
                 })
@@ -190,6 +192,13 @@ export function ImportModal({
                         onChange={(e) => setForm({ ...form, amount: e.target.value })}
                     />
 
+                    <textarea
+                        placeholder="Description (optional)"
+                        className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        rows={3}
+                        onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    />
+
                     <div className="flex gap-2">
                     {["expense", "income"].map((t) => (
                         <button
@@ -221,7 +230,10 @@ export function ImportModal({
                                 categories={categories}
                                 onSelect={(cat) => {
                                     setSelectedCategory(cat);
-                                    setCatOpen(false)
+                                    setCatOpen(false);
+                                    setForm({
+                                        ...form, category: cat.uid
+                                    })
                                 }}
                                 creating= {creating}
                                 setCreating = {setCreating}

@@ -24,7 +24,7 @@ export const verifyMember = async (req: Request<BusinessParams>, res: Response, 
 
         const member = result.rows[0];
 
-        if(!member){
+        if(!member || member.role === "disabled"){
             res.status(403).json({ message: "Not a business member" });
             return;
         }

@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import pool from "../config/db"
-import { Business, BusinessMember } from "../types/business.type";
-import { BusinessParams } from "../types/common.type";
+import { Business, BusinessInvite, BusinessMember } from "../types/business.type";
+import { BusinessParams, InviteParams } from "../types/common.type";
 
 export const getBusiness = async(req: Request<BusinessParams>, res: Response) => {
     const business_id = req.params.businessID;
@@ -23,6 +23,7 @@ export const getUserBusinesses = async(req: Request, res: Response) => {
         FROM business_member bm
         JOIN business b ON bm.business_id = b.uid
         WHERE bm.user_id = $1
+        AND bm.role <> 'disabled'
         `, [uid]);
 
     if(!business.rows[0]){
@@ -110,6 +111,52 @@ export const createBusinessMember = async(req: Request<BusinessParams>, res: Res
     }
 }
 
+export const updateRole = async(req: Request<BusinessParams>, res: Response) => {
+    try{
+        const businessID = req.params.businessID;
+        const { user, role } = req.body;
+
+        if(!user || role !== "admin" || role !== "member" || role !== "disabled"){
+            return res.status(400).json({ message: "Missing Fields" });
+        }
+        const result = await pool.query(`
+            UPDATE business_member
+            SET role = $1,
+            WHERE business_id = $2 
+            AND user_id = $3
+            RETURNING *
+            `, [role, businessID, user]);
+        
+        if(!result.rows[0]){
+            return res.status(500).json({ message: "Database Error" });
+        }
+
+        return res.status(200).json(result.rows[0]);
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).json({ message: "Server Error" })
+    }
+}
+
+export const getRole = async(req: Request<BusinessParams>, res: Response) => {
+    try{
+        const businessID = req.params.businessID;
+        const user = req.user?.uid;
+
+        const result = await pool.query(`SELECT role FROM business_member WHERE business_id = $1 and user_id = $2`, [businessID, user]);
+
+        if(!result.rows[0]){
+            return res.status(500).json({ message: "Database Error" });
+        }
+        return res.status(200).json(result.rows[0]);
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).json({ message: "Server Error" })
+    }
+}
+
 //create invitation for users to join business
 export const createBusinessInvite = async(req: Request<BusinessParams>, res: Response) => {
     try{
@@ -123,8 +170,8 @@ export const createBusinessInvite = async(req: Request<BusinessParams>, res: Res
             return res.status(401).json({ message: "Unauthorized" });
         }
 
-        if(member.role === "admin" && (role === "admin" || role === "owner")){
-            return res.status(403).json({ message: "Unauthorized (Admin)" })
+        if(member.role === "owner"){
+            return res.status(403).json({ message: "Unauthorized" })
         }
 
         const result = await pool.query(`
@@ -146,31 +193,37 @@ export const createBusinessInvite = async(req: Request<BusinessParams>, res: Res
     }
 }
 
+export const getUserInvite = async(req: Request, res: Response) => {
+    try{
+        const user = req.user?.uid;
+
+        const result = await pool.query(`
+            SELECT business_invite
+            WHERE user_id = $1
+            AND status <> 'declined'
+            `, [user]);
+
+        if(!result.rowCount ){
+            return res.status(500).json({ message: "Database Error" });
+        }
+        return res.status(200).json(result.rows)
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).json({ message: "Server Error" });
+    }
+}
+
 //allow user to see if anyone invited them to join their business
 export const getBusinessInvite = async(req: Request<BusinessParams>, res: Response) => {
     try{
-        const user = req.user?.uid;
-        const { business_id, status } = req.body;
+        const businessID = req.params.businessID;
 
-        let query = `SELECT * FROM business_invite WHERE 1=1`;
-        const values: any[] = []
-
-        if(user){
-            values.push(user);
-            query += ` AND user_id = $${values.length}`;
-        }
-        if(business_id){
-            values.push(business_id);
-            query += ` AND business_id = $${values.length}`;
-        }
-        if(status){
-            values.push(status);
-            query += ` AND status = $${values.length}`;
-        }
-        
-        query += ` ORDER BY created_at DESC`;
-
-        const result = await pool.query(query, values);
+        const result = await pool.query(`
+            SELECT business_invite 
+            WHERE business_id = $1 
+            ORDER BY status, created_at DESC`, 
+            [businessID]);
 
         if(!result.rows){
             return res.status(500).json({ message: "Database Error" });
@@ -185,6 +238,68 @@ export const getBusinessInvite = async(req: Request<BusinessParams>, res: Respon
 }
 
 //accept or decline business invite
-export const updateBusinessInvite = async(req: Request<BusinessParams>, res: Response) => {
+export const updateBusinessInvite = async(req: Request<InviteParams>, res: Response) => {
+    const inviteID = req.params.inviteID;
+    const { status } = req.body;
 
+    if(!inviteID || status !== "accepted" || status !== "declined" || status !== "canceled"){
+        return res.status(400).json({ message: "Unacceptable Field" });
+    }
+
+    try{
+        if(status == "declined" || status == "canceled"){
+            const result = await pool.query(`
+                UPDATE business_invite 
+                SET status = $1
+                WHERE uid = $2
+                RETURNING *
+                `, [status, inviteID]);
+
+            if(!result.rows[0]){
+                return res.status(500).json({ message: "Database Error" });
+            }
+            return res.status(200).json(result.rows[0]);
+        }
+
+        const invResult = await pool.query<BusinessInvite>(`SELECT * from business_invite WHERE uid = $1`, [inviteID]);
+
+        if(!invResult.rows[0]){
+            return res.status(500).json({ message: "Database Error" });
+        }
+
+        const invite = invResult.rows[0];
+        
+        if(invite.expires_at && new Date(invite.expires_at) < new Date()){
+            return res.status(400).json({ message: "Invite Expired" })
+        }
+
+        if(invite.status !== "sent"){
+            return res.status(400).json({ message: `Invite already ${invite.status}` })
+        }
+
+        const result = await pool.query(`
+            UPDATE business_invite 
+            SET status = $1
+            WHERE uid = $2
+            RETURNING *
+            `, [status, inviteID]);
+
+        if(!result.rows[0]){
+            return res.status(500).json({ message: "Database Error" });
+        }
+
+        const newMember = await pool.query<BusinessMember>(`INSERT INTO business_members (business_id, user_id, role)
+            VALUES($1, $2, $3) RETURNING *`, 
+            [invite.business_id, invite.user_id, invite.role]);
+
+        if(!newMember.rows[0]){
+            return res.status(500).json({ message: "Database Error" });
+        }
+        
+        return res.status(200).json(newMember.rows[0]);
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).json({ message: "Server Error" })
+    }
 }

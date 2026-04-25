@@ -1,5 +1,5 @@
 import  express  from "express";
-import { getBusiness, getUserBusinesses, getBusinessMember, createBusiness, createBusinessMember } from "../controllers/business.controller";
+import { getBusiness, getUserBusinesses, getBusinessMember, createBusiness, updateRole, getRole, createBusinessInvite, getBusinessInvite, updateBusinessInvite, getUserInvite } from "../controllers/business.controller";
 import { verifySession } from "../middleware/verifySession";
 import { verifyMember } from "../middleware/verifyMember";
 import { requireRole } from "../middleware/requireRole";
@@ -7,16 +7,17 @@ import { requireRole } from "../middleware/requireRole";
 const router = express.Router();
 
 router.post("/", verifySession, createBusiness);
-router.post("/:businessID/member", verifySession, verifyMember, requireRole(['owner', 'admin']), createBusinessMember)
+router.post("/:businessID/invite", verifySession, verifyMember, requireRole(['owner']), createBusinessInvite);
 
-//create update role 
-router.patch("/:businessID/role", verifySession, verifyMember, requireRole(['owner']))
+router.patch("/:businessID/role", verifySession, verifyMember, requireRole(['owner']), updateRole);
+router.patch("/:inviteID", verifySession, updateBusinessInvite);
 
-router.get("/:businessID", verifySession, verifyMember, getBusiness)
-router.get("/", verifySession, getUserBusinesses)
-router.get("/:businessID/member", verifySession, verifyMember, requireRole(['owner', 'admin']), getBusinessMember)
+router.get("/", verifySession, getUserBusinesses);
+router.get('/invite', verifySession, getUserInvite);
 
-//create get role
-router.get("/:businessID/role", verifySession, verifyMember)
+router.get("/:businessID/invite", verifySession, verifyMember, requireRole(['owner']), getBusinessInvite);
+router.get("/:businessID", verifySession, verifyMember, getBusiness);
+router.get("/:businessID/member", verifySession, verifyMember, requireRole(['owner']), getBusinessMember);
+router.get("/:businessID/role", verifySession, verifyMember, getRole);
 
 export default router;

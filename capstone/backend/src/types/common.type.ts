@@ -24,3 +24,7 @@ export type CsvRows = {
 export type BusinessParams = {
     businessID: string
 }
+
+export type InviteParams = {
+    inviteID: string
+}

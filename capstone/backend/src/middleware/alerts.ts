@@ -12,7 +12,7 @@ import { BusinessMember } from "../types/business.type";
 
 const getCurrentBudget = async(business_id: string) => {
     const result = await pool.query<Budget>(
-        `SELECT * FROM budgets
+        `SELECT * FROM budget
         WHERE business_id = $1
         AND period_start <= NOW()
         AND period_end >= NOW()

@@ -33,7 +33,7 @@ export async function initDB() {
             DO $$
             BEGIN
                 IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'business_role') THEN
-                    CREATE TYPE business_role AS ENUM ('owner', 'admin', 'member', 'removed');
+                    CREATE TYPE business_role AS ENUM ('owner', 'admin', 'member', 'disabled');
                 END IF;
             END$$
         `);
@@ -46,6 +46,28 @@ export async function initDB() {
             user_id VARCHAR(255) REFERENCES public.users(firebase_uid) ON DELETE CASCADE,
             role business_role,
             joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );`)
+
+        await pool.query(`
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invite_status') THEN
+                    CREATE TYPE invite_status AS ENUM ('sent', 'accepted', 'declined', 'canceled');
+                END IF;
+            END$$
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS business_invite (
+            uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            business_id UUID REFERENCES business(uid) ON DELETE CASCADE,
+            user_id VARCHAR(255) REFERENCES public.users(firebase_uid) ON DELETE CASCADE,
+            role business_role,
+            status invite_status NOT NULL DEFAULT 'sent',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP NOT NULL,
+            CONSTRAINT business_invite_role_check
+                CHECK(role IN ('admin', 'member'))
             );`)
 
         //transaction category schema
@@ -126,6 +148,7 @@ export async function initDB() {
             created_by VARCHAR(255) REFERENCES public.users(firebase_uid) ON DELETE CASCADE
             );`)
 
+        //alert enums
         await pool.query(`
             DO $$
             BEGIN
@@ -138,6 +161,7 @@ export async function initDB() {
             END$$
             `)
         
+        //alert rules
         await pool.query(`
             CREATE TABLE IF NOT EXISTS alert_rule(
             uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -157,7 +181,7 @@ export async function initDB() {
             title TEXT NOT NULL,
             message TEXT NOT NULL,
             severity alert_severity NOT NULL,
-            alert_rule_id UUID REFERENCES alert_rules(uid) ON DELETE CASCADE,
+            alert_rule_id UUID REFERENCES alert_rule(uid) ON DELETE CASCADE,
             triggered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );`)
 
