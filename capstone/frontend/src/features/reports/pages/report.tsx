@@ -1,14 +1,8 @@
 import Navbar from "../../../components/navbar";
 import { useState } from "react";
-import { ImportModal } from "../components/importModal";
+import { ImportModal } from "../../transactions/components/importModal";
 
 export default function Reports() {
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [mode, setMode] = useState<"manual" | "csv">("manual");
-
-  const business = localStorage.getItem("activeBusiness");
-  const businessID =  business ? JSON.parse(business).uid : null;
-
   return (
     <div className="flex h-screen bg-surface">
       <Navbar />
@@ -38,7 +32,7 @@ export default function Reports() {
 
                 <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm shadow 
                      hover:bg-green-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer"
-                     onClick={()=> setShowImportModal(true)}>
+                    >
                   📊 Import 
                 </button>
               </div>
@@ -207,13 +201,6 @@ export default function Reports() {
 
         </div>
       </main>
-      {showImportModal && (
-        <ImportModal
-          mode = {mode}
-          setMode= {setMode}
-          onClose={() => setShowImportModal(false)}
-          businessID = {businessID || ""}
-      />)}
     </div>
   );
 }
