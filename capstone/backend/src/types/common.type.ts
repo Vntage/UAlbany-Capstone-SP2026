@@ -25,6 +25,11 @@ export type BusinessParams = {
     businessID: string
 }
 
+export type TransactionParams = {
+    businessID: string,
+    transactionID: string
+}
+
 export type InviteParams = {
     inviteID: string
 }

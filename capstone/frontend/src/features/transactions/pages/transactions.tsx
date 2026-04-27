@@ -1,11 +1,14 @@
 import Navbar from "../../../components/navbar";
 import { useState, useEffect } from "react";
 import { ImportModal } from "../components/importModal";
+import EditTransactionModal from "../components/editTransactionModal";
 
 export default function Transactions() {
       const [showImportModal, setShowImportModal] = useState(false);
       const [mode, setMode] = useState<"manual" | "csv">("manual");
     
+      const [showEditTransactionModal, setShowEditTransactionModal] = useState(false);
+
       const business = localStorage.getItem("activeBusiness");
       const businessID =  business ? JSON.parse(business).uid : null;
 
@@ -14,9 +17,12 @@ export default function Transactions() {
       const[selectedTransaction, setSelectedTransaction] = useState<string | null>(null);
 
       const[error, setError] = useState<string | null> (null);
+      const[loading, setLoading] = useState(false)
 
       useEffect(() => {
         if(!businessID) return;
+        setLoading(true);
+
         const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
         fetch(api_url + `/api/transaction/${businessID}`, {
@@ -30,7 +36,7 @@ export default function Transactions() {
         }).catch((error) => {
             setError(error.message)
         }).finally(() => {
-
+            setLoading(false)
         })
       }, [businessID])
 
@@ -46,6 +52,19 @@ export default function Transactions() {
             setMode= {setMode}
             onClose={() => setShowImportModal(false)}
             businessID = {businessID || ""}
+        />)}
+          {showEditTransactionModal && (
+            <EditTransactionModal
+            transaction={selectedTransaction}
+            businessID= {businessID}
+            onClose={() => setShowEditTransactionModal(false)}
+            onUpdate={() => {
+                fetch(`/api/businesses/${businessID}/transactions`)
+                    .then((res) => res.json())
+                    .then((data) => setTransactions(data))
+                    .finally(()=> setLoading(false))
+                }
+            }
         />)}
         </div>
     )

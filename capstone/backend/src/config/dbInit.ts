@@ -100,6 +100,7 @@ export async function initDB() {
             CREATE TABLE IF NOT EXISTS transaction_log (
             uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             transaction_id UUID REFERENCES transactions(uid) ON DELETE CASCADE,
+            business_id UUID REFERENCES business(uid) ON DELETE CASCADE,
             name TEXT,
             date DATE,
             description TEXT,

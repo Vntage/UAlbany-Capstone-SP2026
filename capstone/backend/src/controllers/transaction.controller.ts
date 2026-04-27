@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
-import { BusinessParams, CsvRows } from "../types/common.type";
+import { BusinessParams, CsvRows, TransactionParams } from "../types/common.type";
 import pool from "../config/db"
-import { Transaction, TransactionCategory } from "../types/transaction.type";
+import { Transaction, TransactionCategory, TransactionLog } from "../types/transaction.type";
 import { checkAlertRules } from "../middleware/alerts";
 import { parse } from "csv-parse/sync"
 import { randomUUID } from "crypto";
@@ -280,5 +280,114 @@ export const commitCSV = async(req: Request<BusinessParams>, res: Response) => {
     catch(error){
         console.log(error);
         return res.status(500).json({ message: "Server Error" });
+    }
+}
+
+export const updateTransaction = async (req: Request<TransactionParams>, res: Response) => {
+    try{
+        const { businessID, transactionID } = req.params;
+        const user = req.user?.uid;
+        const { name, date, description, type, category, amount } = req.body;
+
+        const transactionRes = await pool.query<Transaction>(`SELECT * FROM transactions WHERE uid = $1`, [transactionID]);
+
+        const transaction = transactionRes.rows[0];
+
+        if(!transaction){
+            return res.status(400).json({ message: "Could not find transaction" });
+        }
+
+        if(name == transaction.name && date == transaction.date && description == transaction.description && type == transaction.type && category == transaction.category_id && amount == transaction.amount){
+            return res.status(400).json({ message: "No changes detected "});
+        }
+
+        const updateTransactionRes = await pool.query<Transaction>(
+            `UPDATE transactions
+                SET 
+                name = $1, 
+                date = $2, 
+                description = $3, 
+                type = $4, 
+                category_id = $5, 
+                amount = $6, 
+                edited_at = NOW(), 
+                edited_by = $7, 
+            WHERE uid = $8
+            RETURNING *`,
+            [
+                name ?? transaction.name,
+                date ?? transaction.date,
+                description ?? transaction.description,
+                type ?? transaction.type,
+                category ?? transaction.category_id,
+                amount ?? transaction.amount,
+                user,
+                transactionID
+            ]
+        );
+
+        const updateTransaction = updateTransactionRes.rows[0]
+        if(!updateTransaction){
+            return res.status(500).json({ message: "Database Error" });
+        }
+
+        const transactionLog = await pool.query<TransactionLog>(
+            `INSERT INTO transaction_log (
+                transaction_id,
+                business_id,
+                name,
+                date,
+                description,
+                type,
+                category_id,
+                amount,
+                edited_at,
+                edited_by,
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            RETURNING *
+            `, [
+                transaction.uid, 
+                businessID,
+                transaction.name, 
+                transaction.date, 
+                transaction.description, 
+                transaction.type, 
+                transaction.category_id, 
+                transaction.amount, 
+                updateTransaction.edited_at,
+                updateTransaction.edited_by
+            ]);
+
+        if(!transactionLog.rows[0]){
+            return res.status(500).json({ message: "Database Error" });
+        }
+
+        if(transaction.amount != updateTransaction.amount || transaction.type != updateTransaction.type){
+            checkAlertRules(businessID, updateTransaction);
+        }
+
+        return res.status(200).json(updateTransaction);
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).json({ message: "Server Error" })
+    }
+}
+
+export const getTransactionLog = async (req: Request<BusinessParams>, res: Response) => {
+    try{
+        const businessID = req.params.businessID;
+
+        const result = await pool.query<TransactionLog>(
+            `SELECT * FROM transaction_log 
+            WHERE business_id = $1 
+            ORDER BY edited_at DESC`, [businessID]
+        );
+
+        return res.status(200).json(result.rows)
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).json({ message: "Server Error" })
     }
 }

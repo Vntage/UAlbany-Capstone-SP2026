@@ -20,6 +20,7 @@ export type Transaction = {
 export type TransactionLog = {
     uid: UUID;
     transaction_id: UUID;
+    business_id: UUID;
     name: string;
     date: string;
     description?: string;
