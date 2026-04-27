@@ -8,15 +8,28 @@ import { randomUUID } from "crypto";
 
 export const getTransaction = async(req: Request<BusinessParams>, res: Response) => {
     const businessID = req.params.businessID;
+    const { periodStart, periodEnd } = req.query;
 
-    const transactions = await pool.query<Transaction>(`SELECT * FROM transactions
-        WHERE business_id = $1
-        ORDER BY date`,
-        [businessID]);
+    let query = `SELECT * FROM transactions WHERE business_id = $1`;
 
-    if(!transactions.rows.length){
-        return res.status(500).json({ message: "Server Error" })
+    const params: any[] = [businessID];
+    let paramIndex = 2;
+
+    if(periodStart){
+        query += ` AND DATE >= $${paramIndex}`;
+        params.push(periodStart);
+        paramIndex++;
     }
+
+    if(periodEnd){
+        query += ` AND DATE <= $${paramIndex}`;
+        params.push(periodEnd);
+        paramIndex++;
+    }
+
+    query += ` ORDER BY date`;
+
+    const transactions = await pool.query<Transaction>(query, params);
 
     return res.status(201).json(transactions.rows)
 }

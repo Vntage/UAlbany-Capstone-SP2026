@@ -11,7 +11,7 @@ type Props = {
   newCategory: string;
   setNewCategory: (v: string) => void;
   businessID: string;
-  refreshCategories: (cats: TransactionCategory[]) => void;
+  refreshCategories: React.Dispatch<React.SetStateAction<TransactionCategory[]>>;
 };
 
 
@@ -25,34 +25,51 @@ export function CategoryDropDown({
     businessID,
     refreshCategories
 }: Props) {
-    const handleCreateCategory = async() => {
-        console.log(newCategory)
-        if(!newCategory) return;
+    const handleCreateCategory = async () => {
+        if (!newCategory) return;
+
         const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-            const res = await fetch(api_url + `/api/transaction/${businessID}/category`, {
+        // 1. Create temp category (optimistic UI)
+        const tempId = `temp-${Date.now()}`;
+
+        const optimisticCategory = {
+            uid: tempId,
+            name: newCategory,
+        };
+
+        refreshCategories((prev: any[]) => [...prev, optimisticCategory]);
+
+        setNewCategory("");
+        setCreating(false);
+
+        try {
+            // 2. Send request
+            const res = await fetch(api_url + `/api/transaction/${businessID}/category`,{
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: newCategory })
-            })
+                body: JSON.stringify({ name: optimisticCategory.name }),
+            });
 
             const data = await res.json();
-            if(data.rows){
-                setNewCategory("");
 
-                const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
+            if (!res.ok) throw new Error("Failed");
 
-                const res = await fetch(api_url + `/api/transaction/${businessID}/category`, {
-                    method: "GET",
-                    credentials: "include",
-                })
+            // 3. Replace temp with real category
+            refreshCategories((prev: any[]) =>
+            prev.map((cat) =>
+                cat.uid === tempId ? data : cat
+            ));
+        } catch (err) {
+            // 4. Rollback on error
+            refreshCategories((prev: any[]) =>
+            prev.filter((cat) => cat.uid !== tempId)
+            );
 
-                const update = await res.json();
-
-                refreshCategories(update);
-            }
-    }
+            console.error("Category creation failed:", err);
+        }
+    };
     return(
         <div className="relative">
             <ul className="py-2 max-h-60 overflow-auto">

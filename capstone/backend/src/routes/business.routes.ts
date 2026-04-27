@@ -16,8 +16,9 @@ router.get("/", verifySession, getUserBusinesses);
 router.get('/invite', verifySession, getUserInvite);
 
 router.get("/:businessID/invite", verifySession, verifyMember, requireRole(['owner']), getBusinessInvite);
-router.get("/:businessID", verifySession, verifyMember, getBusiness);
 router.get("/:businessID/member", verifySession, verifyMember, requireRole(['owner']), getBusinessMember);
+
+router.get("/:businessID", verifySession, verifyMember, getBusiness);
 router.get("/:businessID/role", verifySession, verifyMember, getRole);
 
 export default router;

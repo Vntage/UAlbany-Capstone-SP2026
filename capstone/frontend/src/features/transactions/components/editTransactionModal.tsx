@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CategoryDropDown } from "./categoryDropDown";
 
 type TransactionCategory = {
@@ -42,7 +42,7 @@ export default function EditTransactionModal({
 
         fetch(api_url + `api/transaction/${businessID}/${transaction.uid}`,
             {
-                method: "PUT",
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -65,6 +65,27 @@ export default function EditTransactionModal({
         .finally(()=> setLoading(false))
     }
 
+    useEffect(() => {
+        const fetchCategories = async() => {
+            try{
+                const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+                const res = await fetch(api_url + `/api/transaction/${businessID}/category`, {
+                    method: "GET",
+                    credentials: "include",
+                })
+
+                const data = await res.json();
+
+                setCategories(data);
+            }
+            catch(error){
+                console.error(error);
+            }
+        };
+        if(businessID) fetchCategories();
+    }, [businessID]);
+
     return(
         <div className = "fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className = "bg-white rounded-2xl w-full max-w-lg p-6">
@@ -82,18 +103,20 @@ export default function EditTransactionModal({
                 <div className="space-y-3">
 
                 <input
-                    placeholder="Name"
+                    value={name}
                     className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     onChange={(e) => setName(e.target.value)}
                 />
 
                 <input
+                    value={date}
                     type="date"
                     className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     onChange={(e) => setDate(e.target.value)}
                 />
 
                 <input
+                    value={amount}
                     placeholder="Amount"
                     type="number"
                     className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
@@ -101,6 +124,7 @@ export default function EditTransactionModal({
                 />
 
                 <textarea
+                    value={description}
                     placeholder="Description (optional)"
                     className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     rows={3}
@@ -110,6 +134,7 @@ export default function EditTransactionModal({
                 <div className="flex gap-2">
                 {["expense", "income"].map((t) => (
                     <button
+                    value={type}
                     key={t}
                     onClick={() =>
                         setType(t as TransactionType)
@@ -127,6 +152,7 @@ export default function EditTransactionModal({
 
                 <div>
                     <button
+                        value={category}
                         onClick= {() => setCatOpen(!catOpen)}
                         className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     >
@@ -146,7 +172,7 @@ export default function EditTransactionModal({
                             newCategory = {newCategory}
                             setNewCategory = {setNewCategory}
                             businessID = {businessID}
-                            refreshCategories = {setCategory}
+                            refreshCategories = {setCategories}
                         />
                     )}
                 </div>
