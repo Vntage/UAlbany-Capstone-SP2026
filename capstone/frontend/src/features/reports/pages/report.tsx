@@ -1,8 +1,36 @@
 import Navbar from "../../../components/navbar";
-import { useState } from "react";
-import { ImportModal } from "../../transactions/components/importModal";
+import { useState, useEffect } from "react";
+
+type IncomeData = {
+  income: number;
+  expense: number;
+  netProfit: number;
+  breakdown?: {category: string; total: number}[];
+}
+type ExpenseData = {
+
+}
+
+type CashFlowData = {
+
+}
+
+type CategoryBreakdownData = {
+
+}
 
 export default function Reports() {
+  const[data, setData] = useState<IncomeData | ExpenseData | CashFlowData | CategoryBreakdownData | null>(null);
+  const[loading, setLoading] = useState(false);
+
+  const business = localStorage.getItem("activeBusiness");
+  const businessID =  business ? JSON.parse(business).uid : null;
+
+  const[range, setRange] = useState({
+    startDate: "",
+    endDate: ""
+  });
+
   return (
     <div className="flex h-screen bg-surface">
       <Navbar />

@@ -136,18 +136,6 @@ export async function initDB() {
             updated_by VARCHAR(255) REFERENCES public.users(firebase_uid) ON DELETE CASCADE,
             updated_at TIMESTAMP
             );`)
-            
-        //report schema
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS reports (
-            uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            business_id UUID REFERENCES business(uid) ON DELETE CASCADE,
-            name TEXT NOT NULL,
-            type TEXT,
-            parameters JSONB, -- flexible content storage
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            created_by VARCHAR(255) REFERENCES public.users(firebase_uid) ON DELETE CASCADE
-            );`)
 
         //alert enums
         await pool.query(`
