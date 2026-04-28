@@ -6,7 +6,7 @@ import { BusinessParams } from "../types/common.type"
 
 export const getIncomeStatement = async(req: Request<BusinessParams>, res: Response) => {
     const businessID = req.params.businessID;
-    const { startDate, endDate } = req.body;
+    const { startDate, endDate } = req.query;
 
     if(!startDate || !endDate){
         return res.status(400).json({ message: "Missing Fields" });
@@ -29,6 +29,8 @@ export const getIncomeStatement = async(req: Request<BusinessParams>, res: Respo
             if(row.type === "income") income = Number(row.total);
             if(row.type === "expense") expense = Number(row.total);
         }
+        console.log(result.rows)
+
         return res.status(200).json({
             income,
             expense,
@@ -43,7 +45,7 @@ export const getIncomeStatement = async(req: Request<BusinessParams>, res: Respo
 
 export const getExpenseReport = async(req: Request<BusinessParams>, res: Response) => {
     const businessID = req.params.businessID;
-    const { startDate, endDate } = req.body;
+    const { startDate, endDate } = req.query;
 
     if(!startDate || !endDate){
         return res.status(400).json({ message: "Missing Fields" });
@@ -73,7 +75,7 @@ export const getExpenseReport = async(req: Request<BusinessParams>, res: Respons
 
 export const getCashFlow = async(req: Request<BusinessParams>, res: Response) => {
     const businessID = req.params.businessID;
-    const { startDate, endDate } = req.body;
+    const { startDate, endDate } = req.query;
 
     if(!startDate || !endDate){
         return res.status(400).json({ message: "Missing Fields" });
@@ -102,7 +104,7 @@ export const getCashFlow = async(req: Request<BusinessParams>, res: Response) =>
 
 export const getCategoryBreakdown = async(req: Request<BusinessParams>, res: Response) => {
     const businessID = req.params.businessID;
-    const { startDate, endDate } = req.body;
+    const { startDate, endDate } = req.query;
 
     if(!startDate || !endDate){
         return res.status(400).json({ message: "Missing Fields" });
@@ -133,7 +135,7 @@ export const getCategoryBreakdown = async(req: Request<BusinessParams>, res: Res
 //not implemented yet
 export const getBalanceSheet = async(req: Request<BusinessParams>, res: Response) => {
     const businessID = req.params.businessID;
-    const { startDate, endDate } = req.body;
+    const { startDate, endDate } = req.query;
 
     if(!startDate || !endDate){
         return res.status(400).json({ message: "Missing Fields" });

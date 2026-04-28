@@ -6,10 +6,10 @@ import { getBalanceSheet, getCashFlow, getCategoryBreakdown, getExpenseReport, g
 
 const router = express.Router();
 
-router.get("/:businessID/incomeStatement", verifySession, verifyMember, requireRole(['owner']), getIncomeStatement);
-router.get("/:businessID/expenseReport", verifySession, verifyMember, requireRole(['owner']), getExpenseReport);
-router.get("/:businessID/cashFlow", verifySession, verifyMember, requireRole(['owner']), getCashFlow);
-router.get("/:businessID/categoryBreakdown", verifySession, verifyMember, requireRole(['owner']), getCategoryBreakdown);
+router.get("/:businessID/income", verifySession, verifyMember, requireRole(['owner']), getIncomeStatement);
+router.get("/:businessID/expense", verifySession, verifyMember, requireRole(['owner']), getExpenseReport);
+router.get("/:businessID/cashflow", verifySession, verifyMember, requireRole(['owner']), getCashFlow);
+router.get("/:businessID/categorybreakdown", verifySession, verifyMember, requireRole(['owner']), getCategoryBreakdown);
 
 //balance sheet not implemented yet
 //router.get("/:businessID/balancesheet", verifySession, verifyMember, requireRole(['owner']), getBalanceSheet);

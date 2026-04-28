@@ -1,35 +1,70 @@
 import Navbar from "../../../components/navbar";
 import { useState, useEffect } from "react";
+import ReportModal from "../components/reportModal";
 
-type IncomeData = {
-  income: number;
-  expense: number;
-  netProfit: number;
-  breakdown?: {category: string; total: number}[];
-}
-type ExpenseData = {
+type ReportType = 
+    | "Income"
+    | "Expense"
+    | "Cashflow"
+    | "Category Breakdown";
 
-}
-
-type CashFlowData = {
-
-}
-
-type CategoryBreakdownData = {
-
-}
 
 export default function Reports() {
-  const[data, setData] = useState<IncomeData | ExpenseData | CashFlowData | CategoryBreakdownData | null>(null);
-  const[loading, setLoading] = useState(false);
+  const[reportType, setReportType] = useState<ReportType>("Income");
+  const[period, setPeriod] = useState("month");
+  const[data, setData] = useState<any>(null);
+  const[open, setOpen] = useState(false);
 
   const business = localStorage.getItem("activeBusiness");
   const businessID =  business ? JSON.parse(business).uid : null;
+  const currency = localStorage.getItem("currency");
 
-  const[range, setRange] = useState({
-    startDate: "",
-    endDate: ""
-  });
+  const getDateRange = () => {
+    const now = new Date();
+    
+    if(period === "month"){
+      return {
+        startDate: new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10),
+        endDate: now.toISOString().slice(0,10)
+      }
+    }
+    if(period === "ytd"){
+      return {
+        startDate: `${now.getFullYear()}-01-01`,
+        endDate: now.toISOString().slice(0,10)
+      }
+    }
+    return{};
+  }
+
+  const generateReport = async() => {
+    const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
+    const report = reportType.toLowerCase().replace(/\s/g, "");
+
+    const params = new URLSearchParams();
+
+    const { startDate, endDate } = getDateRange();
+
+    if (startDate) params.append("startDate", startDate);
+    if (endDate) params.append("endDate", endDate);
+
+    const res = await fetch(`${api_url}/api/report/${businessID}/${report}/?${params.toString()}`, 
+      {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    const result = await res.json();
+
+    setData(result);
+    setOpen(true);
+  }
+
+  const exportPDF = () => {
+
+  }
 
   return (
     <div className="flex h-screen bg-surface">
@@ -43,7 +78,7 @@ export default function Reports() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div>
               <h1 className="text-3xl font-bold">
-                Financial Report
+                Financial Reports
               </h1>
               <p className="text-sm text-on-surface-variant mt-1">
                 {/* dynamic */}
@@ -53,8 +88,10 @@ export default function Reports() {
 
             <div className="flex gap-3">
               <div className="flex gap-3">
-                <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm shadow 
-                     hover:bg-purple-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer">
+                <button 
+                  onClick={generateReport}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm shadow 
+                  hover:bg-purple-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer">
                   📄 Export
                 </button>
 
@@ -70,15 +107,21 @@ export default function Reports() {
           {/* Filters */}
           <div className="bg-white p-2 rounded-xl shadow-sm border mb-8 flex justify-between items-center">
             <div className="flex gap-2">
-              <button className="px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-gray-100">
-                Last Month
-              </button>
-              <button className="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-lg">
-                Selected Period
-              </button>
-              <button className="px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-gray-100">
-                Year to Date
-              </button>
+
+              {[
+                { label: "Last Month", value: "month" },
+                { label: "Select Period", value: "custom" },
+                { label: "Year to Date", value: "ytd" }
+              ].map((p) => (
+                <button
+                  key={p.value}
+                  onClick={() => setPeriod(p.value)}
+                  className="px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-gray-100"
+                >
+                  {p.label}
+                </button>
+              ))
+              }
             </div>
 
             <span className="text-xs text-gray-400">
@@ -100,13 +143,13 @@ export default function Reports() {
                     Company Name
                   </h2>
                   <p className="text-sm text-gray-500">
-                    Date Range
+                    {period.toUpperCase()} Report
                   </p>
                 </div>
 
                 <div className="text-right">
                   <p className="text-xs text-gray-400">
-                    Currency
+                    {currency}
                   </p>
                   <p className="font-semibold">
                     USD
@@ -229,6 +272,15 @@ export default function Reports() {
 
         </div>
       </main>
+
+      <ReportModal
+        open={open}
+        onClose={() => setOpen(false)}
+        reportType={reportType}
+        data = {data}
+        onExport={exportPDF}
+        currency={currency || "USD"}
+      />
     </div>
   );
 }
