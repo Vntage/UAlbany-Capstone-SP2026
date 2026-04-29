@@ -80,28 +80,95 @@ export const newBudgetedItem = async (req: Request<BusinessParams>, res: Respons
 export const getBudget = async (req: Request<BusinessParams>, res: Response) => {
     try{
         const businessID = req.params.businessID;
-        const { periodStart, periodEnd } = req.query;
+        
+        const budgetResult = await pool.query(
+            `SELECT * FROM budget
+            WHERE business_id = $1
+            ORDER BY created_at DESC
+            LIMIT 1`,
+            [businessID]
+        )
 
-        let query = `SELECT * FROM budget WHERE business_id = $1 `;
+        const budget = budgetResult.rows[0];
 
-        const values: any[] = [businessID];
-
-        if(periodStart && periodEnd){
-            values.push(periodStart);
-            values.push(periodEnd);
-
-            query += `AND period_start <= $${values.length - 1} 
-                AND period_end >= $${values.length} `
+        if(!budget){
+            return res.status(200).json({
+                categories: [],
+                summary: null
+            })
         }
+        
+        const itemResult = await pool.query(`
+            SELECT 
+            bi.uid
+            tc.name
+            bi.allocated_amount as budgeted
+            FROM budget_item bi
+            JOIN transaction_category tc
+            ON tc.id = bi.transaction_category_id
+            WHERE bi.business_id = $1
+            AND bi.budget_id = $2`,
+            [businessID, budget.uid]
+        )
 
-        query += `ORDER BY created_at DESC`;
+        const items = itemResult.rows;
 
-        const { rows } = await pool.query<Budget>(query, values);
+        const actualResult = await pool.query(
+            `SELECT 
+            category_id,
+            SUM(amount) as actual
+            FROM transactions
+            WHERE business_id = $1
+            AND type = 'expense'
+            AND date >= $2
+            AND date <= $3
+            GROUP BY category_id`,
+            [businessID, budget.period_start, budget.period_end]
+        );
 
-        if(!rows){
-            return res.status(500).json({ message: "Database Error" });
-        }
-        return res.status(200).json(rows)
+        const actualMap: Record<string, number> = {};
+
+        actualResult.rows.forEach((row) => {
+            actualMap[row.category_id] = Number(row.actual)
+        });
+
+        const categories = items.map((item) => {
+            const actual = actualMap[item.category_id] || 0;
+            const budgeted = Number(item.allocated_amount);
+            const variance = budgeted - actual;
+
+            let status = "OK";
+            if (actual > budgeted) status = "Over";
+            else if (actual > budgeted * 0.8) status = "Warning";
+
+            return {
+                id: item.uid,
+                name: item.name,
+                budgeted,
+                actual,
+                variance,
+                status,
+            };
+        });
+
+        const totalBudget = categories.reduce((s, c) => s + c.budgeted, 0);
+        const totalActual = categories.reduce((s, c) => s + c.actual, 0);
+
+        const utilization =
+        totalBudget > 0
+            ? Math.round((totalActual / totalBudget) * 100)
+            : 0;
+
+        const summary = {
+            utilization,
+            runway: totalBudget - totalActual,
+        };
+
+        return res.status(200).json({
+            budget, 
+            categories,
+            summary
+        })
     }
     catch(error){
         console.log(error);

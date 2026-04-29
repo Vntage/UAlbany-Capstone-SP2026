@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Navbar from "../../../components/navbar";
+import AdjustTargetsModal from "../components/AdjustTargetsModal";
 
 type Category = {
   id: string;
@@ -18,6 +19,7 @@ type BudgetSummary = {
 export default function Budget() {
   const [business, setBusiness] = useState<any>(null);
 
+  const [budget, setBudget] = useState<any>(null)
   const [categories, setCategories] = useState<Category[]>([]);
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
 
@@ -63,18 +65,23 @@ export default function Budget() {
       const res = await fetch(
         `http://localhost:8080/api/budget/${businessId}`,
         {
+          method: "GET",
           credentials: "include",
         }
       );
 
       const data = await res.json();
 
+      console.log(data)
+
       if (res.ok) {
         setCategories(data.categories || []);
         setBudgetSummary(data.summary || null);
+        setBudget(data.budget || null)
       } else {
         setCategories([]);
         setBudgetSummary(null);
+        setBudget(null);
       }
     } catch (err) {
       console.error(err);
@@ -280,6 +287,15 @@ export default function Budget() {
           )}
         </div>
       </main>
+      {showAdjust && (
+        <AdjustTargetsModal
+        isOpen={showAdjust}
+        onClose={() => setShowAdjust(false)}
+        businessID={business?.uid}
+        budget={budget}
+        categories={categories}
+        onSuccess={() => fetchBudget(business.uid)}
+      />)}
     </div>
   );
 }
