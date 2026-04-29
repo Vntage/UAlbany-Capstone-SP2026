@@ -6,7 +6,7 @@ import { BusinessParams, InviteParams } from "../types/common.type";
 export const getBusiness = async(req: Request<BusinessParams>, res: Response) => {
     const business_id = req.params.businessID;
 
-    const business = await pool.query<Business>(`SELECT * FROM businesses WHERE uid = $1`, [business_id]);
+    const business = await pool.query<Business>(`SELECT * FROM business WHERE uid = $1`, [business_id]);
 
     if(!business.rows.length){
         return res.status(401).json({ message: "Business not found" });
