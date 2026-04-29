@@ -4,19 +4,23 @@ import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tool
 import { TrendingUp, TrendingDown, AlertCircle, DollarSign } from "lucide-react";
 import { mockAlerts } from "../data/mockData";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
+  const navigate = useNavigate();
 
   const [data, setData] = useState<any>(null);
   const [metrics, setMetrics] = useState<any>(null); //metrics must be processed separately
   const [total, setTotal] = useState(0); //for pie chart percentage calculation optimization
+  const [activeBusiness, setActiveBusiness] = useState<any>(null);
   const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
 
+  /*
   useEffect(() => {
-    const fetchBusiness = async() => {
-      try{
-        const res = await fetch(`${api_url}/api/business`,{
+    const fetchBusiness = async () => {
+      try {
+        const res = await fetch(`${api_url}/api/business`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
           credentials: "include"
@@ -26,30 +30,49 @@ export default function Dashboard() {
         localStorage.setItem("activeBusiness", JSON.stringify(data[0]))
         const business = localStorage.getItem("activeBusiness") || ""
       }
-      catch(err){
+      catch (err) {
         console.log(err)
       }
     }
-    fetchBusiness();
-  }, [])
+    //fetchBusiness();
+    //console.log("Fetched business data (initial): ", data);
+  }, [])*/
 
   useEffect(() => { //load and verify user session on dashboard load
     const auth = getAuth();
     const fetchData = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          const token = await user.getIdToken();
+          const token = await user.getIdToken(); //identify user for requests
+          const fetchBusiness = await fetch(`${api_url}/api/business`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json",
+                       "Authorization": `Bearer ${token}` },
+            credentials: "include"
+          })
+          //find user business
+          const fetchBusinessArray = await fetchBusiness.json();
+          console.log("Fetched business(es): ", fetchBusinessArray);
+          localStorage.setItem("activeBusiness", JSON.stringify(fetchBusinessArray[0]))
+          const business = localStorage.getItem("activeBusiness") || ""
 
-          const fetchBusinessOne = await fetch(api_url + "/api/fetchBusinessOne", { //FOR TESTING
+          //redirect if no user business is detected
+          if (!Array.isArray(fetchBusinessArray) || fetchBusinessArray.length === 0) {
+            navigate("/users");
+            return;
+          }
+          const activeBusinessUID = fetchBusinessArray[0].uid; //identify user business
+          console.log("Active business UID: ", activeBusinessUID);
+          const businessRes = await fetch(api_url + "/api/business/" + activeBusinessUID, {
             method: "GET",
             headers: { "Authorization": `Bearer ${token}` },
             credentials: "include"
           });
-          const businessOneData = await fetchBusinessOne.json();
-          const businessOneUID = businessOneData.uid; //for later fetching
-          console.log("Fetched business one: ", businessOneData); //END [FOR TESTING]
+          const businessData = await businessRes.json();
+          console.log("Fetched active business data: ", businessData);
+          setActiveBusiness(businessData);
 
-          const res = await fetch(api_url + "/api/dashboard/" + businessOneUID, {
+          const res = await fetch(api_url + "/api/dashboard/" + activeBusinessUID, {
             method: "GET",
             headers: { "Authorization": `Bearer ${token}` },
             credentials: "include"
@@ -161,12 +184,12 @@ export default function Dashboard() {
                   <div className="text-sm text-gray-600">{metric.title}</div>
                   <div
                     className={`flex items-center gap-1 text-sm ${metric.trend === "up"
-                        ? metric.isPositiveDesired
-                          ? "text-green-600"
-                          : "text-red-600"
-                        : metric.isPositiveDesired
-                          ? "text-red-600"
-                          : "text-green-600"
+                      ? metric.isPositiveDesired
+                        ? "text-green-600"
+                        : "text-red-600"
+                      : metric.isPositiveDesired
+                        ? "text-red-600"
+                        : "text-green-600"
                       }`}>
                     {metric.trend === "up" ? (
                       <TrendingUp className="w-4 h-4" />
@@ -178,7 +201,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-2xl font-bold text-gray-900">
                   {metric.value.toLocaleString("en-US",
-                    { style: "currency", currency: data.businesses[0]?.currency || "USD" })}</div>
+                    { style: "currency", currency: activeBusiness?.currency || "USD" })}</div>
                 <div className="text-xs text-gray-500 mt-1">vs. last month</div>
               </div>
             ))}
@@ -220,7 +243,8 @@ export default function Dashboard() {
                     labelLine={false}
                     label={({ payload, value }) => {
                       const percentage = ((Number(value) / total) * 100).toFixed(1);
-                      return `${payload.category} ${percentage}%`; }}
+                      return `${payload.category} ${percentage}%`;
+                    }}
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
