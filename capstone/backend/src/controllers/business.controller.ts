@@ -25,10 +25,7 @@ export const getUserBusinesses = async(req: Request, res: Response) => {
         WHERE bm.user_id = $1
         AND bm.role <> 'disabled'
         `, [uid]);
-
-    if(!business.rows[0]){
-        return res.status(401).json({ message: "Businesses not found" });
-    }
+        
     return res.status(201).json(business.rows)
 }
 

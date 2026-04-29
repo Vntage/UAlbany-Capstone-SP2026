@@ -3,6 +3,11 @@ import { useState, useEffect } from "react";
 import { ImportModal } from "../components/importModal";
 import EditTransactionModal from "../components/editTransactionModal";
 
+type Business = {
+    uid: string;
+    name: string;
+}
+
 export default function Transactions() {
       const [showImportModal, setShowImportModal] = useState(false);
       const [mode, setMode] = useState<"manual" | "csv">("manual");
@@ -10,7 +15,7 @@ export default function Transactions() {
       const [showEditTransactionModal, setShowEditTransactionModal] = useState(false);
 
       const business = localStorage.getItem("activeBusiness");
-      const businessID =  business ? JSON.parse(business).uid : null;
+      const businessID: string | null =  business && business !== "undefined" ? (JSON.parse(business) as Business).uid : null;
 
       const role = localStorage.getItem("role");
 
@@ -114,6 +119,9 @@ export default function Transactions() {
                         </p>
                     </div>
 
+                    
+
+                    {!business && (
                     <button
                         className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm shadow 
                         hover:bg-green-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer"
@@ -121,9 +129,17 @@ export default function Transactions() {
                     >
                         + Create Transaction
                     </button>
+                    )}
 
                     </div>
-
+                    {business && (
+                        <div className="text-center py-20 text-gray-400">
+                        No business selected. Please create or switch a business.
+                        </div>
+                    )}
+                    
+                    {!business && (
+                        <>
                     {/* FILTER BAR */}
                     <div className="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
 
@@ -190,7 +206,10 @@ export default function Transactions() {
                     </div>
 
                     </div>
-
+                    </>
+                    )}
+                    {!business && (
+                        <>
                     {/* CONTENT CARD */}
                     <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
 
@@ -288,7 +307,8 @@ export default function Transactions() {
 
                     </div>
                     </div>
-
+                    </>
+                    )}
                 </div>
             </main>
 

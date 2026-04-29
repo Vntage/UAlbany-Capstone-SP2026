@@ -28,8 +28,7 @@ export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
-  const localStorageBusiness = localStorage.getItem("activeBusiness");
-  const businessID =  localStorageBusiness ? JSON.parse(localStorageBusiness).uid : null;
+  let businessID: string | null  =null;
   const [bInvites, setBInvites] = useState<BusinessInvite[]>([]);
   const [uInvites, setUInvites] = useState<BusinessInvite[]>([]);
 
@@ -78,6 +77,7 @@ export default function Users() {
 
       if (parsed?.uid) {
         fetchUsers(parsed.uid);
+        businessID = parsed.uid;
       }
     } catch (err) {
       console.error("Invalid activeBusiness:", err);
@@ -87,6 +87,8 @@ export default function Users() {
   };
 
   useEffect(() => {
+
+
     loadBusiness();
     getBusinessInvites();
     getUserInvites();
@@ -137,6 +139,7 @@ export default function Users() {
   ).length;
 
   const getBusinessInvites = async() => {
+    if(!business) return;
     try{
       const res = await fetch(`${api_url}/api/business/${businessID}/invite`, {
         method: "GET",
@@ -200,13 +203,16 @@ export default function Users() {
           {/* TOP BAR */}
           <div className="flex justify-between items-center mb-8">
             <BusinessSwitcher onCreateClick={() => setShowCreate(true)} />
-
+            
+            {businessID && (
             <button 
               className="px-4 py-2 bg-black text-white rounded-lg text-sm shadow hover:bg-gray-800"
               onClick={() => setShowInviteModal(true)}
             >
               Invite Member
             </button>
+            )}
+            
           </div>
 
           {/* HEADER */}
@@ -316,92 +322,94 @@ export default function Users() {
             </>
           )}
 
-          <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
-                <div className="px-6 py-4 border-b">
-                  <span className="text-sm font-semibold">Current Business Invitations</span>
-                </div>
+          {business && (
+            <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
+                  <div className="px-6 py-4 border-b">
+                    <span className="text-sm font-semibold">Current Business Invitations</span>
+                  </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-xs uppercase text-gray-400">
-                      <tr>
-                        <th className="px-6 py-3 text-left">Username</th>
-                        <th className="px-6 py-3 text-left">Role</th>
-                        <th className="px-6 py-3 text-left">Status</th>
-                        <th className="px-6 py-3 text-left">Expires At</th>
-                      </tr>
-                    </thead>
-
-                    <tbody className="divide-y">
-                      {loadingUsers ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50 text-xs uppercase text-gray-400">
                         <tr>
-                          <td colSpan={3} className="text-center py-10 text-gray-400">
-                            Loading invites...
-                          </td>
+                          <th className="px-6 py-3 text-left">Username</th>
+                          <th className="px-6 py-3 text-left">Role</th>
+                          <th className="px-6 py-3 text-left">Status</th>
+                          <th className="px-6 py-3 text-left">Expires At</th>
                         </tr>
-                      ) : bInvites.length === 0 ? (
-                        <tr>
-                          <td colSpan={3} className="text-center py-10 text-gray-400">
-                            No invites yet
-                          </td>
-                        </tr>
-                      ) : (
-                        (bInvites ?? []).map((invite) => (
-                          <tr key={invite.uid}>
+                      </thead>
 
-                            {/* NAME */}
-                            <td className="px-6 py-4">
-                              {invite.username}
+                      <tbody className="divide-y">
+                        {loadingUsers ? (
+                          <tr>
+                            <td colSpan={3} className="text-center py-10 text-gray-400">
+                              Loading invites...
                             </td>
-
-                            {/* ROLE */}
-                            <td className="px-6 py-4">
-                                <span className="capitalize">
-                                  {invite.role || "member"}
-                                </span>
-                            </td>
-
-                            {/*change to status */}
-                            <td className="px-6 py-4">
-                              {canEditRoles ? (
-                                <select
-                                  value={invite.status || "member"}
-                                  onChange={(e) =>
-                                    updateInvite(
-                                      invite.uid,
-                                      e.target.value
-                                    )
-                                  }
-                                  className="
-                                    border rounded-lg px-2 py-1 text-sm
-                                    bg-white hover:border-gray-400
-                                    focus:outline-none focus:ring-2 focus:ring-blue-500
-                                  "
-                                >
-                                  <option value="sent">Sent</option>
-                                  <option value="canceled">Cancel</option>
-                                </select>
-                              ) : (
-                                <span className="capitalize">
-                                  {invite.status || "—" }
-                                </span>
-                              )}
-                            </td>
-
-                            {/* EMAIL */}
-                            <td className="px-6 py-4">
-                              {formatDate(invite.expires_at) || "—"}
-                            </td>
-
                           </tr>
-                        ))
-                      )}
+                        ) : bInvites.length === 0 ? (
+                          <tr>
+                            <td colSpan={3} className="text-center py-10 text-gray-400">
+                              No invites yet
+                            </td>
+                          </tr>
+                        ) : (
+                          (bInvites ?? []).map((invite) => (
+                            <tr key={invite.uid}>
 
-                    </tbody>
-                  </table>
+                              {/* NAME */}
+                              <td className="px-6 py-4">
+                                {invite.username}
+                              </td>
+
+                              {/* ROLE */}
+                              <td className="px-6 py-4">
+                                  <span className="capitalize">
+                                    {invite.role || "member"}
+                                  </span>
+                              </td>
+
+                              {/*change to status */}
+                              <td className="px-6 py-4">
+                                {canEditRoles ? (
+                                  <select
+                                    value={invite.status || "member"}
+                                    onChange={(e) =>
+                                      updateInvite(
+                                        invite.uid,
+                                        e.target.value
+                                      )
+                                    }
+                                    className="
+                                      border rounded-lg px-2 py-1 text-sm
+                                      bg-white hover:border-gray-400
+                                      focus:outline-none focus:ring-2 focus:ring-blue-500
+                                    "
+                                  >
+                                    <option value="sent">Sent</option>
+                                    <option value="canceled">Cancel</option>
+                                  </select>
+                                ) : (
+                                  <span className="capitalize">
+                                    {invite.status || "—" }
+                                  </span>
+                                )}
+                              </td>
+
+                              {/* EMAIL */}
+                              <td className="px-6 py-4">
+                                {formatDate(invite.expires_at) || "—"}
+                              </td>
+
+                            </tr>
+                          ))
+                        )}
+
+                      </tbody>
+                    </table>
+                  </div>
+
                 </div>
-
-              </div>
+              )}
               <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
                 <div className="px-6 py-4 border-b">
                   <span className="text-sm font-semibold">Personal Invitations</span>
@@ -450,7 +458,7 @@ export default function Users() {
                             {/*change to status */}
                             <td className="px-6 py-4">
                               <select
-                                value={invite.status || "member"}
+                                value={""}
                                 onChange={(e) =>
                                   updateInvite(
                                     invite.uid,
@@ -463,6 +471,7 @@ export default function Users() {
                                   focus:outline-none focus:ring-2 focus:ring-blue-500
                                 "
                               >
+                                <option value="" disabled>Select status</option>
                                 <option value="accept">Accept</option>
                                 <option value="decline">Decline</option>
                               </select>
