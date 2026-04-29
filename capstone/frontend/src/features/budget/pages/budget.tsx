@@ -61,7 +61,7 @@ export default function Budget() {
       setLoading(true);
 
       const res = await fetch(
-        `http://localhost:8080/api/business/${businessId}/budget`,
+        `http://localhost:8080/api/budget/${businessId}`,
         {
           credentials: "include",
         }

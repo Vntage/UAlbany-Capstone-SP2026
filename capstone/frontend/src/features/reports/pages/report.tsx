@@ -63,7 +63,10 @@ export default function Reports() {
   }
 
   const exportPDF = () => {
+    if(!data) return;
 
+    window.open(`/api/reports/${reportType}/${businessID}?format=pdf`,
+      "_blank");
   }
 
   return (
@@ -93,12 +96,6 @@ export default function Reports() {
                   className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm shadow 
                   hover:bg-purple-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer">
                   📄 Export
-                </button>
-
-                <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm shadow 
-                     hover:bg-green-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer"
-                    >
-                  📊 Import 
                 </button>
               </div>
             </div>

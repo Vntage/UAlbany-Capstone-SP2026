@@ -3,6 +3,7 @@ import { CategoryDropDown } from "./categoryDropDown";
 
 type TransactionCategory = {
     uid: string;
+    business_id: string;
     name: string;
 }
 
@@ -21,7 +22,7 @@ export default function EditTransactionModal({
 }) {
     const[name, setName] = useState(transaction.name);
     const[amount, setAmount] = useState(transaction.amount);
-    const[category, setCategory] = useState(transaction.category);
+    const[category, setCategory] = useState(transaction.category_id);
     const[type, setType] = useState(transaction.type);
     const[description, setDescription] = useState(transaction.description);
     const[date, setDate] = useState(transaction.date);
@@ -30,17 +31,18 @@ export default function EditTransactionModal({
     const[categories, setCategories] = useState<TransactionCategory[]>([]);
     const[newCategory, setNewCategory] = useState("");
     const[creating, setCreating] = useState(false);
+    const selectedCategory = categories.find(c => c.uid === category);
     
     const[loading, setLoading] = useState(false);
     const[error, setError] = useState<string | null>(null);
-
+    
     function handleSave(){
         setLoading(true);
         setError(null);
 
         const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-        fetch(api_url + `api/transaction/${businessID}/${transaction.uid}`,
+        fetch(api_url + `/api/transaction/${businessID}/${transaction.uid}`,
             {
                 method: "POST",
                 headers: {
@@ -50,10 +52,10 @@ export default function EditTransactionModal({
                 body: JSON.stringify({
                     name,
                     amount,
-                    category,
+                    category: category.uid,
                     type,
                     description,
-                    date
+                    date: toISODate(date)
                 })
             }
         ).then((res) => {
@@ -86,6 +88,15 @@ export default function EditTransactionModal({
         if(businessID) fetchCategories();
     }, [businessID]);
 
+    const formatDateForInput = (iso: string) => {
+        if(iso) return iso.split("T")[0];
+        return "";
+    }
+
+    const toISODate = (date: string) => {
+        return new Date(date).toISOString();
+    }
+
     return(
         <div className = "fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className = "bg-white rounded-2xl w-full max-w-lg p-6">
@@ -109,7 +120,7 @@ export default function EditTransactionModal({
                 />
 
                 <input
-                    value={date}
+                    value={formatDateForInput(date)}
                     type="date"
                     className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     onChange={(e) => setDate(e.target.value)}
@@ -156,7 +167,7 @@ export default function EditTransactionModal({
                         onClick= {() => setCatOpen(!catOpen)}
                         className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     >
-                        {category?.name || "Select Category"}
+                        {selectedCategory?.name || "Select Category"}
                     </button>
 
                     {catOpen && (
@@ -165,7 +176,6 @@ export default function EditTransactionModal({
                             onSelect={(cat) => {
                                 setCategory(cat);
                                 setCatOpen(false);
-                                setCategory(cat.uid)
                             }}
                             creating= {creating}
                             setCreating = {setCreating}
@@ -182,7 +192,7 @@ export default function EditTransactionModal({
                     disabled={loading}
                     className="w-full bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition cursor-pointer"
                 >
-                    {loading ? "Saving..." : "Add Transaction"}
+                    {loading ? "Saving..." : "Update Transaction"}
                 </button>
                 </div>
             </div>

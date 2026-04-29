@@ -70,6 +70,7 @@ export const getDashboardData = async (req: Request<BusinessParams>, res: Respon
     }
 
     //recent alerts
+    /*
     const alerts = await pool.query(
       `SELECT a.uid, a.type, a.description, b.name AS business_name, a.created_at
        FROM alert a
@@ -79,13 +80,14 @@ export const getDashboardData = async (req: Request<BusinessParams>, res: Respon
        LIMIT 10`,
       [uid]
     ); //no alerts, no problem
+    */
 
     res.status(200).json({
       businesses: businesses.rows,
       metrics: metrics.rows[0],
       monthlyTrend: monthlyTrend.rows,
       revenueByCategory: revenueByCategory.rows,
-      alerts: alerts.rows,
+      //alerts: alerts.rows,
     });
   } catch (err) {
     console.error(err);

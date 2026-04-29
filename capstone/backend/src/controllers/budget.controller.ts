@@ -80,9 +80,9 @@ export const newBudgetedItem = async (req: Request<BusinessParams>, res: Respons
 export const getBudget = async (req: Request<BusinessParams>, res: Response) => {
     try{
         const businessID = req.params.businessID;
-        const { periodStart, periodEnd } = req.body;
+        const { periodStart, periodEnd } = req.query;
 
-        let query = `SELECT * FROM budgets WHERE business_id = $1 `;
+        let query = `SELECT * FROM budget WHERE business_id = $1 `;
 
         const values: any[] = [businessID];
 
@@ -94,7 +94,7 @@ export const getBudget = async (req: Request<BusinessParams>, res: Response) => 
                 AND period_end >= $${values.length} `
         }
 
-        query += `ORDERED BY created_at DESC`;
+        query += `ORDER BY created_at DESC`;
 
         const { rows } = await pool.query<Budget>(query, values);
 

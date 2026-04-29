@@ -66,3 +66,20 @@ export const signup = async(req: Request, res: Response) => {
 
 }
 
+export const checkUsername = async(req: Request, res: Response) => {
+    try{
+        const { username } = req.query;
+
+        const result = await pool.query(
+            `SELECT username FROM users WHERE username = $1`, [username]);
+
+        if(!result.rows[0]){
+            return res.status(200).json({ message: "Username not taken" });
+        }
+        return res.status(400).json({ message: "Username taken" });
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).json({ message: "Server Error" });
+    }
+}

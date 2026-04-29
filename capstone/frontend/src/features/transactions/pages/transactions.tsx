@@ -27,6 +27,8 @@ export default function Transactions() {
       const[error, setError] = useState<string | null> (null);
       const[loading, setLoading] = useState(false)
 
+      const canEdit = role === "owner" || role === "admin";
+
       useEffect(() => {
         if(!businessID) return;
         setLoading(true);
@@ -62,11 +64,19 @@ export default function Transactions() {
       useEffect(() => {
         if(!businessID || activeTab !== "logs") return;
         if(role !== "owner") return;
-
+        console.log(localStorage)
         setLoading(true);
         const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-        fetch(api_url + `/api/transaction/${businessID}/logs`)
+        fetch(api_url + `/api/transaction/${businessID}/logs`, 
+            {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        )
           .then((res) => {
             if(!res.ok) throw new Error("Failed to fetch logs");
             return res.json();
@@ -78,6 +88,11 @@ export default function Transactions() {
       function truncate(text: string, max = 80) {
         if (!text) return "";
         return text.length > max ? text.slice(0, max) + "..." : text;
+      }
+
+      const formatDate = (iso: string) => {
+        if(iso != null) return iso.split("T")[0];
+        return;
       }
 
     return (
@@ -202,6 +217,7 @@ export default function Transactions() {
                             <div
                                 key={transaction.uid}
                                 onClick={() => {
+                                if(!canEdit) return;
                                 setSelectedTransaction(transaction);
                                 setShowEditTransactionModal(true);
                                 }}
@@ -255,8 +271,13 @@ export default function Transactions() {
 
                                 </div>
 
-                                <div className="text-xs text-gray-500 mt-2">
-                                Edited: {log.editedAt}
+                                <div className="flex justify-between text-xs text-gray-500 mt-2">
+                                    <div> 
+                                        Edited by: {log.first_name} {log.last_name}
+                                    </div>
+                                    <div className="flex justify-end"> 
+                                        Edited at: {formatDate(log.edited_at)}
+                                    </div>
                                 </div>
 
                             </div>

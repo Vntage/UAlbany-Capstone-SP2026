@@ -1,5 +1,7 @@
+import { useState } from "react";
 type TransactionCategory = {
     uid: string;
+    business_id: string;
     name: string;
 }
 
@@ -25,9 +27,11 @@ export function CategoryDropDown({
     businessID,
     refreshCategories
 }: Props) {
-    const handleCreateCategory = async () => {
-        if (!newCategory) return;
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const handleCreateCategory = async () => {
+        if (!newCategory || isSubmitting) return;
+        setIsSubmitting(true);
         const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
         // 1. Create temp category (optimistic UI)
@@ -42,8 +46,10 @@ export function CategoryDropDown({
 
         setNewCategory("");
         setCreating(false);
+        
 
         try {
+            
             // 2. Send request
             const res = await fetch(api_url + `/api/transaction/${businessID}/category`,{
                 method: "POST",
@@ -61,6 +67,8 @@ export function CategoryDropDown({
             prev.map((cat) =>
                 cat.uid === tempId ? data : cat
             ));
+
+
         } catch (err) {
             // 4. Rollback on error
             refreshCategories((prev: any[]) =>
@@ -68,6 +76,9 @@ export function CategoryDropDown({
             );
 
             console.error("Category creation failed:", err);
+        }
+        finally{
+            setIsSubmitting(false)
         }
     };
     return(
@@ -108,6 +119,7 @@ export function CategoryDropDown({
 
                         <button
                             onClick={handleCreateCategory}
+                            disabled={isSubmitting}
                             className="px-2 bg-blue-600 text-white rounded text-sm"
                         >
                             Add

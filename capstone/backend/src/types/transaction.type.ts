@@ -13,8 +13,8 @@ export type Transaction = {
     amount: number;
     created_at: Timestamp;
     created_by: string;
-    edited_at?: Timestamp;
-    edited_by?: string;
+    updated_at?: Timestamp;
+    updated_by?: string;
 }
 
 export type TransactionLog = {

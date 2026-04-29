@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { signup } from "../../../config/authService";
 import { useNavigate } from "react-router-dom";
+import { auth } from "../../../config/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth"
 
 export default function Signup() {
   const [firstName, setFirstName] = useState("");
@@ -13,10 +15,24 @@ export default function Signup() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+      const params = new URLSearchParams();
+
+      params.append("username", username);
+
+      const usernameCheck = await fetch(api_url + `/api/auth/username?${params.toString()}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if(!usernameCheck.ok){
+        alert("Username Taken")
+        return;
+      }
+
       const user = await signup(email, password);
       const token = await user.user.getIdToken(true);
-
-      const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
       const res = await fetch(api_url + "/api/users/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -29,11 +45,29 @@ export default function Signup() {
       });
 
       if (!res.ok) {
-        console.log("Error in server");
+        const data = await res.json();
+        alert(data.message || "Signup failed");
+        return;
       }
 
-      alert("Account created successfully!");
-      navigate("/"); // redirect to home
+      const login = await fetch(api_url + "/api/auth/login", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ token })
+      });
+
+      const data = await login.json();
+      
+      if(!login.ok){
+          alert(data.message || "Login unsuccessful");
+          return;
+      }
+
+      navigate("/dashboard");
+
     } catch (error: any) {
       alert(error.message);
     }

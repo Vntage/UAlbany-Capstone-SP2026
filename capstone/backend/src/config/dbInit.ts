@@ -6,14 +6,13 @@ export async function initDB() {
         await pool.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
 
         //user schema
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS users(
-            firebase_uid VARCHAR(255) NOT NULL,
-            username VARCHAR(100) NOT NULL,
+        await pool.query(
+            `CREATE TABLE IF NOT EXISTS users (
+            firebase_uid VARCHAR(255) NOT NULL UNIQUE,
+            username VARCHAR(100) NOT NULL UNIQUE,
             first_name VARCHAR(50) NOT NULL,
-            last_name VARCHAR(50) NOT NULL,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-            CONSTRAINT users_pkey PRIMARY KEY (firebase_uid)
+            last_name VARCHAR(50) NOT NULL,,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
             );`)
         
         //business schema

@@ -10,7 +10,16 @@ export const getTransaction = async(req: Request<BusinessParams>, res: Response)
     const businessID = req.params.businessID;
     const { periodStart, periodEnd } = req.query;
 
-    let query = `SELECT * FROM transactions WHERE business_id = $1`;
+    let query = `SELECT 
+        uid,
+        name,
+        description,
+        type, 
+        category_id,
+        date,
+        amount
+        FROM transactions 
+        WHERE business_id = $1`;
 
     const params: any[] = [businessID];
     let paramIndex = 2;
@@ -30,6 +39,8 @@ export const getTransaction = async(req: Request<BusinessParams>, res: Response)
     query += ` ORDER BY date`;
 
     const transactions = await pool.query<Transaction>(query, params);
+
+    console.log(transactions.rows)
 
     return res.status(201).json(transactions.rows)
 }
@@ -323,8 +334,8 @@ export const updateTransaction = async (req: Request<TransactionParams>, res: Re
                 type = $4, 
                 category_id = $5, 
                 amount = $6, 
-                edited_at = NOW(), 
-                edited_by = $7, 
+                updated_at = NOW(), 
+                updated_by = $7 
             WHERE uid = $8
             RETURNING *`,
             [
@@ -355,7 +366,7 @@ export const updateTransaction = async (req: Request<TransactionParams>, res: Re
                 category_id,
                 amount,
                 edited_at,
-                edited_by,
+                edited_by
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *
             `, [
@@ -367,8 +378,8 @@ export const updateTransaction = async (req: Request<TransactionParams>, res: Re
                 transaction.type, 
                 transaction.category_id, 
                 transaction.amount, 
-                updateTransaction.edited_at,
-                updateTransaction.edited_by
+                updateTransaction.updated_at,
+                updateTransaction.updated_by
             ]);
 
         if(!transactionLog.rows[0]){
@@ -392,7 +403,19 @@ export const getTransactionLog = async (req: Request<BusinessParams>, res: Respo
         const businessID = req.params.businessID;
 
         const result = await pool.query<TransactionLog>(
-            `SELECT * FROM transaction_log 
+            `SELECT 
+            tl.transaction_id,
+            tl.business_id,
+            tl.name,
+            tl.description,
+            tl.type,
+            tl.category_id,
+            tl.amount,
+            tl.edited_at,
+            u.first_name,
+            u.last_name
+            FROM transaction_log tl
+            JOIN users u ON tl.edited_by = u.firebase_uid
             WHERE business_id = $1 
             ORDER BY edited_at DESC`, [businessID]
         );

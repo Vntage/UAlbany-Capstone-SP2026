@@ -77,7 +77,17 @@ export const createBusiness = async(req: Request, res: Response) => {
 export const getBusinessMember = async(req: Request<BusinessParams>, res: Response) => {
     const business_id = req.params.businessID;
 
-    const business_memberResult = await pool.query<BusinessMember>(`SELECT * FROM business_member WHERE business_id = $1`, [business_id]);
+    const business_memberResult = await pool.query(
+        `SELECT 
+        bm.role,   
+        bm.username,
+        u.first_name,
+        u.last_name
+        FROM business_member bm
+        JOIN users u ON bm.user_id = u.firebase_uid
+        WHERE business_id = $1`, 
+        [business_id]
+    );
 
     if(!business_memberResult.rows.length){
         res.status(500).json({ message: "Server Error" })
@@ -161,7 +171,7 @@ export const getRole = async(req: Request<BusinessParams>, res: Response) => {
 export const createBusinessInvite = async(req: Request<BusinessParams>, res: Response) => {
     try{
         const business_id = req.params.businessID;
-        const { userID, role = "member", expiresAt } = req.body;
+        const { username, role = "member", expiresAt } = req.body;
         const invitedBy = req.user?.uid;
 
         const member = req.businessMember;
@@ -175,10 +185,10 @@ export const createBusinessInvite = async(req: Request<BusinessParams>, res: Res
         }
 
         const result = await pool.query(`
-            INSERT INTO business_invite (business_id, user_id, invited_by, role, expires_at)
+            INSERT INTO business_invite (business_id, username, invited_by, role, expires_at)
             VALUES ($1, $2, $3, $4, $5)
             RETURNING *`,
-            [business_id, userID, invitedBy, role, expiresAt || null]
+            [business_id, username, invitedBy, role, expiresAt || null]
         );
 
         if(!result.rows[0]){
