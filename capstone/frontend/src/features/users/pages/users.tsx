@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Navbar from "../../../components/navbar";
 import BusinessSwitcher from "../components/BusinessSwitcher";
 import CreateBusinessForm from "../components/CreateBusinessForm";
-import BusinessInviteModal from "../components/businessInviteModal";
+import BusinessInviteModal from "../components/BusinessInviteModal";
 
 type User = {
   firebase_uid: string;
