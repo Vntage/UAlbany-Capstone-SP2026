@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [metrics, setMetrics] = useState<any>(null); //metrics must be processed separately
   const [total, setTotal] = useState(0); //for pie chart percentage calculation optimization
   const [activeBusiness, setActiveBusiness] = useState<any>(null);
+  const [executionTime, setExecutionTime] = useState(0); //"last updated"
   const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
 
   /*
@@ -46,8 +47,10 @@ export default function Dashboard() {
           const token = await user.getIdToken(); //identify user for requests
           const fetchBusiness = await fetch(`${api_url}/api/business`, {
             method: "GET",
-            headers: { "Content-Type": "application/json",
-                       "Authorization": `Bearer ${token}` },
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
             credentials: "include"
           })
           //find user business
@@ -117,6 +120,7 @@ export default function Dashboard() {
         } catch (error) {
           alert("Error fetching dashboard data:" + (error instanceof Error ? error.message : String(error)));
         }
+        setExecutionTime(Date.now());
       } else {
         // User is signed out
         alert("You must be logged in to access the dashboard.");
@@ -144,7 +148,18 @@ export default function Dashboard() {
             </div>
             <div className="text-right">
               <div className="text-sm text-gray-500">Last Updated</div>
-              <div className="font-medium text-gray-900">March 3, 2026</div>
+              <div className="font-medium text-gray-900">
+                {new Date(executionTime).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric"
+                })}
+                {" "}
+                {new Date(executionTime).toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit"
+                })}
+              </div>
             </div>
           </div>
 
