@@ -45,46 +45,52 @@ export default function AdjustTargetsModal({
     }
 
     return(
-        <div>
-            <div>
-                <div>
-                <h2>{budget ? "Adjust Targets" : "Create Budget"}</h2>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl w-full max-w-lg p-6">
+                <div className="flex justify-between items-center mb-5">
+                <h2 className="text-xl font-bold">{budget ? "Adjust Targets" : "Create Budget"}</h2>
                 <button className="text-gray-400 hover:text-black text-xl" onClick={onClose}>✕</button>
                 </div>
 
                 {!budget ? (
-                    <>
+                    <div className="space-y-3">
                         <input
                             placeholder="Budget Name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
+                            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         />
                         <input
                             type="date"
                             value={periodStart}
                             onChange={(e) => setPeriodStart(e.target.value)}
+                            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         />
                         <input
                             type="date"
                             value={periodEnd}
                             onChange={(e) => setPeriodEnd(e.target.value)}
+                            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         />
                         <button
                             onClick={handleCreateBudget}
                             disabled={loading}
+                            className="w-full bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition cursor-pointer"
                         >
                             {loading? "Creating" : "Create Budget"}
                         </button>
-                    </>
+                    </div>
                 ): (
-                    <>
-                        <div>
+                    <div className="space-y-4">
+                        <div className="max-h-64 overflow-y-auto space-y-3">
                             {categories.map((cat) => (
-                                <div key={cat.uid}>
-                                    <span>{cat.name}</span>
+                                <div key={cat.uid} 
+                                className="flex items-center justify-between gap-3">
+                                    <span className="text-sm font-medium">{cat.name}</span>
                                     <input
                                         type="number"
                                         placeholder="0"
+                                        className="w-32 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                                         onChange={(e) => 
                                             setAllocations((prev)=> ({
                                                 ...prev,
@@ -98,10 +104,11 @@ export default function AdjustTargetsModal({
                         <button
                             onClick={handleSaveAllocation}
                             disabled={loading}
+                            className="w-full bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition cursor-pointer"
                         >
                             {loading ? "Saving": "Save Targets"}
                         </button>
-                    </>
+                    </div>
                 )}
             </div>
         </div>
