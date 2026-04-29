@@ -11,7 +11,7 @@ export async function initDB() {
             firebase_uid VARCHAR(255) NOT NULL UNIQUE,
             username VARCHAR(100) NOT NULL UNIQUE,
             first_name VARCHAR(50) NOT NULL,
-            last_name VARCHAR(50) NOT NULL,,
+            last_name VARCHAR(50) NOT NULL,
             created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
             );`)
         
