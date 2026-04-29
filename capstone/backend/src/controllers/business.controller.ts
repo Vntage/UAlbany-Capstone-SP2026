@@ -80,7 +80,7 @@ export const getBusinessMember = async(req: Request<BusinessParams>, res: Respon
     const business_memberResult = await pool.query(
         `SELECT 
         bm.role,   
-        bm.username,
+        u.username,
         u.first_name,
         u.last_name
         FROM business_member bm
@@ -180,15 +180,21 @@ export const createBusinessInvite = async(req: Request<BusinessParams>, res: Res
             return res.status(401).json({ message: "Unauthorized" });
         }
 
-        if(member.role === "owner"){
+        if(member.role !== "owner"){
             return res.status(403).json({ message: "Unauthorized" })
         }
 
+        const user = await pool.query(`SELECT firebase_uid FROM users WHERE username = $1`, [username]);
+
+        if(!user.rows[0]) return res.status(400).json({ message: "User not found" });
+
+        const userID = user.rows[0].firebase_uid;
+
         const result = await pool.query(`
-            INSERT INTO business_invite (business_id, username, invited_by, role, expires_at)
+            INSERT INTO business_invite (business_id, user_id, invited_by, role, expires_at)
             VALUES ($1, $2, $3, $4, $5)
             RETURNING *`,
-            [business_id, username, invitedBy, role, expiresAt || null]
+            [business_id, userID, invitedBy, role, expiresAt || null]
         );
 
         if(!result.rows[0]){
@@ -208,14 +214,18 @@ export const getUserInvite = async(req: Request, res: Response) => {
         const user = req.user?.uid;
 
         const result = await pool.query(`
-            SELECT business_invite
+            SELECT 
+            b.name,
+            bi.uid,
+            bi.role,
+            bi.status,
+            bi.expires_at
+            FROM business_invite bi
+            JOIN business b ON bi.business_id = b.uid
             WHERE user_id = $1
-            AND status <> 'declined'
+            AND bi.status <> 'declined'
             `, [user]);
-
-        if(!result.rowCount ){
-            return res.status(500).json({ message: "Database Error" });
-        }
+            
         return res.status(200).json(result.rows)
     }
     catch(error){
@@ -230,14 +240,17 @@ export const getBusinessInvite = async(req: Request<BusinessParams>, res: Respon
         const businessID = req.params.businessID;
 
         const result = await pool.query(`
-            SELECT business_invite 
+            SELECT 
+            u.username,
+            bi.uid,
+            bi.role,
+            bi.status,
+            bi.expires_at
+            FROM business_invite bi
+            JOIN users u ON bi.user_id = u.firebase_uid
             WHERE business_id = $1 
-            ORDER BY status, created_at DESC`, 
+            ORDER BY bi.status, bi.created_at DESC`, 
             [businessID]);
-
-        if(!result.rows){
-            return res.status(500).json({ message: "Database Error" });
-        }
 
         return res.status(200).json(result.rows)
     }

@@ -11,6 +11,27 @@ export default function Dashboard() {
   const [data, setData] = useState<any>(null);
   const [metrics, setMetrics] = useState<any>(null); //metrics must be processed separately
   const [total, setTotal] = useState(0); //for pie chart percentage calculation optimization
+  const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
+
+  useEffect(() => {
+    const fetchBusiness = async() => {
+      try{
+        const res = await fetch(`${api_url}/api/business`,{
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include"
+        })
+
+        const data = await res.json();
+        localStorage.setItem("activeBusiness", JSON.stringify(data[0]))
+        const business = localStorage.getItem("activeBusiness") || ""
+      }
+      catch(err){
+        console.log(err)
+      }
+    }
+    fetchBusiness();
+  }, [])
 
   useEffect(() => { //load and verify user session on dashboard load
     const auth = getAuth();
@@ -18,7 +39,6 @@ export default function Dashboard() {
       if (user) {
         try {
           const token = await user.getIdToken();
-          const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
 
           const fetchBusinessOne = await fetch(api_url + "/api/fetchBusinessOne", { //FOR TESTING
             method: "GET",

@@ -65,6 +65,7 @@ export async function initDB() {
             status invite_status NOT NULL DEFAULT 'sent',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             expires_at TIMESTAMP NOT NULL,
+            invited_by VARCHAR(255) REFERENCES public.users(firebase_uid)
             CONSTRAINT business_invite_role_check
                 CHECK(role IN ('admin', 'member'))
             );`)
