@@ -96,7 +96,7 @@ export default function Reports() {
 
             <div className="flex gap-3">
               <div className="flex gap-3">
-                {!business && (
+                {business && (
                 <button 
                   onClick={generateReport}
                   className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm shadow 
@@ -108,12 +108,12 @@ export default function Reports() {
             </div>
           </div>
 
-          {business && (
+          {!business && (
             <div className="text-center py-20 text-gray-400">
             No business selected. Please create or switch a business.
             </div>
           )}
-          {!business && (
+          {business && (
           <>
           {/* Filters */}
           <div className="bg-white p-2 rounded-xl shadow-sm border mb-8 flex justify-between items-center">

@@ -25,7 +25,7 @@ export const getUserBusinesses = async(req: Request, res: Response) => {
         WHERE bm.user_id = $1
         AND bm.role <> 'disabled'
         `, [uid]);
-        
+
     return res.status(201).json(business.rows)
 }
 
@@ -262,7 +262,8 @@ export const updateBusinessInvite = async(req: Request<InviteParams>, res: Respo
     const inviteID = req.params.inviteID;
     const { status } = req.body;
 
-    if(!inviteID || status !== "accepted" || status !== "declined" || status !== "canceled"){
+
+    if(!inviteID || ( status !== "accepted" && status !== "declined" && status !== "canceled")){
         return res.status(400).json({ message: "Unacceptable Field" });
     }
 
@@ -308,7 +309,7 @@ export const updateBusinessInvite = async(req: Request<InviteParams>, res: Respo
             return res.status(500).json({ message: "Database Error" });
         }
 
-        const newMember = await pool.query<BusinessMember>(`INSERT INTO business_members (business_id, user_id, role)
+        const newMember = await pool.query<BusinessMember>(`INSERT INTO business_member (business_id, user_id, role)
             VALUES($1, $2, $3) RETURNING *`, 
             [invite.business_id, invite.user_id, invite.role]);
 

@@ -181,7 +181,16 @@ export default function Users() {
   //todo
   const updateInvite = async(inviteId: string, newStatus: string) => {
     try{
-
+      const res = await fetch(`${api_url}/api/business/${inviteId}`,{
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          status: newStatus
+        })
+      })
     }
     catch(err: any){
      console.log(err) 
@@ -372,7 +381,7 @@ export default function Users() {
                               <td className="px-6 py-4">
                                 {canEditRoles ? (
                                   <select
-                                    value={invite.status || "member"}
+                                    value={invite.status || ""}
                                     onChange={(e) =>
                                       updateInvite(
                                         invite.uid,
@@ -472,8 +481,8 @@ export default function Users() {
                                 "
                               >
                                 <option value="" disabled>Select status</option>
-                                <option value="accept">Accept</option>
-                                <option value="decline">Decline</option>
+                                <option value="accepted">Accept</option>
+                                <option value="declined">Decline</option>
                               </select>
                             </td>
 

@@ -121,7 +121,7 @@ export default function Transactions() {
 
                     
 
-                    {!business && (
+                    {businessID && (
                     <button
                         className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm shadow 
                         hover:bg-green-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer"
@@ -132,13 +132,13 @@ export default function Transactions() {
                     )}
 
                     </div>
-                    {business && (
+                    {!businessID && (
                         <div className="text-center py-20 text-gray-400">
                         No business selected. Please create or switch a business.
                         </div>
                     )}
                     
-                    {!business && (
+                    {businessID && (
                         <>
                     {/* FILTER BAR */}
                     <div className="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
@@ -208,7 +208,7 @@ export default function Transactions() {
                     </div>
                     </>
                     )}
-                    {!business && (
+                    {businessID && (
                         <>
                     {/* CONTENT CARD */}
                     <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
@@ -324,7 +324,7 @@ export default function Transactions() {
             {showEditTransactionModal && (
             <EditTransactionModal
                 transaction={selectedTransaction}
-                businessID={businessID}
+                businessID={businessID || ""}
                 onClose={() => setShowEditTransactionModal(false)}
                 onUpdate={() => {
                 fetch(`/api/businesses/${businessID}/transactions`)
