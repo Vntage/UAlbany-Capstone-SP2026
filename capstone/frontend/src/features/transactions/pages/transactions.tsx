@@ -82,116 +82,217 @@ export default function Transactions() {
 
     return (
         <div className="flex h-screen bg-surface">
-          <Navbar />
-          <div>
-            <div>
-                <h3>Period Filter</h3>
+            <Navbar />
 
-                <input
-                type="date"
-                value={periodStart}
-                onChange={(e) => setPeriodStart(e.target.value)}
-                />
+            <main className="flex-1 overflow-y-auto p-10">
+                <div className="max-w-6xl mx-auto space-y-8">
 
-                <input
-                type="date"
-                value={periodEnd}
-                onChange={(e) => setPeriodEnd(e.target.value)}
-                style={{ marginLeft: 10 }}
-                />
-            </div>
-            <div>
-                <button onClick={() => setActiveTab("transactions")}>
-                Transactions
-                </button>
+                    {/* HEADER */}
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
 
-                {role === "owner" && (
-                <button
-                    onClick={() => setActiveTab("logs")}
-                >
-                    Transaction Logs
-                </button>
-                )}
-            </div>
-                <button
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm shadow 
-                     hover:bg-green-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer"
-                    
-                    onClick={() => {
-                        setShowImportModal(true)
-                    }}
-                    >
-                    + Create Transaction
-                </button>
-            {activeTab === "transactions" && (
-                <div>
-                    <h2>Transactions</h2>
-
-                    {loading && <p>Loading...</p>}
-
-                    {transactions.map((transaction) => (
-                        <div
-                        key={transaction.uid}
-                        onClick={() => {
-                            setSelectedTransaction(transaction);
-                            setShowEditTransactionModal(true);
-                        }}
-                        >
-                        <div>
-                            <strong>{transaction.name}</strong>
-                            <span>{transaction.type}</span>
-                        </div>
-
-                        <div>${transaction.amount}</div>
-
-                        <div>
-                            {truncate(transaction.description, 80)}
-                        </div>
-                        </div>
-                    ))}
-                    </div>
-                )}
-            {activeTab === "logs" && role === "owner" && (
                     <div>
-                    <h2>Transaction Logs</h2>
-
-                    {loading && <p>Loading logs...</p>}
-
-                    {logs.map((log) => (
-                        <div
-                        key={log.uid}
-                        >
-                        <div><strong>{log.name}</strong></div>
-                        <div>${log.amount}</div>
-                        <div>
-                            Edited: {log.editedAt}
-                        </div>
+                        <h1 className="text-3xl font-bold text-gray-900">
+                        Transactions
+                        </h1>
+                        <p className="text-sm text-gray-500 mt-1">
+                        Transaction history overview
+                        </p>
                     </div>
-                ))}
-                </div>
-            )}
-          </div>
 
-          {showImportModal && (
+                    <button
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm shadow 
+                        hover:bg-green-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer"
+                        onClick={() => setShowImportModal(true)}
+                    >
+                        + Create Transaction
+                    </button>
+
+                    </div>
+
+                    {/* FILTER BAR */}
+                    <div className="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
+
+                    {/* DATE FILTERS */}
+                    <div className="flex gap-4">
+
+                    {/* START DATE */}
+                    <div className="flex flex-col">
+                        <label className="text-xs text-gray-500 mb-1">
+                        Start Date
+                        </label>
+
+                        <input
+                        type="date"
+                        value={periodStart}
+                        onChange={(e) => setPeriodStart(e.target.value)}
+                        className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    </div>
+
+                    {/* END DATE */}
+                    <div className="flex flex-col">
+                        <label className="text-xs text-gray-500 mb-1">
+                        End Date
+                        </label>
+
+                        <input
+                        type="date"
+                        value={periodEnd}
+                        onChange={(e) => setPeriodEnd(e.target.value)}
+                        className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    </div>
+
+                    </div>
+
+                    {/* TABS */}
+                    <div className="flex gap-2">
+
+                        <button
+                        onClick={() => setActiveTab("transactions")}
+                        className={`px-4 py-2 rounded-lg text-sm transition ${
+                            activeTab === "transactions"
+                            ? "bg-blue-600 text-white shadow"
+                            : "text-gray-500 hover:bg-gray-100"
+                        }`}
+                        >
+                        Transactions
+                        </button>
+
+                        {role === "owner" && (
+                        <button
+                            onClick={() => setActiveTab("logs")}
+                            className={`px-4 py-2 rounded-lg text-sm transition ${
+                            activeTab === "logs"
+                                ? "bg-blue-600 text-white shadow"
+                                : "text-gray-500 hover:bg-gray-100"
+                            }`}
+                        >
+                            Logs
+                        </button>
+                        )}
+
+                    </div>
+
+                    </div>
+
+                    {/* CONTENT CARD */}
+                    <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
+
+                    {/* HEADER */}
+                    <div className="p-6 border-b">
+                        <h2 className="text-lg font-semibold text-gray-900">
+                        {activeTab === "transactions" ? "Transaction Ledger" : "Transaction Logs"}
+                        </h2>
+                    </div>
+
+                    {/* BODY */}
+                    <div className="p-6 space-y-4">
+
+                        {/* LOADING */}
+                        {loading && (
+                        <p className="text-sm text-gray-500">Loading...</p>
+                        )}
+
+                        {/* TRANSACTIONS */}
+                        {activeTab === "transactions" && (
+                        <div className="space-y-3">
+
+                            {transactions.map((transaction) => (
+                            <div
+                                key={transaction.uid}
+                                onClick={() => {
+                                setSelectedTransaction(transaction);
+                                setShowEditTransactionModal(true);
+                                }}
+                                className="p-4 border rounded-lg hover:shadow-md hover:border-blue-300 cursor-pointer transition"
+                            >
+                                <div className="flex justify-between items-center">
+
+                                <div>
+                                    <strong className="text-gray-900">
+                                    {transaction.name}
+                                    </strong>
+
+                                    <span className="ml-2 text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600">
+                                    {transaction.type}
+                                    </span>
+                                </div>
+
+                                <div className="font-semibold text-gray-900">
+                                    ${transaction.amount}
+                                </div>
+
+                                </div>
+
+                                <div className="text-sm text-gray-500 mt-2">
+                                {truncate(transaction.description, 80)}
+                                </div>
+                            </div>
+                            ))}
+
+                        </div>
+                        )}
+
+                        {/* LOGS */}
+                        {activeTab === "logs" && role === "owner" && (
+                        <div className="space-y-3">
+
+                            {logs.map((log) => (
+                            <div
+                                key={log.uid}
+                                className="p-4 border rounded-lg bg-gray-50"
+                            >
+                                <div className="flex justify-between">
+
+                                <strong className="text-gray-900">
+                                    {log.name}
+                                </strong>
+
+                                <span className="font-semibold text-gray-800">
+                                    ${log.amount}
+                                </span>
+
+                                </div>
+
+                                <div className="text-xs text-gray-500 mt-2">
+                                Edited: {log.editedAt}
+                                </div>
+
+                            </div>
+                            ))}
+
+                        </div>
+                        )}
+
+                    </div>
+                    </div>
+
+                </div>
+            </main>
+
+            {showImportModal && (
             <ImportModal
-            mode = {mode}
-            setMode= {setMode}
-            onClose={() => setShowImportModal(false)}
-            businessID = {businessID || ""}
-        />)}
-          {showEditTransactionModal && (
+                mode={mode}
+                setMode={setMode}
+                onClose={() => setShowImportModal(false)}
+                businessID={businessID || ""}
+            />
+            )}
+
+            {showEditTransactionModal && (
             <EditTransactionModal
-            transaction={selectedTransaction}
-            businessID= {businessID}
-            onClose={() => setShowEditTransactionModal(false)}
-            onUpdate={() => {
+                transaction={selectedTransaction}
+                businessID={businessID}
+                onClose={() => setShowEditTransactionModal(false)}
+                onUpdate={() => {
                 fetch(`/api/businesses/${businessID}/transactions`)
                     .then((res) => res.json())
                     .then((data) => setTransactions(data))
-                    .finally(()=> setLoading(false))
-                }
-            }
-        />)}
+                    .finally(() => setLoading(false));
+                }}
+            />
+            )}
+
         </div>
-    )
-}
+    )};
