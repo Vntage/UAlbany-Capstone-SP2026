@@ -11,19 +11,7 @@ export const getDashboardData = async (req: Request<BusinessParams>, res: Respon
 
     //you only get data from the user you are logged in as
     try {
-    const businesses = await pool.query( //probably deprecated
-      `SELECT b.uid, b.name, b.currency, b.status
-       FROM business_member bm
-       JOIN business b ON bm.business_id = b.uid
-       WHERE bm.user_id = $1 AND b.uid = $2`,
-      [uid, businessID]
-    );
-    if (businesses.rows.length === 0) {
-        return res.status(500).json({ message: "Unable to retrieve business data for the specified business." });
-    }
-    const businessIds = businesses.rows.map((b) => b.uid);
-
-    const metrics = await pool.query(
+      const metrics = await pool.query(
         `SELECT 
             -- Current Month Metrics
             SUM(CASE WHEN t.type = 'income' AND DATE_TRUNC('month', t.date) = DATE_TRUNC('month', CURRENT_DATE) THEN t.amount ELSE 0 END) AS current_revenue,
@@ -83,14 +71,13 @@ export const getDashboardData = async (req: Request<BusinessParams>, res: Respon
     */
 
     res.status(200).json({
-      businesses: businesses.rows,
       metrics: metrics.rows[0],
       monthlyTrend: monthlyTrend.rows,
       revenueByCategory: revenueByCategory.rows,
       //alerts: alerts.rows,
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error fetching dashboard data" });
-  }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Server error fetching dashboard data" });
+    }
 }
