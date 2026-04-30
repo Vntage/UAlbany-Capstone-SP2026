@@ -112,7 +112,7 @@ export default function Dashboard() {
             headers: { "Authorization": `Bearer ${token}` },
             credentials: "include"
           });
-          const alertSnapshotRes = await fetch(api_url + "/api/dashboard/alert-snapshot/" + activeBusinessUID, {
+          const alertSnapshotRes = await fetch(api_url + "/api/alert/" + activeBusinessUID, {
             method: "GET",
             headers: { "Authorization": `Bearer ${token}` },
             credentials: "include"
@@ -124,9 +124,12 @@ export default function Dashboard() {
             revenueByCategoryRes.json(),
             alertSnapshotRes.json()
           ]);
-          setMonthlyTrend(monthlyTrendData);
-          setRevenueByCategory(revenueByCategoryData);
-          setAlertSnapshot(alertSnapshotData);
+          if (Array.isArray(monthlyTrendData)) { //if failed fetches, set to empty arrays
+            setMonthlyTrend(monthlyTrendData); } else { setMonthlyTrend([]); }
+          if (Array.isArray(revenueByCategoryData)) {
+            setRevenueByCategory(revenueByCategoryData); } else { setRevenueByCategory([]); }
+          if (Array.isArray(alertSnapshotData)) {
+            setAlertSnapshot(alertSnapshotData); } else { setAlertSnapshot([]); }
           console.log("Fetched metrics data: ", metricsData, 
             "\nFetched monthly trend data: ", monthlyTrendData,
             "\nFetched revenue by category data: ", revenueByCategoryData, 
@@ -224,7 +227,7 @@ export default function Dashboard() {
           {alertSnapshot.length > 0 && (() => { //if there are any alerts, notify with banner at top
             //group alerts by type e.g.( critical: 2, warning: 1, info: 5 )
             const counts = alertSnapshot.reduce((acc: Record<string, number>, alert: any) => {
-              acc[alert.type] = (acc[alert.type] || 0) + 1;
+              acc[alert.severity] = (acc[alert.severity] || 0) + 1;
               return acc;
             }, {});
 

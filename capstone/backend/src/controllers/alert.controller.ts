@@ -12,9 +12,9 @@ export const getAlert = async(req: Request<BusinessParams>, res: Response) => {
         const result = await pool.query(`SELECT 
             a.uid AS alert_id, a.title, a.message, a.severity, a.triggered_at, ar.read_at, ar.user_id,
             ar.uid AS recipient_id
-            FROM alert_recipients ar
-            JOIN alerts a ON a.uid = ar.alert_id
-            JOIN alert_rules r ON r.uid = a.alert_rule_id
+            FROM alert_recipient ar
+            JOIN alert a ON a.uid = ar.alert_id
+            JOIN alert_rule r ON r.uid = a.alert_rule_id
             WHERE ar.user_id = $1
             AND r.business_id = $2
             ORDER BY a.triggered_at DESC`, [user_id, businessID]);
