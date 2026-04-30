@@ -13,7 +13,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const [data, setData] = useState<any>(null);
-  const [metrics, setMetrics] = useState<any>(null); //metrics must be processed separately
+  const [metrics, setMetrics] = useState<any[]>([]); //metrics must be processed separately
   const [total, setTotal] = useState(0); //for pie chart percentage calculation optimization
   const [activeBusiness, setActiveBusiness] = useState<any>(null);
   const [executionTime, setExecutionTime] = useState(0); //"last updated"
@@ -107,35 +107,36 @@ export default function Dashboard() {
             if (!previous || previous === 0) return 0; //don't divide by zero, treat as no change
             return ((current - previous) / previous) * 100;
           };
-          const revChange = calculateChange(data.metrics.current_revenue, data.metrics.prev_revenue);
-          const expChange = calculateChange(data.metrics.current_expenses, data.metrics.prev_expenses);
+          const metricsInput = data.metrics ?? { current_revenue: 0, prev_revenue: 0, current_expenses: 0, prev_expenses: 0 };
+          const revChange = calculateChange(metricsInput.current_revenue, metricsInput.prev_revenue);
+          const expChange = calculateChange(metricsInput.current_expenses, metricsInput.prev_expenses);
           const netChange = calculateChange(
-            (data.metrics.current_revenue ?? 0) - (data.metrics.current_expenses ?? 0),
-            (data.metrics.prev_revenue ?? 0) - (data.metrics.prev_expenses ?? 0));
+            (metricsInput.current_revenue ?? 0) - (metricsInput.current_expenses ?? 0),
+            (metricsInput.prev_revenue ?? 0) - (metricsInput.prev_expenses ?? 0));
           setMetrics([
             {
               title: "Change in Revenue",
-              value: data.metrics.current_revenue - data.metrics.prev_revenue,
+              value: metricsInput.current_revenue - metricsInput.prev_revenue,
               change: revChange,
               trend: revChange > 0 ? "up" : "down",
               isPositiveDesired: true
             },
             {
               title: "Change in Expenses",
-              value: data.metrics.current_expenses - data.metrics.prev_expenses,
+              value: metricsInput.current_expenses - metricsInput.prev_expenses,
               change: expChange,
               trend: expChange > 0 ? "up" : "down",
               isPositiveDesired: false
             },
             {
               title: "Change in Net Profit",
-              value: (data.metrics.current_revenue ?? 0) - (data.metrics.current_expenses ?? 0) - ((data.metrics.prev_revenue ?? 0) - (data.metrics.prev_expenses ?? 0)),
+              value: (metricsInput.current_revenue ?? 0) - (metricsInput.current_expenses ?? 0) - ((metricsInput.prev_revenue ?? 0) - (metricsInput.prev_expenses ?? 0)),
               change: netChange,
               trend: netChange > 0 ? "up" : "down",
               isPositiveDesired: true
             }
           ]);
-          setTotal(data.revenueByCategory.reduce((sum: number, entryValue: any) => sum + Number(entryValue.value), 0)); //entry is initially a number string
+          setTotal((data.revenueByCategory || [{ category: "Missing data!", value: 0 }]).reduce((sum: number, entryValue: any) => sum + Number(entryValue.value), 0)); //entry is initially a number string
         } catch (error) {
           console.log("Error fetching dashboard data: " + (error instanceof Error ? error.message : String(error)));
         }
@@ -254,7 +255,7 @@ export default function Dashboard() {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Revenue vs Expenses</h2>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={data.monthlyTrend}>
+                <LineChart data={data.monthlyTrend ?? []}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="month" stroke="#666" tickFormatter={(month) =>
                     new Date(0, month - 1).toLocaleString("en-US", { month: "short" })} />
@@ -278,7 +279,7 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={data.revenueByCategory.map((d: { category: string; value: string; }) => ({ ...d, value: Number(d.value) }))} // convert str to number for compat
+                    data={(data.revenueByCategory || [{ category: "Missing data!", value: 0 }]).map((d: { category: string; value: string; }) => ({ ...d, value: Number(d.value) }))} // convert str to number for compat
                     cx="50%"
                     cy="50%"
                     labelLine={false}
@@ -291,7 +292,7 @@ export default function Dashboard() {
                     dataKey="value"
                     nameKey="category"
                   >
-                    {data.revenueByCategory.map((_: any, index: number) => (
+                    {(data.revenueByCategory || [{ category: "Missing data!", value: 0 }]).map((_: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
