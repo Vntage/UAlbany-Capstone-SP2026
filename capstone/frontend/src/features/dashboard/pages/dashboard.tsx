@@ -5,6 +5,8 @@ import { TrendingUp, TrendingDown, AlertCircle, DollarSign } from "lucide-react"
 import { mockAlerts } from "../data/mockData";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import BusinessSwitcher from "../../users/components/BusinessSwitcher";
+import CreateBusinessForm from "../../users/components/CreateBusinessForm";
 
 export default function Dashboard() {
   const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
@@ -15,29 +17,64 @@ export default function Dashboard() {
   const [total, setTotal] = useState(0); //for pie chart percentage calculation optimization
   const [activeBusiness, setActiveBusiness] = useState<any>(null);
   const [executionTime, setExecutionTime] = useState(0); //"last updated"
+  const [showCreateBusiness, setShowCreateBusiness] = useState(false);
   const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
+  let myActiveBusiness: { name: string, uid: string } = { name: "", uid: "" }; //for debug
 
-  /*
+  const loadBusiness = () => {
+    const stored = localStorage.getItem("activeBusiness");
+    if (!stored) {
+      setActiveBusiness(null);
+      myActiveBusiness = { name: "", uid: "" };
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(stored);
+      setActiveBusiness(parsed);
+      console.log("Obtained active business from local storage...", parsed);
+      myActiveBusiness = parsed;
+    } catch (err) {
+      console.error("Invalid activeBusiness:", err);
+      setActiveBusiness(null);
+      myActiveBusiness = { name: "", uid: "" };
+    }
+  };
+
+
   useEffect(() => {
+    loadBusiness();
     const fetchBusiness = async () => {
       try {
-        const res = await fetch(`${api_url}/api/business`, {
+        const fetchBusiness = await fetch(`${api_url}/api/business`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
           credentials: "include"
         })
 
-        const data = await res.json();
-        localStorage.setItem("activeBusiness", JSON.stringify(data[0]))
-        const business = localStorage.getItem("activeBusiness") || ""
+        if (myActiveBusiness.name === "") { //if empty business 
+          const fetchBusinessArray = await fetchBusiness.json();
+          console.log("Fetched business(es): ", fetchBusinessArray);
+          //redirect if no user business is detected
+          if (!fetchBusinessArray || fetchBusinessArray.length === 0) {
+            console.error("No valid business found, redirecting...", activeBusiness);
+            navigate("/users");
+            return;
+          }
+
+          setActiveBusiness(fetchBusinessArray[0]);
+          localStorage.setItem("activeBusiness", JSON.stringify(fetchBusinessArray[0]));
+          myActiveBusiness = fetchBusinessArray[0];
+          console.log("Active business UID: ", myActiveBusiness.uid);
+        }
+        console.log("My active business: ", myActiveBusiness);
       }
       catch (err) {
         console.log(err)
       }
     }
-    //fetchBusiness();
-    //console.log("Fetched business data (initial): ", data);
-  }, [])*/
+    fetchBusiness();
+  }, [])
 
   useEffect(() => { //load and verify user session on dashboard load
     const auth = getAuth();
@@ -45,26 +82,9 @@ export default function Dashboard() {
       if (user) {
         try {
           const token = await user.getIdToken(); //identify user for requests
-          const fetchBusiness = await fetch(`${api_url}/api/business`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-            },
-            credentials: "include"
-          })
-          //find user business
-          const fetchBusinessArray = await fetchBusiness.json();
-          console.log("Fetched business(es): ", fetchBusinessArray);
-          localStorage.setItem("activeBusiness", JSON.stringify(fetchBusinessArray[0]))
-          const business = localStorage.getItem("activeBusiness") || ""
 
-          //redirect if no user business is detected
-          if (!Array.isArray(fetchBusinessArray) || fetchBusinessArray.length === 0) {
-            navigate("/users");
-            return;
-          }
-          const activeBusinessUID = fetchBusinessArray[0].uid; //identify user business
+          //identify user business
+          const activeBusinessUID = activeBusiness.uid;
           console.log("Active business UID: ", activeBusinessUID);
           const businessRes = await fetch(api_url + "/api/business/" + activeBusinessUID, {
             method: "GET",
@@ -73,7 +93,6 @@ export default function Dashboard() {
           });
           const businessData = await businessRes.json();
           console.log("Fetched active business data: ", businessData);
-          setActiveBusiness(businessData);
 
           const res = await fetch(api_url + "/api/dashboard/" + activeBusinessUID, {
             method: "GET",
@@ -118,16 +137,20 @@ export default function Dashboard() {
           ]);
           setTotal(data.revenueByCategory.reduce((sum: number, entryValue: any) => sum + Number(entryValue.value), 0)); //entry is initially a number string
         } catch (error) {
-          alert("Error fetching dashboard data:" + (error instanceof Error ? error.message : String(error)));
+          console.log("Error fetching dashboard data: " + (error instanceof Error ? error.message : String(error)));
         }
         setExecutionTime(Date.now());
+        window.addEventListener("businessChanged", loadBusiness);
       } else {
         // User is signed out
         alert("You must be logged in to access the dashboard.");
       }
     });
-    return () => fetchData();
-  }, []);
+    return () => {
+      window.removeEventListener("businessChanged", loadBusiness);
+      fetchData(); //end on exit
+    };
+  }, [activeBusiness?.uid]);
 
   if (!data) return <div>Loading data...</div>; //wait until data is done loading before rendering
   if (!metrics) return <div>Loading metrics...</div>;
@@ -145,6 +168,9 @@ export default function Dashboard() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
               <p className="text-gray-600 mt-1">Overview of your business financial performance</p>
+            </div>
+            <div className="flex-1 flex justify-center">
+              <BusinessSwitcher onCreateClick={() => setShowCreateBusiness(true)} />
             </div>
             <div className="text-right">
               <div className="text-sm text-gray-500">Last Updated</div>
@@ -363,6 +389,17 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+
+      {/* Create Business Modal */}
+      {showCreateBusiness && (
+        <CreateBusinessForm
+          onClose={() => setShowCreateBusiness(false)}
+          onSuccess={() => {
+            setShowCreateBusiness(false);
+            window.location.reload();
+          }}
+        />
+      )}
     </div>
   );
 }
