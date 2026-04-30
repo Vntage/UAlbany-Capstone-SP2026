@@ -30,7 +30,7 @@ export default function BusinessInviteModal({
     const[loading, setLoading] = useState(false);
     const[error, setError] = useState("");
 
-    if(!isOpen) return;
+    if(!isOpen || !businessID) return;
 
     const handleSubmit = async() => {
         setLoading(true);

@@ -3,7 +3,7 @@ import Navbar from "../../../components/navbar";
 import AdjustTargetsModal from "../components/AdjustTargetsModal";
 
 type Category = {
-  id: string;
+  uid: string;
   name: string;
   budgeted: number;
   actual?: number;
@@ -224,7 +224,7 @@ export default function Budget() {
                       </tr>
                     ) : (
                       categories.map((cat) => (
-                        <tr key={cat.id} className="hover:bg-gray-50 transition">
+                        <tr key={cat.uid} className="hover:bg-gray-50 transition">
                           <td className="px-6 py-4 font-medium">
                             {cat.name}
                           </td>

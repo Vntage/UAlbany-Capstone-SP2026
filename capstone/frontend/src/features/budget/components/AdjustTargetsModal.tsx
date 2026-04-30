@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 type Category = {
-  id: string;
+  uid: string;
   name: string;
   budgeted: number;
   actual?: number;
@@ -33,15 +33,67 @@ export default function AdjustTargetsModal({
     const [periodEnd, setPeriodEnd] = useState("");
 
     const [allocations, setAllocations] = useState<Record<string, number>>({});
+    const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
     if(!isOpen || businessID === "") return;
 
     const handleCreateBudget = async() => {
+        try{
+            console.log(periodStart)
+            setLoading(true);
+            const res = await fetch(`${api_url}/api/budget/${businessID}`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name,
+                    periodStart,
+                    periodEnd,
+                }),
+            });
+            if(!res.ok) throw new Error("Failed to create Budget");
 
+            onSuccess();
+            onClose();
+        }
+        catch(err){
+            console.log(err);
+        }
+        finally{
+            setLoading(false);
+        }
     }
 
     const handleSaveAllocation = async() => {
+        try{
+            setLoading(true);
 
+            const requests = Object.entries(allocations).map(
+                ([categoryID, amount]) => {
+                    fetch(`${api_url}/api/budgets/${businessID}/item`,{
+                        method: "POST",
+                        credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            budgetId: budget.uid, 
+                            transactionCategoryId: categoryID, 
+                            allocatedAmount: amount,
+                        }),
+                    })
+                }
+            );
+
+            await Promise.all(requests);
+
+            onSuccess();
+            onClose();
+        }
+        catch(err){
+            console.log(err);
+        }
+        finally{
+            setLoading(false);
+        }
     }
 
     return(
@@ -94,7 +146,7 @@ export default function AdjustTargetsModal({
                                         onChange={(e) => 
                                             setAllocations((prev)=> ({
                                                 ...prev,
-                                                [cat.id]: Number(e.target.value)
+                                                [cat.uid]: Number(e.target.value)
                                             }))
                                         }
                                     />

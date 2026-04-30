@@ -13,7 +13,7 @@ export const verifyMember = async (req: Request<BusinessParams>, res: Response, 
         const businessID = req.params.businessID;
         const userID = req.user.uid;
 
-        if(!businessID){
+        if(!businessID || !userID){
             res.status(400).json({ message: "Missing Parameter" });
             return;
         }

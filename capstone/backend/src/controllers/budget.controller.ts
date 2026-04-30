@@ -7,6 +7,7 @@ export const newBudget = async (req: Request<BusinessParams>, res: Response) => 
     try{
         const businessID = req.params.businessID;
         const { name, periodStart, periodEnd } = req.body;
+        console.log(req.body)
         if(!req.user){
             return res.status(401).json({ message: "Unauthorized" })
         }
@@ -14,9 +15,9 @@ export const newBudget = async (req: Request<BusinessParams>, res: Response) => 
         if(!name || !periodStart || !periodEnd){
             return res.status(400).json({ message: "Missing required fields" })
         }
-        const query = `INSERT INTO budgets (
-            business_id, name, period_start, period_end, created_at, creator)
-            VALUES($1, $2, $3, $4, $5, $6)
+        const query = `INSERT INTO budget (
+            business_id, name, period_start, period_end, created_at, created_by)
+            VALUES($1, $2, $3, $4, NOW(), $5)
             RETURNING *`;
         
         const values = [
@@ -24,7 +25,6 @@ export const newBudget = async (req: Request<BusinessParams>, res: Response) => 
             name,
             periodStart,
             periodEnd,
-            Date.now(),
             req.user?.uid
         ];
         
@@ -50,9 +50,9 @@ export const newBudgetedItem = async (req: Request<BusinessParams>, res: Respons
             return res.status(401).json({ message: "Missing Required Fields" })
         }
 
-        const query = `INSERT INTO budgeted_items (
-            business_id, budget_id, transaction_category_id, allocated_amount, creator, created_at, update_by, updated_at)
-            VALUES($1, $2, $3, $4, $5, $6, $5, $6)
+        const query = `INSERT INTO budget_item (
+            business_id, budget_id, transaction_category_id, allocated_amount, created_by, created_at)
+            VALUES($1, $2, $3, $4, $5, $6)
             RETURNING *`;
 
         const values = [
@@ -97,21 +97,23 @@ export const getBudget = async (req: Request<BusinessParams>, res: Response) => 
                 summary: null
             })
         }
+
         
-        const itemResult = await pool.query(`
-            SELECT 
-            bi.uid
-            tc.name
-            bi.allocated_amount as budgeted
+        const itemResult = await pool.query(
+            `SELECT 
+            bi.uid,
+            tc.name,
+            bi.allocated_amount AS budgeted
             FROM budget_item bi
             JOIN transaction_category tc
-            ON tc.id = bi.transaction_category_id
+            ON tc.uid = bi.category_id
             WHERE bi.business_id = $1
             AND bi.budget_id = $2`,
             [businessID, budget.uid]
         )
 
         const items = itemResult.rows;
+
 
         const actualResult = await pool.query(
             `SELECT 
@@ -181,7 +183,7 @@ export const getBudgetedItem = async (req: Request<BusinessParams>, res: Respons
         const businessID = req.params.businessID;
         const { transactionCategoryId, budgetId} = req.body;
 
-        let query = `SELECT * FROM budgeted_items WHERE business_id = $1 `;
+        let query = `SELECT * FROM budget_item WHERE business_id = $1 `;
         const values: any[] = [businessID];
 
         if(transactionCategoryId){
