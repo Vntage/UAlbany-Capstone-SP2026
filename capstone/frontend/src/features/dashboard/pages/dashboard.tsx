@@ -12,8 +12,11 @@ export default function Dashboard() {
   const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
   const navigate = useNavigate();
 
-  const [data, setData] = useState<any>(null);
+  //const [data, setData] = useState<any>(null);
   const [metrics, setMetrics] = useState<any[]>([]); //metrics must be processed separately
+  const [monthlyTrend, setMonthlyTrend] = useState<any[]>([]); //monthly trend data
+  const [revenueByCategory, setRevenueByCategory] = useState<any[]>([]); //revenue by category data
+  const [alertSnapshot, setAlertSnapshot] = useState<any[]>([]); //alert snapshot data
   const [total, setTotal] = useState(0); //for pie chart percentage calculation optimization
   const [activeBusiness, setActiveBusiness] = useState<any>(null);
   const [executionTime, setExecutionTime] = useState(0); //"last updated"
@@ -94,20 +97,46 @@ export default function Dashboard() {
           const businessData = await businessRes.json();
           console.log("Fetched active business data: ", businessData);
 
-          const res = await fetch(api_url + "/api/dashboard/" + activeBusinessUID, {
+          const metricsRes = await fetch(api_url + "/api/dashboard/metrics/" + activeBusinessUID, {
             method: "GET",
             headers: { "Authorization": `Bearer ${token}` },
             credentials: "include"
           });
-          const data = await res.json();
-          setData(data);
-          console.log("Dashboard data: ", data);
+          const monthlyTrendRes = await fetch(api_url + "/api/dashboard/monthly-trend/" + activeBusinessUID, {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}` },
+            credentials: "include"
+          });
+          const revenueByCategoryRes = await fetch(api_url + "/api/dashboard/revenue-by-category/" + activeBusinessUID, {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}` },
+            credentials: "include"
+          });
+          const alertSnapshotRes = await fetch(api_url + "/api/dashboard/alert-snapshot/" + activeBusinessUID, {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}` },
+            credentials: "include"
+          });
+
+          const [metricsData, monthlyTrendData, revenueByCategoryData, alertSnapshotData] = await Promise.all([
+            metricsRes.json(),
+            monthlyTrendRes.json(),
+            revenueByCategoryRes.json(),
+            alertSnapshotRes.json()
+          ]);
+          setMonthlyTrend(monthlyTrendData);
+          setRevenueByCategory(revenueByCategoryData);
+          setAlertSnapshot(alertSnapshotData);
+          console.log("Fetched metrics data: ", metricsData, 
+            "\nFetched monthly trend data: ", monthlyTrendData,
+            "\nFetched revenue by category data: ", revenueByCategoryData, 
+            "\nFetched alert snapshot data: ", alertSnapshotData);
 
           const calculateChange = (current: number, previous: number) => { //for metrics
             if (!previous || previous === 0) return 0; //don't divide by zero, treat as no change
             return ((current - previous) / previous) * 100;
           };
-          const metricsInput = data.metrics ?? { current_revenue: 0, prev_revenue: 0, current_expenses: 0, prev_expenses: 0 };
+          const metricsInput = metricsData ?? { current_revenue: 0, prev_revenue: 0, current_expenses: 0, prev_expenses: 0 };
           const revChange = calculateChange(metricsInput.current_revenue, metricsInput.prev_revenue);
           const expChange = calculateChange(metricsInput.current_expenses, metricsInput.prev_expenses);
           const netChange = calculateChange(
@@ -136,7 +165,7 @@ export default function Dashboard() {
               isPositiveDesired: true
             }
           ]);
-          setTotal((data.revenueByCategory || [{ category: "Missing data!", value: 0 }]).reduce((sum: number, entryValue: any) => sum + Number(entryValue.value), 0)); //entry is initially a number string
+          setTotal((revenueByCategory || [{ category: "Missing data!", value: 0 }]).reduce((sum: number, entryValue: any) => sum + Number(entryValue.value), 0)); //entry is initially a number string
         } catch (error) {
           console.log("Error fetching dashboard data: " + (error instanceof Error ? error.message : String(error)));
         }
@@ -153,9 +182,10 @@ export default function Dashboard() {
     };
   }, [activeBusiness?.uid]);
 
-  if (!data) return <div>Loading data...</div>; //wait until data is done loading before rendering
-  if (!metrics) return <div>Loading metrics...</div>;
-  console.log("Processed metrics: ", metrics);
+  if (!metrics) {return <div>Loading metrics...</div>;}
+  if (!monthlyTrend) {return <div>Loading monthly trends...</div>;}
+  if (!revenueByCategory) {return <div>Loading revenues by category...</div>;}
+  //if (!alertSnapshot) {return <div>Loading alert snapshot...</div>;}
 
   return (
     <div className="flex h-screen bg-surface">
@@ -191,9 +221,9 @@ export default function Dashboard() {
           </div>
 
           {/* Alert Banner */}
-          {data?.alerts?.length > 0 && (() => { //if there are any alerts, notify with banner at top
+          {alertSnapshot.length > 0 && (() => { //if there are any alerts, notify with banner at top
             //group alerts by type e.g.( critical: 2, warning: 1, info: 5 )
-            const counts = data.alerts.reduce((acc: Record<string, number>, alert: any) => {
+            const counts = alertSnapshot.reduce((acc: Record<string, number>, alert: any) => {
               acc[alert.type] = (acc[alert.type] || 0) + 1;
               return acc;
             }, {});
@@ -211,7 +241,7 @@ export default function Dashboard() {
                     ))}
                   </div>
                   <div className="text-xs text-red-600 mt-2 italic">
-                    Check the alerts section below for full details.
+                    Check the alerts page from the sidebar for full details.
                   </div>
                 </div>
               </div>
@@ -255,7 +285,7 @@ export default function Dashboard() {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Revenue vs Expenses</h2>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={data.monthlyTrend ?? []}>
+                <LineChart data={monthlyTrend ?? []}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="month" stroke="#666" tickFormatter={(month) =>
                     new Date(0, month - 1).toLocaleString("en-US", { month: "short" })} />
@@ -279,7 +309,7 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={(data.revenueByCategory || [{ category: "Missing data!", value: 0 }]).map((d: { category: string; value: string; }) => ({ ...d, value: Number(d.value) }))} // convert str to number for compat
+                    data={(revenueByCategory || [{ category: "Missing data!", value: 0 }]).map((d: { category: string; value: string; }) => ({ ...d, value: Number(d.value) }))} // convert str to number for compat
                     cx="50%"
                     cy="50%"
                     labelLine={false}
@@ -292,7 +322,7 @@ export default function Dashboard() {
                     dataKey="value"
                     nameKey="category"
                   >
-                    {(data.revenueByCategory || [{ category: "Missing data!", value: 0 }]).map((_: any, index: number) => (
+                    {(revenueByCategory || [{ category: "Missing data!", value: 0 }]).map((_: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
