@@ -6,7 +6,7 @@ import { verifyMember } from "../middleware/verifyMember";
 import { requireRole } from "../middleware/requireRole";
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/" })
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.get("/:businessID", verifySession, verifyMember, requireRole(['owner', 'admin', 'member']), getTransaction);
 router.get("/:businessID/category", verifySession, verifyMember, requireRole(['owner', 'admin', 'member']), getTransactionCategory);

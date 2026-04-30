@@ -3,7 +3,6 @@ import { CategoryDropDown } from "./categoryDropDown";
 
 type TransactionCategory = {
     uid: string;
-    business_id: string;
     name: string;
 }
 

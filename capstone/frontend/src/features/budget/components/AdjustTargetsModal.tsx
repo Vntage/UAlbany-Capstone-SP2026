@@ -163,6 +163,7 @@ export default function AdjustTargetsModal({
                                 <span className="text-sm font-medium">{cat.name}</span>
                                 <input
                                     type="number"
+                                    value={allocations[cat.uid] ?? cat.budgeted ?? 0}
                                     placeholder="0"
                                     className="w-32 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                                     onChange={(e) => 

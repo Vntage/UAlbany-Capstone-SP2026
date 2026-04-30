@@ -1,7 +1,6 @@
 import { useState } from "react";
 type TransactionCategory = {
     uid: string;
-    business_id: string;
     name: string;
 }
 

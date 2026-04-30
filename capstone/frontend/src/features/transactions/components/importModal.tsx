@@ -40,14 +40,13 @@ export function ImportModal({
     const[selectedCategory, setSelectedCategory] = useState<TransactionCategory | null>(null);
     const[newCategory, setNewCategory] = useState("");
     const[creating, setCreating] = useState(false);
+    const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
     if (businessID === "") return;
 
     const handleManualSubmit = async() => {
         try{
             setLoading(true);
-
-            const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
             const res = await fetch(api_url + `/api/transaction/${businessID}`, {
                 method: "POST",
@@ -87,9 +86,6 @@ export function ImportModal({
             const formData = new FormData();
             formData.append("file", file);
 
-
-            const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
-
             const res = await fetch(api_url + `/api/transaction/${businessID}/csv/validate`, {
                 method: "POST",
                 body: formData,
@@ -102,13 +98,45 @@ export function ImportModal({
                 setError(data.message || "Failed to validate CSV");
                 return;
             }
-            onClose();
+            setResult(data)
         }
         catch(error){
             console.error(error)
         }
         finally{
             setLoading(false)
+        }
+    }
+
+    const handleCSVCommit = async() => {
+        if(!result?.finalValid?.length) return;
+
+        try{
+            const res = await fetch(`${api_url}/api/transaction/${businessID}/csv/commit`, 
+            {
+                method: "POST",
+                headers:{ "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    rows: result.finalValid,
+                })
+            });
+
+            const data = await res.json();
+
+            if(!res.ok) {
+                setError(data.message || "Failed to commit CSV");
+                return;
+            }
+            setResult(null);
+            setFile(null);
+            onClose();
+        }
+        catch(err){
+            console.log(err);
+        }
+        finally{
+            setLoading(false);
         }
     }
 
@@ -271,7 +299,6 @@ export function ImportModal({
                         {loading ? "Uploading..." : "Validate CSV"}
                     </button>
 
-                    {/* 🧠 Preview results */}
                     {result && (
                         <div className="bg-gray-50 border rounded-lg p-3 text-xs space-y-1 max-h-40 overflow-auto">
                             <div className="font-semibold mb-2">
@@ -282,6 +309,16 @@ export function ImportModal({
                             <p>Invalid: {result.summary.invalid}</p>
                             <p>Duplicates: {result.summary.duplicate}</p>
                         </div>
+                    )}
+
+                    {result?.finalValid?.length > 0 && (
+                        <button
+                            onClick={handleCSVCommit}
+                            disabled={loading}
+                            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                        >
+                            {loading ? "Importing..." : `Commit ${result.finalValid.length} Transactions`}
+                        </button>
                     )}
                 </div>
                 )}

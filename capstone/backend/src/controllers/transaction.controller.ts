@@ -110,6 +110,10 @@ export const validatedCSV = async(req: Request<BusinessParams>, res: Response) =
     }
 
     try{
+        if(!req.file || !req.file.buffer){
+            return res.status(400).json({ message: "Missing CSV file" });
+        }
+
         const csv = req.file?.buffer.toString();
 
         const records = parse(csv, {
@@ -249,7 +253,7 @@ function isCsvRow(row: any): row is CsvRows {
     return(
         typeof row.date === "string" &&
         typeof row.name === "string" &&
-        typeof row.amount === "number" &&
+        typeof row.amount !== "undefined" &&
         typeof row.category === "string"
     );
 }
@@ -287,13 +291,12 @@ export const commitCSV = async(req: Request<BusinessParams>, res: Response) => {
 
             const newTransaction = await pool.query<Transaction>(`
                 INSERT INTO transactions (
-                business_id, name, date, description, type, category, amount, created_at, created_by)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
+                business_id, name, date, description, type, category_id, amount, created_at, created_by)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8) RETURNING *`,
                 [business_id, row.name, row.date, row.description, row.type, category_id, row.amount, user]
             );
 
             if(!newTransaction.rows[0]){
-                console.log(newTransaction);
                 return res.status(500).json({ message: "Server Error" });
             }
         }

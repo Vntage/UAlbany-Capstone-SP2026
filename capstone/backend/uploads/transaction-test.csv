@@ -1,0 +1,22 @@
+date,name,amount,category,description
+2026-04-01,Starbucks,-5.50,Food,Coffee
+2025-12-30,Workers,-20000,Salary,Paying workers
+2024-11-01,Uber,-12.20,Transportation,Ride
+2025-12-08,Sale Record,1492.83,Sales,Total sales for the day
+2026-01-06,Amazon,-45.99,Shopping,Order #example1
+2026-03-11,Netflix,-10.99,Subscription,
+2026-04-26,Commission,149.99,Income,Side job
+
+2025-12-08,Sale Record,1492.83,Sales,Total sales for the day
+
+2026-01-19,Amazon,-45.99,Shopping,Order #example2
+2026-04-11,Netflix,-10.99,Subscription,
+2026-02-11,Commission,249.99,Income,Side job
+2025-12-19,Sale Record,1492.83,Sales,Total sales for the day
+
+2026-99-99,Starbucks,-5.50,Food,Coffee
+
+2024-04-01,Starbucks,-5.50,,Coffee
+
+2025-04-01,Starbucks,,Food,Coffee
+2026-02-01,,-5.50,Food,Coffee
