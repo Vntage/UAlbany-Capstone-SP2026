@@ -1,18 +1,18 @@
-import {Request, Response} from "express";
+import { Request, Response } from "express";
 import pool from "../config/db";
 import { BusinessParams } from "../types/common.type";
 
-export const getDashboardData = async (req: Request<BusinessParams>, res: Response) => { //get it all in one request
-    if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized: No user found in dashboard_data request!" });
-    }   
-    const uid = req.user?.uid;
-    const businessID = req.params.businessID; //narrow search compared to before
+export const getMetrics = async (req: Request<BusinessParams>, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized: No user found in dashboard data request!" });
+  }
+  const uid = req.user?.uid;
+  const businessID = req.params.businessID;
+  //you only get data from this business
 
-    //you only get data from the user you are logged in as
-    try {
-      const metrics = await pool.query(
-        `SELECT 
+  try {
+    const metrics = await pool.query(
+      `SELECT 
             -- Current Month Metrics
             SUM(CASE WHEN t.type = 'income' AND DATE_TRUNC('month', t.date) = DATE_TRUNC('month', CURRENT_DATE) THEN t.amount ELSE 0 END) AS current_revenue,
             SUM(CASE WHEN t.type = 'expense' AND DATE_TRUNC('month', t.date) = DATE_TRUNC('month', CURRENT_DATE) THEN t.amount ELSE 0 END) AS current_expenses,
@@ -22,12 +22,29 @@ export const getDashboardData = async (req: Request<BusinessParams>, res: Respon
             SUM(CASE WHEN t.type = 'expense' AND DATE_TRUNC('month', t.date) = DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month') THEN t.amount ELSE 0 END) AS prev_expenses
         FROM transactions t
         WHERE t.business_id = $1
-        AND t.date >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month')`, 
-        [businessID]
+        AND t.date >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month')`,
+      [businessID]
     );
     if (metrics.rows.length === 0) {
-        return res.status(500).json({ message: "Unable to retrieve business metrics for the specified business." });
+      return res.status(500).json({ message: "Unable to retrieve business metrics for the specified business." });
     }
+
+    res.status(200).json(metrics.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error fetching dashboard data" });
+  }
+}
+
+export const getMonthlyTrend = async (req: Request<BusinessParams>, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized: No user found in monthly trend request!" });
+  }
+  const uid = req.user?.uid;
+  const businessID = req.params.businessID;
+  //you only get data from this business
+
+  try {
 
     //monthly revenue vs expenses trend
     const monthlyTrend = await pool.query(
@@ -42,9 +59,25 @@ export const getDashboardData = async (req: Request<BusinessParams>, res: Respon
       [businessID]
     );
     if (monthlyTrend.rows.length === 0) {
-        return res.status(500).json({ message: "Unable to retrieve monthly trend data for the specified business." });
+      return res.status(500).json({ message: "Unable to retrieve monthly trend data for the specified business." });
     }
 
+    res.status(200).json(monthlyTrend.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error fetching monthly trend data" });
+  }
+}
+
+export const getRevenueByCategory = async (req: Request<BusinessParams>, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized: No user found in revenue by category request!" });
+  }
+  const uid = req.user?.uid;
+  const businessID = req.params.businessID;
+  //you only get data from this business
+  
+  try {
     const revenueByCategory = await pool.query(
       `SELECT tc.name AS category, SUM(t.amount) AS value
        FROM transactions t
@@ -54,11 +87,25 @@ export const getDashboardData = async (req: Request<BusinessParams>, res: Respon
       [businessID]
     );
     if (revenueByCategory.rows.length === 0) {
-        return res.status(500).json({ message: "Unable to retrieve revenue by category data for the specified business." });
+      return res.status(500).json({ message: "Unable to retrieve revenue by category data for the specified business." });
     }
 
-    //recent alerts
-    /*
+    res.status(200).json(revenueByCategory.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error fetching revenue by category data" });
+  }
+}
+
+export const getAlertSnapshot = async (req: Request<BusinessParams>, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized: No user found in revenue by category request!" });
+  }
+  const uid = req.user?.uid;
+  const businessID = req.params.businessID;
+  //you only get data from the user you are logged in as
+  
+  try {
     const alerts = await pool.query(
       `SELECT a.uid, a.type, a.description, b.name AS business_name, a.created_at
        FROM alert a
@@ -68,16 +115,13 @@ export const getDashboardData = async (req: Request<BusinessParams>, res: Respon
        LIMIT 10`,
       [uid]
     ); //no alerts, no problem
-    */
-
-    res.status(200).json({
-      metrics: metrics.rows[0],
-      monthlyTrend: monthlyTrend.rows,
-      revenueByCategory: revenueByCategory.rows,
-      //alerts: alerts.rows,
-    });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server error fetching dashboard data" });
+    if (alerts.rows.length === 0) {
+      return res.status(500).json({ message: "Unable to retrieve alert data for the specified user." });
     }
+
+    res.status(200).json(alerts.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error fetching alert data" });
+  }
 }
