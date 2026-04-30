@@ -40,8 +40,6 @@ export const getTransaction = async(req: Request<BusinessParams>, res: Response)
 
     const transactions = await pool.query<Transaction>(query, params);
 
-    console.log(transactions.rows)
-
     return res.status(201).json(transactions.rows)
 }
 

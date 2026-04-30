@@ -222,7 +222,6 @@ export const getUserInvite = async(req: Request, res: Response) => {
             WHERE user_id = $1
             AND bi.status <> 'declined'
             `, [user]);
-            
         return res.status(200).json(result.rows)
     }
     catch(error){
@@ -246,6 +245,8 @@ export const getBusinessInvite = async(req: Request<BusinessParams>, res: Respon
             FROM business_invite bi
             JOIN users u ON bi.user_id = u.firebase_uid
             WHERE business_id = $1 
+            AND bi.status IN ('canceled', 'sent')
+            AND (bi.expires_at IS NULL OR bi.expires_at > NOW())
             ORDER BY bi.status, bi.created_at DESC`, 
             [businessID]);
 
@@ -263,7 +264,7 @@ export const updateBusinessInvite = async(req: Request<InviteParams>, res: Respo
     const { status } = req.body;
 
 
-    if(!inviteID || ( status !== "accepted" && status !== "declined" && status !== "canceled")){
+    if(!inviteID || ( status !== "accepted" && status !== "declined" && status !== "canceled" && status != "sent")){
         return res.status(400).json({ message: "Unacceptable Field" });
     }
 
@@ -294,7 +295,7 @@ export const updateBusinessInvite = async(req: Request<InviteParams>, res: Respo
             return res.status(400).json({ message: "Invite Expired" })
         }
 
-        if(invite.status !== "sent"){
+        if(invite.status !== "sent" && status !== "sent"){
             return res.status(400).json({ message: `Invite already ${invite.status}` })
         }
 

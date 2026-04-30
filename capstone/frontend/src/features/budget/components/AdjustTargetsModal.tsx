@@ -53,6 +53,27 @@ export default function AdjustTargetsModal({
             });
             if(!res.ok) throw new Error("Failed to create Budget");
 
+            const newBudget = await res.json();
+
+            const requests = Object.entries(allocations).map(
+                ([categoryID, amount]) => {
+                    if (!amount) return null; // skip empty
+
+                    return fetch(`${api_url}/api/budgets/${businessID}/item`, {
+                        method: "POST",
+                        credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            budgetId: newBudget.uid,
+                            transactionCategoryId: categoryID,
+                            allocatedAmount: amount,
+                        }),
+                    });
+                }
+            ).filter(Boolean);
+
+            await Promise.all(requests);
+
             onSuccess();
             onClose();
         }
@@ -70,7 +91,7 @@ export default function AdjustTargetsModal({
 
             const requests = Object.entries(allocations).map(
                 ([categoryID, amount]) => {
-                    fetch(`${api_url}/api/budgets/${businessID}/item`,{
+                    return fetch(`${api_url}/api/budget/${businessID}/item`,{
                         method: "POST",
                         credentials: "include",
                         headers: { "Content-Type": "application/json" },
@@ -103,8 +124,8 @@ export default function AdjustTargetsModal({
                 <h2 className="text-xl font-bold">{budget ? "Adjust Targets" : "Create Budget"}</h2>
                 <button className="text-gray-400 hover:text-black text-xl" onClick={onClose}>✕</button>
                 </div>
-
-                {!budget ? (
+                
+                {!budget && (
                     <div className="space-y-3">
                         <input
                             placeholder="Budget Name"
@@ -132,36 +153,36 @@ export default function AdjustTargetsModal({
                             {loading? "Creating" : "Create Budget"}
                         </button>
                     </div>
-                ): (
-                    <div className="space-y-4">
-                        <div className="max-h-64 overflow-y-auto space-y-3">
-                            {categories.map((cat) => (
-                                <div key={cat.uid} 
-                                className="flex items-center justify-between gap-3">
-                                    <span className="text-sm font-medium">{cat.name}</span>
-                                    <input
-                                        type="number"
-                                        placeholder="0"
-                                        className="w-32 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                                        onChange={(e) => 
-                                            setAllocations((prev)=> ({
-                                                ...prev,
-                                                [cat.uid]: Number(e.target.value)
-                                            }))
-                                        }
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                        <button
-                            onClick={handleSaveAllocation}
-                            disabled={loading}
-                            className="w-full bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition cursor-pointer"
-                        >
-                            {loading ? "Saving": "Save Targets"}
-                        </button>
-                    </div>
                 )}
+
+                <div className="space-y-4">
+                    <div className="max-h-64 overflow-y-auto space-y-3">
+                        {categories.map((cat) => (
+                            <div key={cat.uid} 
+                            className="flex items-center justify-between gap-3">
+                                <span className="text-sm font-medium">{cat.name}</span>
+                                <input
+                                    type="number"
+                                    placeholder="0"
+                                    className="w-32 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                    onChange={(e) => 
+                                        setAllocations((prev)=> ({
+                                            ...prev,
+                                            [cat.uid]: Number(e.target.value)
+                                        }))
+                                    }
+                                />
+                            </div>
+                        ))}
+                    </div>
+                    <button
+                        onClick={handleSaveAllocation}
+                        disabled={loading}
+                        className="w-full bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition cursor-pointer"
+                    >
+                        {loading ? "Saving": "Save Targets"}
+                    </button>
+                </div>
             </div>
         </div>
     )

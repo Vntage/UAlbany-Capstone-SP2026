@@ -87,8 +87,6 @@ export default function Users() {
   };
 
   useEffect(() => {
-
-
     loadBusiness();
     getBusinessInvites();
     getUserInvites();
@@ -139,9 +137,9 @@ export default function Users() {
   ).length;
 
   const getBusinessInvites = async() => {
-    if(!business) return;
+    if(!businessID) return;
     try{
-      const res = await fetch(`${api_url}/api/business/${business.uid}/invite`, {
+      const res = await fetch(`${api_url}/api/business/${businessID}/invite`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

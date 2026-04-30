@@ -50,9 +50,35 @@ export const newBudgetedItem = async (req: Request<BusinessParams>, res: Respons
             return res.status(401).json({ message: "Missing Required Fields" })
         }
 
+        const updateQuery = `
+            UPDATE budget_item
+            SET 
+            allocated_amount = $1,
+            updated_by = $2,
+            updated_at = NOW()
+            WHERE business_id = $3
+            AND budget_id = $4
+            AND category_id = $5
+            RETURNING *;
+        `;
+
+        const updateValues = [
+            allocatedAmount,
+            req.user?.uid,
+            businessID,
+            budgetId,
+            transactionCategoryId,
+        ];
+
+        const updateResult = await pool.query<BudgetedItem>(updateQuery, updateValues);
+
+        if (updateResult.rows.length > 0) {
+            return res.status(200).json(updateResult.rows[0]);
+        }
+
         const query = `INSERT INTO budget_item (
-            business_id, budget_id, transaction_category_id, allocated_amount, created_by, created_at)
-            VALUES($1, $2, $3, $4, $5, $6)
+            business_id, budget_id, category_id, allocated_amount, created_by, created_at)
+            VALUES($1, $2, $3, $4, $5, NOW())
             RETURNING *`;
 
         const values = [
@@ -61,7 +87,6 @@ export const newBudgetedItem = async (req: Request<BusinessParams>, res: Respons
             transactionCategoryId,
             allocatedAmount,
             req.user?.uid,
-            Date.now()
         ];
 
         const { rows } = await pool.query<BudgetedItem>(query, values);
@@ -101,19 +126,19 @@ export const getBudget = async (req: Request<BusinessParams>, res: Response) => 
         
         const itemResult = await pool.query(
             `SELECT 
-            bi.uid,
+            tc.uid AS category_id,
             tc.name,
-            bi.allocated_amount AS budgeted
-            FROM budget_item bi
-            JOIN transaction_category tc
-            ON tc.uid = bi.category_id
-            WHERE bi.business_id = $1
-            AND bi.budget_id = $2`,
+            COALESCE (bi.allocated_amount, 0) AS budgeted
+            FROM transaction_category tc
+            LEFT JOIN budget_item bi 
+            ON bi.category_id = tc.uid
+            AND bi.budget_id = $2
+            AND bi.business_id = $1
+            WHERE tc.business_id = $1`,
             [businessID, budget.uid]
         )
 
         const items = itemResult.rows;
-
 
         const actualResult = await pool.query(
             `SELECT 
@@ -136,15 +161,14 @@ export const getBudget = async (req: Request<BusinessParams>, res: Response) => 
 
         const categories = items.map((item) => {
             const actual = actualMap[item.category_id] || 0;
-            const budgeted = Number(item.allocated_amount);
+            const budgeted = Number(item.budgeted);
             const variance = budgeted - actual;
 
             let status = "OK";
             if (actual > budgeted) status = "Over";
             else if (actual > budgeted * 0.8) status = "Warning";
-
             return {
-                id: item.uid,
+                uid: item.category_id,
                 name: item.name,
                 budgeted,
                 actual,

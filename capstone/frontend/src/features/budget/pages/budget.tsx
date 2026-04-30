@@ -28,6 +28,10 @@ export default function Budget() {
   const [showAdjust, setShowAdjust] = useState(false);
   const [editCategories, setEditCategories] = useState<Category[]>([]);
 
+  const role = localStorage.getItem("role");
+
+  const canEdit = role === "owner" || role === "admin"
+
   const openAdjustTargets = () => {
   setEditCategories(categories.map(c => ({ ...c })));
   setShowAdjust(true);
@@ -120,14 +124,12 @@ export default function Budget() {
             </div>
 
             <div className="flex gap-3">
-              <button className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm shadow hover:bg-gray-900 transition">
-                Export
-              </button>
-
-              <button onClick={openAdjustTargets}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm shadow hover:bg-blue-700 transition">
-                Adjust Targets
-              </button>
+              {canEdit && (
+                <button onClick={openAdjustTargets}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm shadow hover:bg-blue-700 transition">
+                  Adjust Targets
+                </button>
+              )}
             </div>
           </div>
 

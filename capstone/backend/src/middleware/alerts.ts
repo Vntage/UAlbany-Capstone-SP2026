@@ -114,7 +114,7 @@ export const checkAlertRules = async(business_id: string, transaction: Transacti
     if(!budget) return;
 
     const rulesResult = await pool.query<AlertRule>(
-        `SELECT * FROM alert_rules 
+        `SELECT * FROM alert_rule
         WHERE business_id = $1 AND is_active = true`,
         [business_id]
     );
