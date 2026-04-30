@@ -1,6 +1,18 @@
+import { useState } from "react";
 import Navbar from "../../../components/navbar";
+import { CreateAlertModal } from "../components/CreateAlertModal";
+
+type Business = {
+    uid: string;
+    name: string;
+}
 
 export default function Alerts() {
+  const business = localStorage.getItem("activeBusiness");
+  const businessID: string | null =  business && business !== "undefined" ? (JSON.parse(business) as Business).uid : null;
+
+  const [openModal, setOpenModal] = useState(false);
+
   return (
     <div className="flex h-screen bg-surface">
       <Navbar />
@@ -20,7 +32,9 @@ export default function Alerts() {
               </p>
             </div>
 
-            <button className="px-5 py-2 bg-primary text-on-primary rounded-lg text-sm shadow hover:opacity-90 transition">
+            <button className="px-5 py-2 bg-primary text-on-primary rounded-lg text-sm shadow hover:opacity-90 transition"
+              onClick={() => setOpenModal(true)}
+            >
               + Create Alert
             </button>
           </div>
@@ -172,6 +186,16 @@ export default function Alerts() {
 
         </div>
       </main>
+      {openModal && (
+        <CreateAlertModal
+          isOpen = {openModal}
+          businessID={businessID || ""}
+          //get categories and refresh on submit
+          categories={[]}
+          onSubmit={() => {}}
+          onClose={() => setOpenModal(false)}
+        />
+      )}
     </div>
   );
 }
