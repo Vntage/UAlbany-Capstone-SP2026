@@ -49,13 +49,14 @@ export const getMonthlyTrend = async (req: Request<BusinessParams>, res: Respons
     //monthly revenue vs expenses trend
     const monthlyTrend = await pool.query(
       `SELECT 
+          EXTRACT(YEAR FROM date) AS year,
           EXTRACT(MONTH FROM date) AS month,
           SUM(CASE WHEN type='income' THEN amount ELSE 0 END) AS revenue,
           SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) AS expenses
        FROM transactions
        WHERE business_id = $1
-       GROUP BY month
-       ORDER BY month`,
+       GROUP BY year, month
+       ORDER BY year ASC, month ASC`,
       [businessID]
     );
     if (monthlyTrend.rows.length === 0) {
@@ -83,6 +84,7 @@ export const getRevenueByCategory = async (req: Request<BusinessParams>, res: Re
        FROM transactions t
        JOIN transaction_category tc ON t.category_id = tc.uid
        WHERE t.business_id = $1 AND t.type='income'
+       AND DATE_TRUNC('month', t.date) = DATE_TRUNC('month', CURRENT_DATE)
        GROUP BY tc.name`,
       [businessID]
     );
@@ -94,34 +96,5 @@ export const getRevenueByCategory = async (req: Request<BusinessParams>, res: Re
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error fetching revenue by category data" });
-  }
-}
-
-export const getAlertSnapshot = async (req: Request<BusinessParams>, res: Response) => {
-  if (!req.user) {
-    return res.status(401).json({ message: "Unauthorized: No user found in revenue by category request!" });
-  }
-  const uid = req.user?.uid;
-  const businessID = req.params.businessID;
-  //you only get data from the user you are logged in as
-  
-  try {
-    const alerts = await pool.query(
-      `SELECT a.uid, a.type, a.description, b.name AS business_name, a.created_at
-       FROM alert a
-       JOIN business b ON a.business_id = b.uid
-       WHERE a.user_id = $1
-       ORDER BY a.created_at DESC
-       LIMIT 10`,
-      [uid]
-    ); //no alerts, no problem
-    if (alerts.rows.length === 0) {
-      return res.status(500).json({ message: "Unable to retrieve alert data for the specified user." });
-    }
-
-    res.status(200).json(alerts.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error fetching alert data" });
   }
 }

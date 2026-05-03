@@ -2,7 +2,6 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Navbar from "../../../components/navbar";
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { TrendingUp, TrendingDown, AlertCircle, DollarSign } from "lucide-react";
-import { mockAlerts } from "../data/mockData";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BusinessSwitcher from "../../users/components/BusinessSwitcher";
@@ -168,7 +167,7 @@ export default function Dashboard() {
               isPositiveDesired: true
             }
           ]);
-          setTotal((revenueByCategory || [{ category: "Missing data!", value: 0 }]).reduce((sum: number, entryValue: any) => sum + Number(entryValue.value), 0)); //entry is initially a number string
+          setTotal((revenueByCategoryData || [{ category: "Missing data!", value: 0 }]).reduce((sum: number, entryValue: any) => sum + Number(entryValue.value), 0)); //entry is initially a number string
         } catch (error) {
           console.log("Error fetching dashboard data: " + (error instanceof Error ? error.message : String(error)));
         }
@@ -295,8 +294,10 @@ export default function Dashboard() {
                   <YAxis stroke="#666" tickFormatter={(value) => `$${value / 1000}k`} />
                   <Tooltip
                     formatter={(value) => `$${(value as number).toLocaleString()}`}
-                    labelFormatter={(month) =>
-                      new Date(0, month - 1).toLocaleString("en-US", { month: "long" })}
+                    labelFormatter={(_, chartDate) => {
+                      if (!chartDate || chartDate.length === 0) return "";
+                      return new Date(chartDate[0].payload.year, chartDate[0].payload.month - 1).toLocaleString("en-US", { month: "long", year: "numeric" });
+                    }}
                     contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb" }}
                   />
                   <Legend />
@@ -336,90 +337,6 @@ export default function Dashboard() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-          </div>
-
-          {/* Recent Alerts */}
-          <div className="bg-white rounded-lg border border-gray-200">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Alerts</h2>
-            </div>
-            <div className="divide-y divide-gray-200">
-              {mockAlerts.slice(0, 4).map((alert) => (
-                <div key={alert.id} className="p-6 flex items-start gap-4">
-                  <div
-                    className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${alert.type === "critical"
-                      ? "bg-red-500"
-                      : alert.type === "warning"
-                        ? "bg-yellow-500"
-                        : "bg-blue-500"
-                      }`}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="font-medium text-gray-900">{alert.title}</div>
-                        <div className="text-sm text-gray-600 mt-1">{alert.message}</div>
-                      </div>
-                      <div className="text-xs text-gray-500 flex-shrink-0">{alert.date}</div>
-                    </div>
-                    <div className="flex items-center gap-3 mt-2">
-                      <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                        {alert.category}
-                      </span>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${alert.type === "critical"
-                          ? "bg-red-100 text-red-700"
-                          : alert.type === "warning"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-blue-100 text-blue-700"
-                          }`}
-                      >
-                        {alert.type}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="grid md:grid-cols-3 gap-4">
-            <button className="bg-white rounded-lg border border-gray-200 p-4 text-left hover:border-blue-300 hover:shadow-sm transition-all">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <div className="font-medium text-gray-900">Update Budget</div>
-                  <div className="text-sm text-gray-600">Adjust allocations</div>
-                </div>
-              </div>
-            </button>
-
-            <button className="bg-white rounded-lg border border-gray-200 p-4 text-left hover:border-blue-300 hover:shadow-sm transition-all">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <div className="font-medium text-gray-900">Run Forecast</div>
-                  <div className="text-sm text-gray-600">Generate projections</div>
-                </div>
-              </div>
-            </button>
-
-            <button className="bg-white rounded-lg border border-gray-200 p-4 text-left hover:border-blue-300 hover:shadow-sm transition-all">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <AlertCircle className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <div className="font-medium text-gray-900">Review Alerts</div>
-                  <div className="text-sm text-gray-600">View all notifications</div>
-                </div>
-              </div>
-            </button>
           </div>
         </div>
       </main>
