@@ -1,7 +1,7 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Navbar from "../../../components/navbar";
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { TrendingUp, TrendingDown, AlertCircle, DollarSign } from "lucide-react";
+import { TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BusinessSwitcher from "../../users/components/BusinessSwitcher";
@@ -18,7 +18,6 @@ export default function Dashboard() {
   const [alertSnapshot, setAlertSnapshot] = useState<any[]>([]); //alert snapshot data
   const [total, setTotal] = useState(0); //for pie chart percentage calculation optimization
   const [activeBusiness, setActiveBusiness] = useState<any>(null);
-  const [executionTime, setExecutionTime] = useState(0); //"last updated"
   const [showCreateBusiness, setShowCreateBusiness] = useState(false);
   const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
   let myActiveBusiness: { name: string, uid: string } = { name: "", uid: "" }; //for debug
@@ -171,7 +170,6 @@ export default function Dashboard() {
         } catch (error) {
           console.log("Error fetching dashboard data: " + (error instanceof Error ? error.message : String(error)));
         }
-        setExecutionTime(Date.now());
         window.addEventListener("businessChanged", loadBusiness);
       } else {
         // User is signed out
@@ -208,13 +206,13 @@ export default function Dashboard() {
             <div className="text-right">
               <div className="text-sm text-gray-500">Last Updated</div>
               <div className="font-medium text-gray-900">
-                {new Date(executionTime).toLocaleDateString("en-US", {
+                {new Date(Date.now()).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
                   day: "numeric"
                 })}
                 {" "}
-                {new Date(executionTime).toLocaleTimeString("en-US", {
+                {new Date(Date.now()).toLocaleTimeString("en-US", {
                   hour: "2-digit",
                   minute: "2-digit"
                 })}

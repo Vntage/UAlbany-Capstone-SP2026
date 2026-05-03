@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../../../components/navbar";
 import { CreateAlertModal } from "../components/CreateAlertModal";
 
@@ -12,7 +12,36 @@ export default function Alerts() {
   const businessID: string | null =  business && business !== "undefined" ? (JSON.parse(business) as Business).uid : null;
 
   const [openModal, setOpenModal] = useState(false);
+  const [alerts, setAlerts] = useState([]);
+  const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
 
+  const fetchAlerts = async (businessId: string) => {
+    try {
+      const res = await fetch(`${api_url}/api/alert/${businessId}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      const data = await res.json();
+      console.log(data)
+      if (res.ok) {
+        setAlerts(data || []);
+      } else {
+        setAlerts([]);
+      }
+      console.log("Fetched alerts: ", data);
+    } catch (err) {
+      console.error(err);
+      alert("Error fetching alerts! Did you join any businesses?");
+    }
+  };
+  useEffect(() => {
+    //fetch alerts
+    fetchAlerts(businessID || "");
+  }, []);
+  
   return (
     <div className="flex h-screen bg-surface">
       <Navbar />
