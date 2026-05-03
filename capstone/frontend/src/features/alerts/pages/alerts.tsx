@@ -25,13 +25,12 @@ export default function Alerts() {
       );
 
       const data = await res.json();
-      console.log(data)
+      console.log("Fetched alerts: ", data);
       if (res.ok) {
         setAlerts(data || []);
       } else {
         setAlerts([]);
       }
-      console.log("Fetched alerts: ", data);
     } catch (err) {
       console.error(err);
       alert("Error fetching alerts! Did you join any businesses?");

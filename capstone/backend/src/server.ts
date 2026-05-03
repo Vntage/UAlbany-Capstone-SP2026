@@ -5,7 +5,6 @@ import cookieParser from "cookie-parser";
 import router from "./routes/router"
 import { initDB } from "./config/dbInit";
 import pool from "./config/db";
-import authenticateToken from "./middleware/authenticateToken";
 
 dotenv.config();
 
