@@ -9,6 +9,5 @@ const router = express.Router();
 router.get("/metrics/:businessID", verifySession, verifyMember, requireRole(['owner', 'admin', 'member']), getMetrics);
 router.get("/monthly-trend/:businessID", verifySession, verifyMember, requireRole(['owner', 'admin', 'member']), getMonthlyTrend);
 router.get("/revenue-by-category/:businessID", verifySession, verifyMember, requireRole(['owner', 'admin', 'member']), getRevenueByCategory);
-router.get("/alert-snapshot/:businessID", verifySession, verifyMember, requireRole(['owner', 'admin', 'member']), getAlertSnapshot);
 
 export default router;

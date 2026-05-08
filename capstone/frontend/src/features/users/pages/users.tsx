@@ -40,7 +40,7 @@ export default function Users() {
       setLoadingUsers(true);
 
       const res = await fetch(
-        `http://localhost:8080/api/business/${businessID}/member`,
+        `${api_url}/api/business/${businessID}/member`,
         {
           credentials: "include",
         }
