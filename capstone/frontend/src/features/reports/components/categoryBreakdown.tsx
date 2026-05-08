@@ -17,7 +17,7 @@ export function CategoryBreakdownTable({ data, currency }: any) {
                         <tbody>
                             {(group.categories ?? []).map((row: any, i: number) => (
                                 <tr key={i}>
-                                    <td>{row.period.slice(0, 10)}</td>
+                                    <td>{row.period}</td>
                                     <td>{row.category}</td>
                                     <td>{currency} {row.total}</td>
                                 </tr>

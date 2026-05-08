@@ -13,7 +13,7 @@ export function IncomeTable({ data, currency }: any) {
             <tbody>
                 {data.data.map((row: any) => (
                     <tr key={row.period}>
-                        <td>{row.period.slice(0,10)}</td>
+                        <td>{row.period}</td>
                         <td>{currency} {row.income}</td>
                         <td>{currency} {row.expense}</td>
                         <td>{currency} {row.net}</td>

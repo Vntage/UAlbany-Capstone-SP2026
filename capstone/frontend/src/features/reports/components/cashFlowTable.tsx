@@ -13,7 +13,7 @@ export function CashFlowTable({ data, currency }: any) {
             <tbody>
                 {data.data.map((row: any) => (
                     <tr key={row.period}>
-                        <td>{row.period ? row.period.slice(0,10) : ""}</td>
+                        <td>{row.period}</td>
                         <td>{currency} {row.inflow}</td>
                         <td>{currency} {row.outflow}</td>
                         <td>{currency} {row.netCashFlow}</td>

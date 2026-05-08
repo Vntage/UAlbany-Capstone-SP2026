@@ -3,7 +3,7 @@ export function ExpenseTable({ data , currency }: any) {
         <div>
             {data.data.map((period: any) => (
                 <div>
-                    <h3>{period.period.slice(0,10)}</h3>
+                    <h3>{period.period}</h3>
 
                     <table>
                         <thead>

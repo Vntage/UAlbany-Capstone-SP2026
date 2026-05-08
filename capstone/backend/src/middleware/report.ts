@@ -56,7 +56,7 @@ export class ReportService{
 
         return {
             data: result.rows.map(r => ({
-                period: r.period,
+                period: new Date(r.period).toISOString().slice(0, 10),
                 income: Number(r.income),
                 expense: Number(r.expense),
                 net: Number(r.net),
@@ -97,7 +97,7 @@ export class ReportService{
             
             if(!map.has(key)){
                 map.set(key, {
-                    period: r.period,
+                    period: new Date(r.period).toISOString().slice(0, 10),
                     categories: []
                 });
             }
@@ -140,7 +140,7 @@ export class ReportService{
 
         return {
             data: result.rows.map(r => ({
-                period: r.period,
+                period: new Date(r.period).toISOString().slice(0, 10),
                 inflow: Number(r.inflow),
                 outflow: Number(r.outflow),
                 netCashFlow: Number(r.net_cash_flow)
@@ -188,7 +188,7 @@ export class ReportService{
             }
 
             map.get(key).categories.push({
-                period: r.period,
+                period: new Date(r.period).toISOString().slice(0, 10),
                 category: r.category,
                 total: Number(r.total)
             });
@@ -240,7 +240,7 @@ export class PDFReportService{
                         </tr>
                         {{#each data}}
                         <tr>
-                            <td>{{period}}</td>
+                            <td>{{periodFormatted}}</td>
                             <td>{{income}}</td>
                             <td>{{expense}}</td>
                             <td>{{net}}</td>

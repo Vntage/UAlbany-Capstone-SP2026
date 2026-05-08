@@ -71,8 +71,48 @@ export default function Reports() {
   }
 
   const exportPDF = async() => {
+    if(!businessID) return;
 
+    setLoading(true);
+
+    try{
+      const res = await fetch(`${api_url}/api/report/${businessID}/export`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type" : "application/json" },
+        body: JSON.stringify({ 
+          reportType, 
+          startDate, 
+          endDate, 
+          periodType: period,
+        })
+      })
+
+      const blob = await res.blob();
+
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = `${reportType}-${Date.now()}.pdf`;
+
+      document.body.appendChild(a);
+
+      a.click();
+
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+    }
+    catch(error){
+      console.log("Failed to get PDF: ", error);
+    }
+    finally{
+      setLoading(false)
+    }
   }
+
 
   const reportButtons: {
     label: string, 
