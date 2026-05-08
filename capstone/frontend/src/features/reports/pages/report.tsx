@@ -14,10 +14,17 @@ type Business = {
   name: string;
 }
 
+type Period = "day" | "month" | "year";
+
 
 export default function Reports() {
-  const[reportType, setReportType] = useState<ReportType>();
-  const[period, setPeriod] = useState<"month" | "year">("month");
+  const[reportType, setReportType] = useState<ReportType>("income_statement");
+  const[period, setPeriod] = useState<Period>("month");
+
+  const today = new Date();
+  const[startDate, setStartDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10));
+  const[endDate, setEndDate] = useState(today.toISOString().slice(0, 10));
+
   const[data, setData] = useState<any>(null);
   const[open, setOpen] = useState(false);
 
@@ -25,35 +32,73 @@ export default function Reports() {
   const businessID: string | null =  business && business !== "undefined" ? (JSON.parse(business) as Business).uid : null;
   const currency = localStorage.getItem("currency");
 
+  const [lastSync, setLastSync] = useState("--");
   const [loading, setLoading] = useState(false);
 
   const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-  const getDateRange = () => {
-    const now = new Date();
-    
-    if(period === "month"){
-      return {
-        startDate: new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10),
-        endDate: now.toISOString().slice(0,10)
-      }
-    }
-    if(period === "year"){
-      return {
-        startDate: `${now.getFullYear()}-01-01`,
-        endDate: now.toISOString().slice(0,10)
-      }
-    }
-    return{};
-  }
-
   const fetchPreview = async() => {
+    if(!businessID) return;
 
+    setLoading(true);
+
+    try{
+      const res = await fetch(`${api_url}/api/report/${businessID}/preview`,{
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type" : "application/json" },
+        body: JSON.stringify({ 
+          reportType, 
+          startDate, 
+          endDate, 
+          periodType: period,
+        })
+      })
+
+      const result = await res.json();
+
+      console.log(result)
+
+      setData(result.data);
+    }
+    catch(error){
+      console.log("Failed to load report: ", error);
+    }
+    finally{
+      setLoading(false);
+    }
   }
 
   const exportPDF = async() => {
 
   }
+
+  const reportButtons: {
+    label: string, 
+    value: ReportType;
+  }[] = [
+    {
+      label: "Income Statement",
+      value: "income_statement",
+    },
+    {
+      label: "Expense Report",
+      value: "expense_report",
+    },
+    {
+      label: "Cash Flow Report",
+      value: "cash_flow",
+    },
+    {
+      label: "Category Breakdown Report",
+      value: "category_breakdown",
+    },
+  ]
+
+  useEffect(() => {
+    fetchPreview();
+    setLastSync(new Date().toLocaleDateString([], {hour: "2-digit", minute: "2-digit"}));
+  }, [period, startDate, endDate, reportType])
 
   return (
     <div className="flex h-screen bg-surface">
@@ -79,7 +124,7 @@ export default function Reports() {
               <div className="flex gap-3">
                 {business && (
                 <button 
-                  onClick={generateReport}
+                  onClick={exportPDF}
                   className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm shadow 
                   hover:bg-purple-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer">
                   📄 Export
@@ -96,18 +141,29 @@ export default function Reports() {
           )}
           {business && (
           <>
+          <div>
+            {reportButtons.map((btn) => (
+              <button
+                key={btn.value}
+                onClick={() => setReportType(btn.value)}
+              >
+                {btn.label}
+              </button>
+            ))}
+          </div>
+
           {/* Filters */}
           <div className="bg-white p-2 rounded-xl shadow-sm border mb-8 flex justify-between items-center">
             <div className="flex gap-2">
 
               {[
-                { label: "Last Month", value: "month" },
-                { label: "Select Period", value: "custom" },
-                { label: "Year to Date", value: "ytd" }
+                { label: "Days", value: "day" },
+                { label: "Months", value: "month" },
+                { label: "Years", value: "year" }
               ].map((p) => (
                 <button
                   key={p.value}
-                  onClick={() => setPeriod(p.value)}
+                  onClick={() => setPeriod(p.value as Period)}
                   className="px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-gray-100"
                 >
                   {p.label}
@@ -116,8 +172,30 @@ export default function Reports() {
               }
             </div>
 
+            <div>
+              <label>
+                Start Date
+              </label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label>
+                End Date
+              </label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
+
             <span className="text-xs text-gray-400">
-              Last Sync: --
+              Last Sync: {lastSync}
             </span>
           </div>
 
@@ -135,7 +213,7 @@ export default function Reports() {
                     Company Name
                   </h2>
                   <p className="text-sm text-gray-500">
-                    {period.toUpperCase()} Report
+                    {reportType} Report
                   </p>
                 </div>
 

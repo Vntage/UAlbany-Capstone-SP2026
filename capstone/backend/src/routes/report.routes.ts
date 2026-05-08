@@ -10,7 +10,4 @@ router.post("/:businessID/preview", verifySession, verifyMember, requireRole(['o
 router.post("/:businessID/export", verifySession, verifyMember, requireRole(['owner', 'admin']), exportReport);
 
 
-
-
-
 export default router;

@@ -54,8 +54,6 @@ export class ReportService{
             [p.businessID, p.startDate, p.endDate, p.periodType]
         );
 
-        console.log(result.rows)
-
         return {
             data: result.rows.map(r => ({
                 period: r.period,
@@ -63,9 +61,9 @@ export class ReportService{
                 expense: Number(r.expense),
                 net: Number(r.net),
             })),
-            income: result.rows[0].total_income,
-            expense: result.rows[0].total_expense,
-            netProfit: result.rows[0].total_net
+            income: Number(result.rows[0]?.total_income ?? 0),
+            expense: Number(result.rows[0]?.total_expense ?? 0),
+            netProfit: Number(result.rows[0]?.total_net ?? 0)
         }
     }
 
@@ -79,7 +77,7 @@ export class ReportService{
                 FROM transactions t
                 JOIN transaction_category c
                 ON t.category_id = c.uid
-                WHERE t.business_id = 1
+                WHERE t.business_id = $1
                 AND t.type = 'expense'
                 AND t.date BETWEEN $2 AND $3
                 GROUP BY period, c.name
@@ -122,9 +120,9 @@ export class ReportService{
             `WITH grouped AS (
                 SELECT
                 DATE_TRUNC($4, date) AS period,
-                SUM(CASE WHEN type = "income" THEN amount ELSE -amount END) AS net_cash_flow,
-                SUM(CASE WHEN type = "income" THEN amount ELSE 0 END) AS inflow,
-                SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) AS outflow
+                SUM(CASE WHEN type = 'income' THEN amount ELSE -amount END) AS net_cash_flow,
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS inflow,
+                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS outflow
                 FROM transactions
                 WHERE business_id = $1
                 AND date BETWEEN $2 AND $3

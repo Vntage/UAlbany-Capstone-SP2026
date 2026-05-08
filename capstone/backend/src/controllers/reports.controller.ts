@@ -8,7 +8,7 @@ export const previewReport = async(req: Request<BusinessParams>, res: Response) 
     const businessID = req.params.businessID;
     const { reportType, startDate, endDate, periodType = "month" } = req.body;
 
-    if(!reportType || !startDate || !endDate || (periodType !== "month" && periodType !== "year")){
+    if(!reportType || !startDate || !endDate || (periodType !== "day" && periodType !== "month" && periodType !== "year")){
         return res.status(400).json({ message: "Missing Fields" })
     }
 
@@ -38,7 +38,7 @@ export const exportReport = async(req: Request<BusinessParams>, res: Response) =
     const businessID = req.params.businessID;
     const { reportType, startDate, endDate, periodType = "month" } = req.body;
 
-    if(!reportType || !startDate || !endDate || (periodType !== "month" && periodType !== "year")){
+    if(!reportType || !startDate || !endDate || (periodType !== "day" && periodType !== "month" && periodType !== "year")){
         return res.status(400).json({ message: "Missing Fields" })
     }
 
