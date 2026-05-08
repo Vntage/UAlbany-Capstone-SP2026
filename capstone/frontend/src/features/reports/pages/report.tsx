@@ -1,12 +1,13 @@
 import Navbar from "../../../components/navbar";
 import { useState, useEffect } from "react";
 import ReportModal from "../components/reportModal";
+import { ReportRenderer } from "../components/reportRender";
 
 type ReportType = 
-    | "Income"
-    | "Expense"
-    | "Cashflow"
-    | "Category Breakdown";
+  | "income_statement"
+  | "expense_report"
+  | "cash_flow"
+  | "category_breakdown"
 
 type Business = {
   uid: string;
@@ -15,14 +16,18 @@ type Business = {
 
 
 export default function Reports() {
-  const[reportType, setReportType] = useState<ReportType>("Income");
-  const[period, setPeriod] = useState("month");
+  const[reportType, setReportType] = useState<ReportType>();
+  const[period, setPeriod] = useState<"month" | "year">("month");
   const[data, setData] = useState<any>(null);
   const[open, setOpen] = useState(false);
 
   const business = localStorage.getItem("activeBusiness");
   const businessID: string | null =  business && business !== "undefined" ? (JSON.parse(business) as Business).uid : null;
   const currency = localStorage.getItem("currency");
+
+  const [loading, setLoading] = useState(false);
+
+  const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
   const getDateRange = () => {
     const now = new Date();
@@ -33,7 +38,7 @@ export default function Reports() {
         endDate: now.toISOString().slice(0,10)
       }
     }
-    if(period === "ytd"){
+    if(period === "year"){
       return {
         startDate: `${now.getFullYear()}-01-01`,
         endDate: now.toISOString().slice(0,10)
@@ -42,36 +47,12 @@ export default function Reports() {
     return{};
   }
 
-  const generateReport = async() => {
-    const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
-    const report = reportType.toLowerCase().replace(/\s/g, "");
+  const fetchPreview = async() => {
 
-    const params = new URLSearchParams();
-
-    const { startDate, endDate } = getDateRange();
-
-    if (startDate) params.append("startDate", startDate);
-    if (endDate) params.append("endDate", endDate);
-
-    const res = await fetch(`${api_url}/api/report/${businessID}/${report}/?${params.toString()}`, 
-      {
-        method: "GET",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-
-    const result = await res.json();
-
-    setData(result);
-    setOpen(true);
   }
 
-  const exportPDF = () => {
-    if(!data) return;
+  const exportPDF = async() => {
 
-    window.open(`/api/reports/${reportType}/${businessID}?format=pdf`,
-      "_blank");
   }
 
   return (
@@ -286,14 +267,13 @@ export default function Reports() {
         </div>
       </main>
 
-      <ReportModal
-        open={open}
-        onClose={() => setOpen(false)}
-        reportType={reportType}
-        data = {data}
-        onExport={exportPDF}
-        currency={currency || "USD"}
-      />
+      {!loading && data && (
+        <ReportRenderer
+          reportType = {reportType}
+          data = {data}
+          currency = {currency || "USD"} 
+          />
+      )}
     </div>
   );
 }
