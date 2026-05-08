@@ -63,7 +63,7 @@ export class ReportService{
             })),
             income: Number(result.rows[0]?.total_income ?? 0),
             expense: Number(result.rows[0]?.total_expense ?? 0),
-            netProfit: Number(result.rows[0]?.total_net ?? 0)
+            netTotal: Number(result.rows[0]?.total_net ?? 0)
         }
     }
 

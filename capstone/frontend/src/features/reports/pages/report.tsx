@@ -29,6 +29,7 @@ export default function Reports() {
   const[open, setOpen] = useState(false);
 
   const business = localStorage.getItem("activeBusiness");
+  const businessName : string | null =  business && business !== "undefined" ? (JSON.parse(business) as Business).name : null;
   const businessID: string | null =  business && business !== "undefined" ? (JSON.parse(business) as Business).uid : null;
   const currency = localStorage.getItem("currency");
 
@@ -210,7 +211,7 @@ export default function Reports() {
                     Statement
                   </p>
                   <h2 className="text-xl font-bold">
-                    Company Name
+                    {businessName}
                   </h2>
                   <p className="text-sm text-gray-500">
                     {reportType} Report
@@ -229,109 +230,15 @@ export default function Reports() {
             </div>
 
             {/* Table */}
-            <div className="p-8">
-              <table className="w-full text-sm">
-                <thead className="text-xs uppercase text-gray-400 border-b">
-                  <tr>
-                    <th className="pb-3 text-left">Category</th>
-                    <th className="pb-3 text-right">Current</th>
-                    <th className="pb-3 text-right">Previous</th>
-                    <th className="pb-3 text-right">Change</th>
-                  </tr>
-                </thead>
-
-                <tbody className="divide-y">
-
-                  {/* Revenue */}
-                  <tr>
-                    <td className="py-4 font-semibold">
-                      Total Revenue
-                    </td>
-                    <td className="py-4 text-right">--</td>
-                    <td className="py-4 text-right">--</td>
-                    <td className="py-4 text-right text-green-600">--</td>
-                  </tr>
-
-                  {/* COGS */}
-                  <tr>
-                    <td className="py-3 pl-4 text-gray-500">
-                      Cost of Goods Sold
-                    </td>
-                    <td className="py-3 text-right">--</td>
-                    <td className="py-3 text-right">--</td>
-                    <td className="py-3 text-right text-red-500">--</td>
-                  </tr>
-
-                  {/* Gross Profit */}
-                  <tr className="bg-gray-50 font-semibold">
-                    <td className="py-4">
-                      Gross Profit
-                    </td>
-                    <td className="py-4 text-right">--</td>
-                    <td className="py-4 text-right">--</td>
-                    <td className="py-4 text-right text-green-600">--</td>
-                  </tr>
-
-                  {/* Section Header */}
-                  <tr>
-                    <td colSpan={4} className="pt-6 text-xs uppercase text-gray-400">
-                      Operating Expenses
-                    </td>
-                  </tr>
-
-                  {/* Expense Row Template */}
-                  <tr>
-                    <td className="py-3 pl-4">
-                      Expense Category
-                    </td>
-                    <td className="py-3 text-right">--</td>
-                    <td className="py-3 text-right">--</td>
-                    <td className="py-3 text-right">--</td>
-                  </tr>
-
-                  {/* Total Expenses */}
-                  <tr className="bg-gray-50 font-semibold">
-                    <td className="py-4">
-                      Total Expenses
-                    </td>
-                    <td className="py-4 text-right">--</td>
-                    <td className="py-4 text-right">--</td>
-                    <td className="py-4 text-right text-red-500">--</td>
-                  </tr>
-
-                  {/* Net Income */}
-                  <tr className="bg-blue-50">
-                    <td className="py-5 font-bold text-blue-700">
-                      Net Income
-                    </td>
-                    <td className="py-5 text-right font-bold">--</td>
-                    <td className="py-5 text-right">--</td>
-                    <td className="py-5 text-right text-green-600 font-bold">--</td>
-                  </tr>
-
-                </tbody>
-              </table>
-            </div>
-
-            {/* Summary Cards */}
-            <div className="p-8 bg-gray-50 grid grid-cols-1 md:grid-cols-3 gap-6">
-
-              <div>
-                <p className="text-xs text-gray-400">Profit Margin</p>
-                <p className="text-2xl font-bold">--</p>
-              </div>
-
-              <div>
-                <p className="text-xs text-gray-400">Efficiency Ratio</p>
-                <p className="text-2xl font-bold">--</p>
-              </div>
-
-              <div>
-                <p className="text-xs text-gray-400">Burn Rate</p>
-                <p className="text-2xl font-bold">--</p>
-              </div>
-
-            </div>
+            {!loading && data && (
+              <ReportRenderer
+                reportType = {reportType}
+                data = {data}
+                currency = {currency || "$"} 
+                />
+            )}
+            
+            
           </div>
 
           {/* Footer */}
@@ -344,14 +251,6 @@ export default function Reports() {
 
         </div>
       </main>
-
-      {!loading && data && (
-        <ReportRenderer
-          reportType = {reportType}
-          data = {data}
-          currency = {currency || "USD"} 
-          />
-      )}
     </div>
   );
 }

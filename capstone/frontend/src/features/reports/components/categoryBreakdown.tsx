@@ -1,7 +1,31 @@
 export function CategoryBreakdownTable({ data, currency }: any) {
     return(
-        <table>
+        <div>
+            {data.data.map((group: any) => (
+                <div key={group.type}>
+                    <h2>{group.type}</h2>
 
-        </table>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Category</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {(group.categories ?? []).map((row: any, i: number) => (
+                                <tr key={i}>
+                                    <td>{row.period.slice(0, 10)}</td>
+                                    <td>{row.category}</td>
+                                    <td>{currency} {row.total}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ))}
+        </div>
     )
 }

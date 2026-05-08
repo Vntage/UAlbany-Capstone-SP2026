@@ -1,7 +1,29 @@
-export function ExpenseTable({ data, currency }: any) {
+export function ExpenseTable({ data , currency }: any) {
     return(
-        <table>
+        <div>
+            {data.data.map((period: any) => (
+                <div>
+                    <h3>{period.period.slice(0,10)}</h3>
 
-        </table>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Expense</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {(period.categories ?? []).map((c: any) => (
+                                <tr key={c.category}>
+                                    <td>{c.category}</td>
+                                    <td>{currency} {c.expense}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ))}
+        </div>
     )
 }
