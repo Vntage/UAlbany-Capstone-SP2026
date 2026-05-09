@@ -94,9 +94,7 @@ export const getRule = async(req: Request<BusinessParams>, res: Response) => {
     try{
         const result = await pool.query(`SELECT * FROM alert_rule WHERE business_id = $1`, [req.params.businessID]);
 
-        if(!result.rows){
-            return res.status(500).json({ message: "Database Error" });
-        }
+        console.log(result.rows)
 
         return res.status(200).json(result.rows);
     }

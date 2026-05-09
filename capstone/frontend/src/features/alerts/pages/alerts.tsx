@@ -15,11 +15,55 @@ export default function Alerts() {
 
   const [openModal, setOpenModal] = useState(false);
   const [alerts, setAlerts] = useState([]);
+
+  const [loading, setLoading] = useState(false);
   const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
 
-  const fetchAlerts = async (businessId: string) => {
+  const fetchRules = async() => {
+    if(!businessID) return;
+
+    setLoading(true);
+    try{
+      const res = await fetch(`${api_url}/api/alert/${businessID}/rules`, {
+        method: "GET",
+        credentials: "include",
+        headers: {"Content-Type": "application/json"}
+      });
+
+      const data = await res.json();
+
+      setRules(data);
+      console.log(data)
+    }
+    catch(error){
+      console.log(error)
+    }
+    finally{
+      setLoading(false);
+    }
+  }
+
+  const toggleRule = async(uid: any) => {
+    console.log(uid)
+    try{
+      await fetch(`${api_url}/api/alert/${businessID}/rule`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({alert_rule_id: uid})
+      });
+
+      await fetchRules();
+    }
+    catch(error){
+     console.log(error) 
+    }
+  }
+
+  const fetchAlerts = async () => {
+    if(!businessID) return;
     try {
-      const res = await fetch(`${api_url}/api/alert/${businessId}`,
+      const res = await fetch(`${api_url}/api/alert/${businessID}`,
         {
           method: "GET",
           credentials: "include",
@@ -40,7 +84,8 @@ export default function Alerts() {
   };
   useEffect(() => {
     //fetch alerts
-    fetchAlerts(businessID || "");
+    fetchAlerts();
+    fetchRules();
   }, []);
   
   const categoryMap: Record<string, string> = {};
@@ -77,11 +122,6 @@ export default function Alerts() {
     }
   }
   
-
-  useEffect(() => {
-
-  })
-
   return (
     <div className="flex h-screen bg-surface">
       <Navbar />
@@ -135,7 +175,7 @@ export default function Alerts() {
                     </td>
                   </tr>
                 ):(
-                  rules.map((rule: any) => {
+                  rules.map((rule: any) => (
                     <tr key={rule.uid}>
                       <td className="px-6 py-4">
                         {rule.title}
@@ -156,10 +196,12 @@ export default function Alerts() {
                         </span>
                       </td>
                       <td>
-                        //edit rule
+                        <button onClick={() => toggleRule(rule.uid)}>
+                          O
+                        </button>
                       </td>
                     </tr>
-                  })
+                  ))
                 )}
 
               </tbody>
