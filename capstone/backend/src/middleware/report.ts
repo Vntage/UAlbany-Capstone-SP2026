@@ -259,11 +259,76 @@ export class PDFReportService{
                     </table>
                 `;
             case "expense_report":
-                return ``;
+                return `
+                    <h1>Expense Report</h1>
+                    {{#each data}}
+                        <h2>Period: {{period}}</h2>
+                        <table> 
+                            <tr> 
+                                <th>Category</th>
+                                <th>Expense</th>
+                            </tr>
+
+                            {{#each categories}}
+                                <tr>
+                                    <td>{{category}}</td>
+                                    <td>{{expense}}</td>
+                                </tr>
+                            {{/each}}
+                        </table>
+                    {{/each}}
+                    <h3>Total Expense: {{total}}</h3>
+                `;
             case "cash_flow":
-                return ``;
+                return `
+                    <h1>Cash Flow Report</h1>
+                    <table>
+                        <tr>
+                            <th>Period</th>
+                            <th>Inflow</th>
+                            <th>Outflow</th>
+                            <th>Net Cash Flow</th>
+                        </tr>
+
+                        {{#each data}}
+                            <tr>
+                                <td>{{period}}</td>
+                                <td>{{inflow}}</td>
+                                <td>{{outflow}}</td>
+                                <td>{{netCashFlow}}</td>
+                            </tr>
+                        {{/each}}
+
+                        <tr>
+                            <td>Total</td>
+                            <td>>{{inflow}}</td>
+                            <td>{{outflow}}</td>
+                            <td>{{net_cash_flow}}</td>
+                        </tr>
+                    </table>
+                `;
             case "category_breakdown":
-                return ``;
+                return `
+                    <h1>Category Breakdown Report</h1>
+                    {{#each data}}
+                        <h2>Type: {{type}}</h2>
+                        <table>
+                            <tr>
+                                <th>Period</th>
+                                <th>Category</th>
+                                <th>Total</th>
+                            </tr>
+
+                            {{#each categories}}
+                                <tr>
+                                    <td>{{period}}</td>
+                                    <td>{{category}}</td>
+                                    <td>{{total}}</td>
+                                </tr>
+                            {{/each}}
+                        </table>
+                    {{/each}}
+                `;
             default:
                 throw new Error("Invalid Report Type");
         }
