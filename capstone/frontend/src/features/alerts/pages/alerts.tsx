@@ -135,7 +135,7 @@ export default function Alerts() {
                     </td>
                   </tr>
                 ):(
-                  rules.map((rule) => {
+                  rules.map((rule: any) => {
                     <tr key={rule.uid}>
                       <td className="px-6 py-4">
                         {rule.title}
