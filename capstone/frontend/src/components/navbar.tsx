@@ -48,7 +48,7 @@ export default function Navbar() {
 
   ];
 
-  const emptyUserLinks = [
+  const emptyBusinessLinks = [ //when no businesses
     { name: "Users", icon: UsersIcon, path: "/users" }
 
   ];
@@ -125,7 +125,7 @@ export default function Navbar() {
         <ul className="flex flex-col gap-2">
           {activeBusiness
           ?mainLinks.map(renderLink)
-          :emptyUserLinks.map(renderLink)}
+          :emptyBusinessLinks.map(renderLink)}
         </ul>
       </nav>
 
