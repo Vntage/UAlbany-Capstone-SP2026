@@ -1,8 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import admin from "../config/firebase"
-import { BusinessMember } from "../types/business.type";
-
-
 
 export const verifySession = async(req: Request, res: Response, next: NextFunction) => {
     const sessionCookie = req.cookies?.session
@@ -21,3 +18,4 @@ export const verifySession = async(req: Request, res: Response, next: NextFuncti
         return;
     }
 }
+
