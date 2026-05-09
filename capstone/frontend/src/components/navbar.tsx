@@ -5,8 +5,8 @@ import UsersIcon from "../assets/navbar/users.png";
 import ReportIcon from "../assets/navbar/report.png";
 import BudgetIcon from "../assets/navbar/budget.png";
 import TransactionsIcon from "../assets/navbar/transactions.png";
-import SettingsIcon from "../assets/navbar/setting.png";
-import SupportIcon from "../assets/navbar/support.png";
+// import SettingsIcon from "../assets/navbar/setting.png";
+// import SupportIcon from "../assets/navbar/support.png";
 import LogoutIcon from "../assets/navbar/logout.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { auth } from "../config/firebase";
@@ -53,10 +53,10 @@ export default function Navbar() {
 
   ];
 
-  const bottomLinks = [
-    { name: "Settings", icon: SettingsIcon, path: "/settings" },
-    { name: "Support", icon: SupportIcon, path: "/support" },
-  ];
+  // const bottomLinks = [
+  //   { name: "Settings", icon: SettingsIcon, path: "/settings" },
+  //   { name: "Support", icon: SupportIcon, path: "/support" },
+  // ];
 
   const handleLogout = async () => {
     await auth.signOut();
@@ -132,7 +132,7 @@ export default function Navbar() {
       {/* Bottom Links */}
       <nav className="mb-6">
         <ul className="flex flex-col gap-2">
-          {bottomLinks.map(renderLink)}
+          {/* {bottomLinks.map(renderLink)} */}
 
           <li>
             <button
