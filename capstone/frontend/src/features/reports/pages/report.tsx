@@ -111,29 +111,6 @@ export default function Reports() {
     }
   }
 
-
-  const reportButtons: {
-    label: string, 
-    value: ReportType;
-  }[] = [
-    {
-      label: "Income Statement",
-      value: "income_statement",
-    },
-    {
-      label: "Expense Report",
-      value: "expense_report",
-    },
-    {
-      label: "Cash Flow Report",
-      value: "cash_flow",
-    },
-    {
-      label: "Category Breakdown Report",
-      value: "category_breakdown",
-    },
-  ]
-
   useEffect(() => {
     fetchPreview();
     setLastSync(new Date().toLocaleDateString([], {hour: "2-digit", minute: "2-digit"}));
@@ -180,48 +157,7 @@ export default function Reports() {
           )}
           {business && (
           <>
-<<<<<<< HEAD
-          <div className="flex flex-wrap gap-3 mb-6">
-            {reportButtons.map((btn) => (
-              <button
-                key={btn.value}
-                onClick={() => setReportType(btn.value)}
-                className={`px-4 py-2 rounded-lg text-sm transition ${
-                  reportType === btn.value
-                    ? "bg-blue-600 text-white shadow"
-                    : "bg-white border text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {btn.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Filters */}
-          <div className="bg-white p-4 rounded-xl shadow-sm border mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <div className="flex gap-2 flex-wrap">
-
-              {[
-                { label: "Days", value: "day" },
-                { label: "Months", value: "month" },
-                { label: "Years", value: "year" }
-              ].map((p) => (
-                <button
-                  key={p.value}
-                  onClick={() => setPeriod(p.value as Period)}
-                  className={`px-4 py-2 rounded-lg text-sm transition ${
-                    period === p.value
-                      ? "bg-blue-600 text-white shadow"
-                      : "text-gray-500 hover:bg-gray-100"
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))
-              }
-=======
           
-
           {/* Filters */}
           <div className="bg-white p-2 rounded-xl shadow-sm border mb-8 flex justify-between items-center">
             <div className="flex gap-2">
@@ -273,7 +209,6 @@ export default function Reports() {
               </select>
 
               
->>>>>>> 23850dad384da1af3741e6c721d9aec51e38e65b
             </div>
 
             <div className="flex flex-col">
