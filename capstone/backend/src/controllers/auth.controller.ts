@@ -1,6 +1,10 @@
 import { Request, Response } from "express"
 import admin from "../config/firebase"
 import pool from "../config/db";
+import { Result } from "pg";
+
+//1 hour expiration 
+const expiresIn = 60 * 60 *1000;
 
 //authenticates token and creates session cookie
 export const login = async(req: Request, res: Response) => {
@@ -22,20 +26,8 @@ export const login = async(req: Request, res: Response) => {
         if(!result.rows[0]){
             return res.status(400).json({ message: "User not found" })
         }
-
-        //1 hour expiration 
-        const expiresIn = 60 * 60 *1000;
-
-        const sessionCookie = await admin.auth().createSessionCookie(token, { expiresIn });
-
-        res.cookie("session", sessionCookie, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
-            maxAge: expiresIn,
-        });
-
-        return res.status(200).json({ message: "Session Cookie Created" });
+        
+        createSessionCookie(token, req, res);
 
     }catch(error){
         console.log(error);
@@ -49,3 +41,39 @@ export const logout = async(req: Request, res: Response) => {
     res.json({ status: "logged out" })
 };
 
+export const refreshSession = async(req: Request, res: Response) => {
+    const authHeader = req.headers.authorization;
+
+    if(!authHeader?.startsWith("Bearer ")){
+        return res.status(401).json({ message: "Missing Token" });
+    }
+
+    const idToken = authHeader.split("Bearer ")[1];
+
+    createSessionCookie(idToken, req, res);
+}
+
+const createSessionCookie = async(idToken: any, req: Request, res: Response) => {
+    if(!idToken){
+        return res.status(401).json({ message: "Missing Token" });
+    }
+
+    try{
+        await admin.auth().verifyIdToken(idToken);
+
+        const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn });
+
+        res.cookie("session", sessionCookie, {
+                httpOnly: true,
+                secure: false,
+                sameSite: "lax",
+                maxAge: expiresIn,
+        });
+
+        return res.status(200).json({ message: "Session Cookie Created" })
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).json({ message: "Server Error" });
+    }
+}

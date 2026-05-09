@@ -40,7 +40,7 @@ export const toggleRule = async(req: Request, res: Response) => {
             return res.status(401).json({ message: "Missing Field" })
         }
 
-        const result = await pool.query(`UPDATE alert_rules
+        const result = await pool.query(`UPDATE alert_rule
             SET is_active = NOT is_active
             WHERE uid = $1
             RETURNING *`, [alert_rule_id]);
@@ -67,7 +67,7 @@ export const updateSeen = async(req: Request, res: Response) => {
             return res.status(401).json({ message: "Missing Field" })
         }
 
-        const result = await pool.query(`UPDATE alert_recipients
+        const result = await pool.query(`UPDATE alert_recipient
             SET read_at = CASE 
                 WHEN read_at IS NULL THEN NOW()
                 ELSE NULL

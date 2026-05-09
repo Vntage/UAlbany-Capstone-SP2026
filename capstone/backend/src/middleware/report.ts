@@ -5,9 +5,9 @@ import pool from "../config/db";
 export class ReportService{
     async generateReport(params: {
         reportType: string;
-        startDate: string;
-        endDate: string;
-        periodType: "month" | "year";
+        startDate: string | null;
+        endDate: string |null; 
+        periodType: "day" | "week" | "month" | "year";
         businessID: string;
     }) {
         const { reportType } = params;
@@ -43,7 +43,8 @@ export class ReportService{
             ) AS net
             FROM transactions
             WHERE business_id = $1
-            AND date BETWEEN $2 AND $3
+            AND (NULLIF($2, ''):: date IS NULL OR date >= NULLIF($2, '')::date)
+            AND (NULLIF($3, ''):: date IS NULL OR date <= NULLIF($3, '')::date)
             GROUP BY period)
             SELECT *,
             SUM(income) OVER () AS total_income,
@@ -79,7 +80,8 @@ export class ReportService{
                 ON t.category_id = c.uid
                 WHERE t.business_id = $1
                 AND t.type = 'expense'
-                AND t.date BETWEEN $2 AND $3
+                AND (NULLIF($2, ''):: date IS NULL OR t.date >= NULLIF($2, '')::date)
+                AND (NULLIF($3, ''):: date IS NULL OR t.date <= NULLIF($3, '')::date)
                 GROUP BY period, c.name
             )
             SELECT *,
@@ -125,7 +127,8 @@ export class ReportService{
                 SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS outflow
                 FROM transactions
                 WHERE business_id = $1
-                AND date BETWEEN $2 AND $3
+                AND (NULLIF($2, ''):: date IS NULL OR date >= NULLIF($2, '')::date)
+                AND (NULLIF($3, ''):: date IS NULL OR date <= NULLIF($3, '')::date)
                 GROUP BY period
             )
             SELECT *,
@@ -163,7 +166,8 @@ export class ReportService{
                 JOIN transaction_category c
                 ON t.category_id = c.uid
                 WHERE t.business_id = $1
-                AND t.date BETWEEN $2 AND $3
+                AND (NULLIF($2, ''):: date IS NULL OR t.date >= NULLIF($2, '')::date)
+                AND (NULLIF($3, ''):: date IS NULL OR t.date <= NULLIF($3, '')::date)
                 GROUP BY period, type, c.name
             )
             SELECT *,
@@ -240,12 +244,18 @@ export class PDFReportService{
                         </tr>
                         {{#each data}}
                         <tr>
-                            <td>{{periodFormatted}}</td>
+                            <td>{{period}}</td>
                             <td>{{income}}</td>
                             <td>{{expense}}</td>
                             <td>{{net}}</td>
                         </tr>
                         {{/each}}
+                        <tr>
+                            <td>Total</td>
+                            <td>{{income}}</td>
+                            <td>{{expense}}</td>
+                            <td>{{netTotal}}</td>
+                        </tr>
                     </table>
                 `;
             case "expense_report":

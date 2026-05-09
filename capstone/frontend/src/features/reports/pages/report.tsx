@@ -14,19 +14,17 @@ type Business = {
   name: string;
 }
 
-type Period = "day" | "month" | "year";
+type Period = "day" | "week" | "month" | "year";
 
 
 export default function Reports() {
   const[reportType, setReportType] = useState<ReportType>("income_statement");
   const[period, setPeriod] = useState<Period>("month");
 
-  const today = new Date();
-  const[startDate, setStartDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10));
-  const[endDate, setEndDate] = useState(today.toISOString().slice(0, 10));
+  const[startDate, setStartDate] = useState("");
+  const[endDate, setEndDate] = useState("");
 
   const[data, setData] = useState<any>(null);
-  const[open, setOpen] = useState(false);
 
   const business = localStorage.getItem("activeBusiness");
   const businessName : string | null =  business && business !== "undefined" ? (JSON.parse(business) as Business).name : null;
@@ -182,6 +180,7 @@ export default function Reports() {
           )}
           {business && (
           <>
+<<<<<<< HEAD
           <div className="flex flex-wrap gap-3 mb-6">
             {reportButtons.map((btn) => (
               <button
@@ -220,6 +219,61 @@ export default function Reports() {
                 </button>
               ))
               }
+=======
+          
+
+          {/* Filters */}
+          <div className="bg-white p-2 rounded-xl shadow-sm border mb-8 flex justify-between items-center">
+            <div className="flex gap-2">
+              <select
+                value={reportType}
+                onChange={(e) => setReportType(e.target.value as ReportType)}
+                className="px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-gray-100"
+              >
+                {[
+                  {
+                    label: "Income Statement",
+                    value: "income_statement",
+                  },
+                  {
+                    label: "Expense Report",
+                    value: "expense_report",
+                  },
+                  {
+                    label: "Cash Flow Report",
+                    value: "cash_flow",
+                  },
+                  {
+                    label: "Category Breakdown Report",
+                    value: "category_breakdown",
+                  }
+                ].map((rt) => (
+                  <option key={rt.value} value={rt.value}>
+                    {rt.label}
+                  </option>
+                ))}
+
+              </select>
+
+              <select
+                value={period}
+                onChange={(e)=> setPeriod(e.target.value as Period)}
+                className="px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-gray-100"
+              >
+                {[
+                  { label: "Days", value: "day" },
+                  { label: "Weeks", value: "week"},
+                  { label: "Months", value: "month" },
+                  { label: "Years", value: "year" }
+                ].map((p) => (
+                  <option key={p.value} value={p.value}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+
+              
+>>>>>>> 23850dad384da1af3741e6c721d9aec51e38e65b
             </div>
 
             <div className="flex flex-col">
