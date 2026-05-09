@@ -19,6 +19,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeBusiness = localStorage.getItem("activeBusiness");
 
   const handleMouseEnter = () => {
     if (closeTimeout.current) clearTimeout(closeTimeout.current);
@@ -44,6 +45,11 @@ export default function Navbar() {
     { name: "Transactions", icon: TransactionsIcon, path: "/transactions"},
     { name: "Budget", icon: BudgetIcon, path: "/budget" },
     { name: "Users", icon: UsersIcon, path: "/users" },
+
+  ];
+
+  const emptyUserLinks = [
+    { name: "Users", icon: UsersIcon, path: "/users" }
 
   ];
 
@@ -117,7 +123,9 @@ export default function Navbar() {
       {/* Top Links */}
       <nav className="flex-1 mt-6">
         <ul className="flex flex-col gap-2">
-          {mainLinks.map(renderLink)}
+          {activeBusiness
+          ?mainLinks.map(renderLink)
+          :emptyUserLinks.map(renderLink)}
         </ul>
       </nav>
 
