@@ -147,7 +147,7 @@ export default function Reports() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-10">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto space-y-8">
 
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
@@ -182,11 +182,16 @@ export default function Reports() {
           )}
           {business && (
           <>
-          <div>
+          <div className="flex flex-wrap gap-3 mb-6">
             {reportButtons.map((btn) => (
               <button
                 key={btn.value}
                 onClick={() => setReportType(btn.value)}
+                className={`px-4 py-2 rounded-lg text-sm transition ${
+                  reportType === btn.value
+                    ? "bg-blue-600 text-white shadow"
+                    : "bg-white border text-gray-600 hover:bg-gray-100"
+                }`}
               >
                 {btn.label}
               </button>
@@ -194,8 +199,8 @@ export default function Reports() {
           </div>
 
           {/* Filters */}
-          <div className="bg-white p-2 rounded-xl shadow-sm border mb-8 flex justify-between items-center">
-            <div className="flex gap-2">
+          <div className="bg-white p-4 rounded-xl shadow-sm border mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div className="flex gap-2 flex-wrap">
 
               {[
                 { label: "Days", value: "day" },
@@ -205,7 +210,11 @@ export default function Reports() {
                 <button
                   key={p.value}
                   onClick={() => setPeriod(p.value as Period)}
-                  className="px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-gray-100"
+                  className={`px-4 py-2 rounded-lg text-sm transition ${
+                    period === p.value
+                      ? "bg-blue-600 text-white shadow"
+                      : "text-gray-500 hover:bg-gray-100"
+                  }`}
                 >
                   {p.label}
                 </button>
@@ -213,25 +222,27 @@ export default function Reports() {
               }
             </div>
 
-            <div>
-              <label>
+            <div className="flex flex-col">
+              <label className="text-xs text-gray-500 mb-1">
                 Start Date
               </label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
+                className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
 
-            <div>
-              <label>
+            <div className="flex flex-col">
+              <label className="text-xs text-gray-500 mb-1">
                 End Date
               </label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+                className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
 
@@ -244,26 +255,26 @@ export default function Reports() {
           <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
 
             {/* Report Header */}
-            <div className="p-8 border-b">
+            <div className="p-6 border-b bg-gray-50">
               <div className="flex justify-between">
                 <div>
-                  <p className="text-xs uppercase text-primary mb-1">
+                  <p className="text-xs uppercase tracking-wide text-blue-600 mb-1 font-medium">
                     Statement
                   </p>
-                  <h2 className="text-xl font-bold">
+                  <h2 className="text-2xl font-bold text-gray-900">
                     {businessName}
                   </h2>
-                  <p className="text-sm text-gray-500">
-                    {reportType} Report
+                  <p className="text-sm text-gray-500 mt-1 capitalize">
+                    {reportType.replaceAll("_", " ")} Report
                   </p>
                 </div>
 
                 <div className="text-right">
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
                     {currency}
                   </p>
-                  <p className="font-semibold">
-                    USD
+                  <p className="font-semibold text-gray-900">
+                    {currency || "USD"}
                   </p>
                 </div>
               </div>
