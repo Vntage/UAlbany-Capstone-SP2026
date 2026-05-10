@@ -54,23 +54,23 @@ const getCategoryTotal = async(business_id: string, category_id: string, budget:
 const getBudgetTotal = async(budget_id:string) => {
     const result = await pool.query(
         `SELECT COALESCE(SUM(amount), 0) as total
-        FROM budgeted_items
+        FROM budget_item
         WHERE budget_id = $1`,
         [budget_id]
     );
 
-    return Number(result.rows[0].allocated_amount);
+    return Number(result.rows[0].total);
 }
 
 const getAllocatedAmount = async(budget_id: string, category_id: string) => {
     const result = await pool.query(
         `SELECT allocated_amount 
-        FROM budgeted_items
+        FROM budget_item
         WHERE budget_id = $1 AND category_id = $2`,
         [budget_id, category_id]
     );
 
-    return Number(result.rows[0].total);
+    return Number(result.rows[0].allocated_amount);
 }
 
 
