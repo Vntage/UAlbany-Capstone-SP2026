@@ -148,7 +148,8 @@ export default function Alerts() {
               + Create Alert Rule
             </button>
           </div>
-
+          {businessID &&
+          <>
           {/*Change to only seen by owner or admin*/}
           <div className="mt-10 bg-white rounded-xl shadow-sm border overflow-hidden">
             <div className="p-6 border-b">
@@ -196,7 +197,10 @@ export default function Alerts() {
                         </span>
                       </td>
                       <td>
-                        <button onClick={() => toggleRule(rule.uid)}>
+                        <button 
+                        disabled={false}
+                        onClick={() => toggleRule(rule.uid)}
+                        >
                           O
                         </button>
                       </td>
@@ -208,7 +212,8 @@ export default function Alerts() {
 
             </table>
           </div>
-
+          </>
+          }
 
           {/* Alerts Table */}
           <div className="mt-10 bg-white rounded-xl shadow-sm border overflow-hidden">

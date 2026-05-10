@@ -41,6 +41,7 @@ export type Alert = {
     message: string;
     severity: AlertSeverity;
     alert_rule_id: UUID;
+    status: "active" | "resolved";
     triggered_at: Timestamp;
 };
 

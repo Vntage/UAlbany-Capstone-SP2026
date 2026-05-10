@@ -170,8 +170,10 @@ export async function initDB() {
             title TEXT NOT NULL,
             message TEXT NOT NULL,
             severity alert_severity NOT NULL,
+            status TEXT NOT NULL DEFAULT 'active',
             alert_rule_id UUID REFERENCES alert_rule(uid) ON DELETE CASCADE,
-            triggered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            triggered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            resolved_at TIMESTAMP NULL
             );`)
 
         //alert recipient schema

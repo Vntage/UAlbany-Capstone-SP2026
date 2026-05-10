@@ -109,6 +109,8 @@ export const getBudget = async (req: Request<BusinessParams>, res: Response) => 
         const budgetResult = await pool.query(
             `SELECT * FROM budget
             WHERE business_id = $1
+            AND period_start <= NOW()
+            AND period_end >= NOW()
             ORDER BY created_at DESC
             LIMIT 1`,
             [businessID]

@@ -61,7 +61,7 @@ export const createTransaction = async(req: Request<BusinessParams>, res: Respon
             return res.status(500).json({ message: "Database Error" })
         }
 
-        checkAlertRules(businessID, result.rows[0])
+        await checkAlertRules(businessID)
         
         return res.status(201).json({ message: "Successfully created transaction" })
     }
