@@ -267,7 +267,7 @@ export default function Alerts() {
                     </td>
 
                     <td className="px-6 py-4 text-gray-500">
-                      {alert.triggered_at}
+                      {new Date(alert.triggered_at).toLocaleString()}
                     </td>
 
                     <td className="px-6 py-4 text-right">
