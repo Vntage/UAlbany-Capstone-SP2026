@@ -300,6 +300,9 @@ export const commitCSV = async(req: Request<BusinessParams>, res: Response) => {
                 return res.status(500).json({ message: "Server Error" });
             }
         }
+
+        await checkAlertRules(business_id)
+
         return res.status(200).json({ message: "Successful Import" });
     }
     catch(error){
@@ -387,8 +390,8 @@ export const updateTransaction = async (req: Request<TransactionParams>, res: Re
             return res.status(500).json({ message: "Database Error" });
         }
 
-        if(transaction.amount != updateTransaction.amount || transaction.type != updateTransaction.type){
-            checkAlertRules(businessID, updateTransaction);
+        if(transaction.amount != updateTransaction.amount || transaction.type != updateTransaction.type || transaction.category_id != updateTransaction.category_id || transaction.date != updateTransaction.date){
+            await checkAlertRules(businessID);
         }
 
         return res.status(200).json(updateTransaction);

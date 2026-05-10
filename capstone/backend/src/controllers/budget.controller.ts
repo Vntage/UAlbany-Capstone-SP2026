@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import { BusinessParams } from "../types/common.type";
 import pool from "../config/db"
 import { Budget, BudgetedItem } from "../types/budget.type";
+import { checkAlertRules } from "../middleware/alerts";
 
 export const newBudget = async (req: Request<BusinessParams>, res: Response) => {
     try{
@@ -33,6 +34,9 @@ export const newBudget = async (req: Request<BusinessParams>, res: Response) => 
         if(!rows[0]){
             return res.status(500).json({ message: "Database Error" });
         }
+
+        await checkAlertRules(businessID);
+
         return res.status(201).json(rows[0])
     }
     catch(error){
@@ -73,6 +77,7 @@ export const newBudgetedItem = async (req: Request<BusinessParams>, res: Respons
         const updateResult = await pool.query<BudgetedItem>(updateQuery, updateValues);
 
         if (updateResult.rows.length > 0) {
+            await checkAlertRules(businessID);
             return res.status(200).json(updateResult.rows[0]);
         }
 
@@ -94,6 +99,9 @@ export const newBudgetedItem = async (req: Request<BusinessParams>, res: Respons
         if(!rows[0]){
             return res.status(500).json({ message: "Database Error" });
         }
+
+        await checkAlertRules(businessID);
+
         return res.status(201).json(rows[0])
     }
     catch(error){
@@ -215,7 +223,7 @@ export const getBudgetedItem = async (req: Request<BusinessParams>, res: Respons
         if(transactionCategoryId){
             values.push(transactionCategoryId);
 
-            query += `AND transaction_category_id = $${values.length} `;
+            query += `AND category_id = $${values.length} `;
         }
 
         if(budgetId){
@@ -227,10 +235,6 @@ export const getBudgetedItem = async (req: Request<BusinessParams>, res: Respons
         query += `ORDER BY created_at DESC`;
 
         const { rows } = await pool.query<BudgetedItem>(query, values);
-
-        if(!rows){
-            return res.status(500).json({ message: "Database Error" })
-        }
 
         return res.status(200).json(rows)
     }
