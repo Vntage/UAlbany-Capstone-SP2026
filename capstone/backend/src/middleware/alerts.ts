@@ -66,7 +66,7 @@ const getAllocatedAmount = async(budget_id: string, category_id: string) => {
     const result = await pool.query(
         `SELECT allocated_amount 
         FROM budgeted_items
-        WHERE budget = $1 AND category_id = $2`,
+        WHERE budget_id = $1 AND category_id = $2`,
         [budget_id, category_id]
     );
 
