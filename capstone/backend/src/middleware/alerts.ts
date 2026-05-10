@@ -80,7 +80,7 @@ const evaluateExpression = async (expr: Expression, business_id: string, budget:
         case "metric": return await getTransactionTotal(business_id, budget);
         case "budget_total": return await getBudgetTotal(budget.uid);
         case "category_total": return await getCategoryTotal(business_id, expr.category_id, budget);
-        case "budget_item_allocated": return await getAllocatedAmount(business_id, expr.category_id);
+        case "budget_item_allocated": return await getAllocatedAmount(budget.uid, expr.category_id);
         case "expression": {
             const left = await evaluateExpression(expr.left, business_id, budget);
             const right = await evaluateExpression(expr.right, business_id, budget);
