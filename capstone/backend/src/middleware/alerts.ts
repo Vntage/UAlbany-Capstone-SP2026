@@ -135,7 +135,7 @@ const operatorMessage = (operator: ">" | ">=" | "<=" | "<" | "=") => {
     }
 }
 
-const describeExpresssion = (expr: Expression): string => {
+const describeExpression = (expr: Expression): string => {
     switch(expr.type){
         case "value":
             return expr.value.toString();
@@ -148,13 +148,13 @@ const describeExpresssion = (expr: Expression): string => {
         case "budget_item_allocated":
             return "Allocated Budget";
         case "expression":
-            return `(${describeExpresssion(expr.left)} ${expr.operator} ${expr.right})`;
+            return `(${describeExpression(expr.left)} ${expr.operator} ${describeExpression(expr.right)})`;
     }
 }
 
 const buildAlertMessage = (condition: AlertCondition, left: number, right: number): string => {
-    const leftDescription = describeExpresssion(condition.left);
-    const rightDescription = describeExpresssion(condition.right);
+    const leftDescription = describeExpression(condition.left);
+    const rightDescription = describeExpression(condition.right);
 
     const operatorDescription = operatorMessage(condition.operator);
 
