@@ -3,13 +3,13 @@ import Navbar from "../../../components/navbar";
 import { CreateAlertModal } from "../components/CreateAlertModal";
 
 type Business = {
-    uid: string;
-    name: string;
+  uid: string;
+  name: string;
 }
 
 export default function Alerts() {
   const business = localStorage.getItem("activeBusiness");
-  const businessID: string | null =  business && business !== "undefined" ? (JSON.parse(business) as Business).uid : null;
+  const businessID: string | null = business && business !== "undefined" ? (JSON.parse(business) as Business).uid : null;
 
   const [rules, setRules] = useState<any>([]);
 
@@ -19,15 +19,15 @@ export default function Alerts() {
   const [loading, setLoading] = useState(false);
   const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
 
-  const fetchRules = async() => {
-    if(!businessID) return;
+  const fetchRules = async () => {
+    if (!businessID) return;
 
     setLoading(true);
-    try{
+    try {
       const res = await fetch(`${api_url}/api/alert/${businessID}/rules`, {
         method: "GET",
         credentials: "include",
-        headers: {"Content-Type": "application/json"}
+        headers: { "Content-Type": "application/json" }
       });
 
       const data = await res.json();
@@ -35,33 +35,33 @@ export default function Alerts() {
       setRules(data);
       console.log(data)
     }
-    catch(error){
+    catch (error) {
       console.log(error)
     }
-    finally{
+    finally {
       setLoading(false);
     }
   }
 
-  const toggleRule = async(uid: any) => {
+  const toggleRule = async (uid: any) => {
     console.log(uid)
-    try{
+    try {
       await fetch(`${api_url}/api/alert/${businessID}/rule`, {
         method: "PATCH",
         credentials: "include",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({alert_rule_id: uid})
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ alert_rule_id: uid })
       });
 
       await fetchRules();
     }
-    catch(error){
-     console.log(error) 
+    catch (error) {
+      console.log(error)
     }
   }
 
   const fetchAlerts = async () => {
-    if(!businessID) return;
+    if (!businessID) return;
     try {
       const res = await fetch(`${api_url}/api/alert/${businessID}`,
         {
@@ -87,7 +87,7 @@ export default function Alerts() {
     fetchAlerts();
     fetchRules();
   }, []);
-  
+
   const categoryMap: Record<string, string> = {};
 
   function renderCondition(condition: any): string {
@@ -101,7 +101,7 @@ export default function Alerts() {
     if (!exp || !exp.type) {
       return "Missing expression type"
     }
-    switch(exp.type){
+    switch (exp.type) {
       case "value":
         return exp.value.toString();
 
@@ -110,7 +110,7 @@ export default function Alerts() {
 
       case "budget_total":
         return "Budget Total";
-      
+
       case "category_total":
         return `Category (${categoryMap[exp.category_id] || ""})`;
 
@@ -124,7 +124,7 @@ export default function Alerts() {
         return "";
     }
   }
-  
+
   return (
     <div className="flex h-screen bg-surface">
       <Navbar />
@@ -152,70 +152,69 @@ export default function Alerts() {
             </button>
           </div>
           {businessID &&
-          <>
-          {/*Change to only seen by owner or admin*/}
-          <div className="mt-10 bg-white rounded-xl shadow-sm border overflow-hidden">
-            <div className="p-6 border-b">
-              <h2 className="text-lg font-semibold">
-                Alert Rules
-              </h2>
-            </div>
-            
-            <table className="w-full text-sm">
-              <thead className="text-xs text-gray-400 uppercase border-b">
-                <tr>
-                  <th className="py-3 px-6 text-left">Title</th>
-                  <th className="py-3 px-6 text-left">Condition</th>
-                  <th className="py-3 px-6 text-left">Type</th>
-                  <th className="py-3 px-6 text-right">Status</th>
-                  <th className="py-3 px-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rules.length === 0 ? (
-                  <tr>
-                    <td>
-                      No alert rules yet
-                    </td>
-                  </tr>
-                ):(
-                  rules.map((rule: any) => (
-                    <tr key={rule.uid}>
-                      <td className="px-6 py-4">
-                        {rule.title}
-                      </td>
-                      <td className="px-6 py-4">
-                        {renderCondition(rule.condition)}
-                      </td>
-                      <td className="px-6 py-4">
-                        {rule.type}
-                      </td>
-                      <td>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                            rule.is_active
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-500"
-                          }`}>
-                          {rule.is_active ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                      <td>
-                        <button 
-                        disabled={false}
-                        onClick={() => toggleRule(rule.uid)}
-                        >
-                          O
-                        </button>
-                      </td>
+            <>
+              {/*Change to only seen by owner or admin*/}
+              <div className="mt-10 bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div className="p-6 border-b">
+                  <h2 className="text-lg font-semibold">
+                    Alert Rules
+                  </h2>
+                </div>
+
+                <table className="w-full text-sm">
+                  <thead className="text-xs text-gray-400 uppercase border-b">
+                    <tr>
+                      <th className="py-3 px-6 text-left">Title</th>
+                      <th className="py-3 px-6 text-left">Condition</th>
+                      <th className="py-3 px-6 text-left">Type</th>
+                      <th className="py-3 px-6 text-right">Status</th>
+                      <th className="py-3 px-6 text-right">Actions</th>
                     </tr>
-                  ))
-                )}
+                  </thead>
+                  <tbody>
+                    {rules.length === 0 ? (
+                      <tr>
+                        <td>
+                          No alert rules yet
+                        </td>
+                      </tr>
+                    ) : (
+                      rules.map((rule: any) => (
+                        <tr key={rule.uid}>
+                          <td className="px-6 py-4">
+                            {rule.title}
+                          </td>
+                          <td className="px-6 py-4">
+                            {renderCondition(rule.condition)}
+                          </td>
+                          <td className="px-6 py-4">
+                            {rule.type}
+                          </td>
+                          <td>
+                            <span className={`px-2 py-1 rounded-full text-xs ${rule.is_active
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-500"
+                              }`}>
+                              {rule.is_active ? "Active" : "Inactive"}
+                            </span>
+                          </td>
+                          <td>
+                            <button
+                              disabled={false}
+                              onClick={() => toggleRule(rule.uid)}
+                            >
+                              O
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
 
-              </tbody>
+                  </tbody>
 
-            </table>
-          </div>
-          </>
+                </table>
+              </div>
+            </>
           }
 
           {/* Alerts Table */}
@@ -236,36 +235,41 @@ export default function Alerts() {
                 </tr>
               </thead>
 
+              {/* following old format */ }
               <tbody className="divide-y">
-                <tr>
-                  <td className="px-6 py-4 text-red-600 font-semibold">
-                    Critical
-                  </td>
-                  <td className="px-6 py-4">
-                    Expense spike detected
-                  </td>
-                  <td className="px-6 py-4 text-gray-500">
-                    Today
-                  </td>
-                  <td className="px-6 py-4 text-right text-red-500">
-                    Open
-                  </td>
-                </tr>
+                {alerts.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                      No alerts yet
+                    </td>
+                  </tr>
+                ) : (alerts.map((alert: any) => (
+                  <tr key = {alert.alert_id}> 
+                    <td className="px-6 py-4 font-semibold">
+                      {alert.severity}
+                    </td>
 
-                <tr>
-                  <td className="px-6 py-4 text-blue-600 font-semibold">
-                    Insight
-                  </td>
-                  <td className="px-6 py-4">
-                    Cash flow healthy
-                  </td>
-                  <td className="px-6 py-4 text-gray-500">
-                    Yesterday
-                  </td>
-                  <td className="px-6 py-4 text-right text-green-600">
-                    Resolved
-                  </td>
-                </tr>
+                    <td className="px-6 py-4">
+                      {alert.message}
+                    </td>
+
+                    <td className="px-6 py-4 text-gray-500">
+                      {alert.triggered_at}
+                    </td>
+
+                    <td className="px-6 py-4 text-right">
+                      {alert.read_at ? (
+                        <span className="text-green-600">
+                          Read at {alert.read_at}
+                        </span>
+                      ) : (
+                        <span className="text-red-600">
+                          Unread
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                )))}
               </tbody>
             </table>
           </div>
@@ -274,11 +278,11 @@ export default function Alerts() {
       </main>
       {openModal && (
         <CreateAlertModal
-          isOpen = {openModal}
+          isOpen={openModal}
           businessID={businessID || ""}
           //get categories and refresh on submit
           categories={[]}
-          onSubmit={() => {}}
+          onSubmit={() => { }}
           onClose={() => setOpenModal(false)}
         />
       )}
