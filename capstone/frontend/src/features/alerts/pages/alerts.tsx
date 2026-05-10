@@ -7,6 +7,12 @@ type Business = {
   name: string;
 }
 
+const SEVERITY_COLORS: Record<string, string> = {
+  high: "text-red-600 bg-red-50",
+  medium: "text-amber-600 bg-amber-50",
+  low: "text-blue-600 bg-blue-50", //not sure about this color so feel free to change it
+}; //alert_severity AS ENUM ('low', 'medium', 'high');
+
 export default function Alerts() {
   const business = localStorage.getItem("activeBusiness");
   const businessID: string | null = business && business !== "undefined" ? (JSON.parse(business) as Business).uid : null;
@@ -192,8 +198,8 @@ export default function Alerts() {
                           </td>
                           <td>
                             <span className={`px-2 py-1 rounded-full text-xs ${rule.is_active
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-500"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-500"
                               }`}>
                               {rule.is_active ? "Active" : "Inactive"}
                             </span>
@@ -229,13 +235,14 @@ export default function Alerts() {
               <thead className="text-xs text-gray-400 uppercase border-b">
                 <tr>
                   <th className="py-3 px-6 text-left">Type</th>
+                  <th className="py-3 px-6 text-left">Title</th>
                   <th className="py-3 px-6 text-left">Message</th>
                   <th className="py-3 px-6 text-left">Date</th>
                   <th className="py-3 px-6 text-right">Status</th>
                 </tr>
               </thead>
 
-              {/* following old format */ }
+              {/* following old format */}
               <tbody className="divide-y">
                 {alerts.length === 0 ? (
                   <tr>
@@ -244,9 +251,15 @@ export default function Alerts() {
                     </td>
                   </tr>
                 ) : (alerts.map((alert: any) => (
-                  <tr key = {alert.alert_id}> 
+                  <tr key={alert.alert_id}>
                     <td className="px-6 py-4 font-semibold">
-                      {alert.severity}
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase border ${SEVERITY_COLORS[alert.severity] || "text-gray-600 bg-gray-50"
+                        }`}>{alert.severity}</span>
+
+                    </td>
+
+                    <td className="px-6 py-4 font-semibold">
+                      {alert.title}
                     </td>
 
                     <td className="px-6 py-4">
