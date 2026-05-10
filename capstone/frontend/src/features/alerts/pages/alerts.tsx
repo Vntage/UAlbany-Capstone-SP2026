@@ -98,6 +98,9 @@ export default function Alerts() {
   }
 
   function renderExpression(exp: any): string {
+    if (!exp || !exp.type) {
+      return "Missing expression type"
+    }
     switch(exp.type){
       case "value":
         return exp.value.toString();

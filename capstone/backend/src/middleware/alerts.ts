@@ -251,7 +251,7 @@ export const checkAlertRules = async(business_id: string) => {
             await pool.query(
                 `UPDATE alert
                 SET status = 'resolved',
-                resolved_at = NOW()
+                resolved_at = NOW(),
                 message = $2
                 WHERE alert_rule_id = $1
                 AND status = 'active'`,
