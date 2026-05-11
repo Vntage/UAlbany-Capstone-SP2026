@@ -139,25 +139,24 @@ export function ImportModal({
             setLoading(false);
         }
     }
+    const fetchCategories = async() => {
+        try{
+            const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
+            const res = await fetch(api_url + `/api/transaction/${businessID}/category`, {
+                method: "GET",
+                credentials: "include",
+            })
+
+            const data = await res.json();
+
+            setCategories(data);
+        }
+        catch(error){
+            console.error(error);
+        }
+    };
     useEffect(() => {
-        const fetchCategories = async() => {
-            try{
-                const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
-
-                const res = await fetch(api_url + `/api/transaction/${businessID}/category`, {
-                    method: "GET",
-                    credentials: "include",
-                })
-
-                const data = await res.json();
-
-                setCategories(data);
-            }
-            catch(error){
-                console.error(error);
-            }
-        };
         if(businessID) fetchCategories();
     }, [businessID]);
 
@@ -268,7 +267,7 @@ export function ImportModal({
                                 newCategory = {newCategory}
                                 setNewCategory = {setNewCategory}
                                 businessID = {businessID}
-                                refreshCategories = {setCategories}
+                                refreshCategories = {fetchCategories}
                             />
                         )}
                     </div>

@@ -140,7 +140,7 @@ export default function Alerts() {
   }, []);
 
   const categoryMap: Record<string, string> = Object.fromEntries(
-    categories.map((category) => [
+    categories.map((category: any) => [
       category.uid,
       category.name
     ])
