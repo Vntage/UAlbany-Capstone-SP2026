@@ -7,9 +7,10 @@ import { auth } from "../config/firebase";
 
 interface AuthContextProps {
   currentUser: User | null;
+  authorizing: boolean;
 }
 
-const AuthContext = createContext<AuthContextProps>({ currentUser: null });
+const AuthContext = createContext<AuthContextProps>({ currentUser: null, authorizing: true });
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -19,14 +20,16 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authorizing, setAuthorizing] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      setAuthorizing(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  return <AuthContext.Provider value={{ currentUser }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ currentUser, authorizing }}>{children}</AuthContext.Provider>;
 };
