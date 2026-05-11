@@ -31,7 +31,7 @@ export function ExpenseTable({ data , currency }: any) {
                         <tbody>
                             {(period.categories ?? []).map((c: any, i: number) => (
                                 <tr key={c.category}
-                                    className={`transition hover:bg-gray-50 ${
+                                    className={`border-t transition hover:bg-gray-50 ${
                                         i % 2 === 0
                                             ? "bg-white"
                                             : "bg-gray-50/40"
