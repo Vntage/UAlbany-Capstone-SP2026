@@ -89,9 +89,19 @@ export default function Alerts() {
     }
   };
   useEffect(() => {
-    //fetch alerts
-    fetchAlerts();
+    //fetch rules before alerts
     fetchRules();
+    fetchAlerts();
+
+    /*
+    //POLL EVERY 15 MINUTES FOR NEW ALERTS (really only useful if multiple users are on)
+    //not necessary for now but might be useful in a practical environment
+    const alertInterval = setInterval(() => {
+      fetchAlerts();
+    }, 900000); //15m * 60s * 1000ms = 900000
+
+    return () => clearInterval(alertInterval);
+    */
   }, []);
 
   const categoryMap: Record<string, string> = {};
