@@ -18,6 +18,7 @@ export default function Alerts() {
   const businessID: string | null = business && business !== "undefined" ? (JSON.parse(business) as Business).uid : null;
 
   const [rules, setRules] = useState<any>([]);
+  const [categories, setCategories] = useState<any>([]);
 
   const [openModal, setOpenModal] = useState(false);
   const [alerts, setAlerts] = useState([]);
@@ -96,9 +97,33 @@ export default function Alerts() {
       alert("Error fetching alerts! Did you join any businesses?");
     }
   };
+
+  const fetchCategories = async () => {
+    if (!businessID) return;
+    try {
+      const res = await fetch(`${api_url}/api/transaction/${businessID}/category`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      const data = await res.json();
+      console.log("Fetched categories: ", data);
+      if (res.ok) {
+        setCategories(data || []);
+      } else {
+        setCategories([]);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error fetching categories! Did you join any businesses?");
+    }
+  };
   useEffect(() => {
     //fetch rules before alerts
     fetchRules();
+    fetchCategories();
     fetchAlerts();
 
     /*
@@ -310,7 +335,7 @@ export default function Alerts() {
           isOpen={openModal}
           businessID={businessID || ""}
           //get categories and refresh on submit
-          categories={[]}
+          categories={[ ...categories ]}
           onSubmit={() => { fetchRules(); fetchAlerts(); }}
           onClose={() => setOpenModal(false)}
         />
