@@ -114,7 +114,7 @@ export const createBusinessMember = async(req: Request<BusinessParams>, res: Res
             return res.status(409).json({ message: "User is already member" })
         }
         console.log(error)
-        res.status(500).json({ message: "Server error" })
+        return res.status(500).json({ message: "Server error" })
     }
 }
 
