@@ -200,8 +200,8 @@ export const createBusinessInvite = async(req: Request<BusinessParams>, res: Res
             SELECT * FROM business_invite 
             WHERE user_id = $1
             AND business_id =$2  
-            AND bi.status = 'sent'
-            AND bi.expires_at > NOW()`,
+            AND status = 'sent'
+            AND expires_at > NOW()`,
             [userID, business_id]
         );
 
