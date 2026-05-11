@@ -136,10 +136,10 @@ export default function Alerts() {
         return "Budget Total";
 
       case "category_total":
-        return `Category (${categoryMap[exp.category_id] || ""})`;
+        return `Category (${categoryMap[exp.category_id] ?? ""})`;
 
       case "budget_item_allocated":
-        return `Budget (${exp.budget_id})`;
+        return `Budget (${exp.budget_id ?? "-"})`;
 
       case "expression":
         return `(${renderExpression(exp.left)} ${exp.operator} ${renderExpression(exp.right)})`;

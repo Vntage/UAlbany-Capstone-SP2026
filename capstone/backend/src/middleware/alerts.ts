@@ -76,11 +76,15 @@ const getAllocatedAmount = async(budget_id: string, category_id: string) => {
 
 const evaluateExpression = async (expr: Expression, business_id: string, budget: Budget): Promise<number> => {
     switch(expr.type){
-        case "value": return expr.value;
-        case "metric": return await getTransactionTotal(business_id, budget);
-        case "budget_total": return await getBudgetTotal(budget.uid);
-        case "category_total": return await getCategoryTotal(business_id, expr.category_id, budget);
-        case "budget_item_allocated": return await getAllocatedAmount(budget.uid, expr.category_id);
+        case "value": return Number(expr.value ?? 0);
+        case "metric": return (await getTransactionTotal(business_id, budget)) ?? 0;
+        case "budget_total": return (await getBudgetTotal(budget.uid)) ?? 0;
+        case "category_total": 
+            if(!expr.category_id) return 0;
+            return (await getCategoryTotal(business_id, expr.category_id, budget)) ?? 0;
+        case "budget_item_allocated": 
+            if(!expr.category_id) return 0;
+            return (await getAllocatedAmount(budget.uid, expr.category_id)) ?? 0;
         case "expression": {
             const left = await evaluateExpression(expr.left, business_id, budget);
             const right = await evaluateExpression(expr.right, business_id, budget);
@@ -90,8 +94,10 @@ const evaluateExpression = async (expr: Expression, business_id: string, budget:
                 case "/": return left / right;
                 case "+": return left + right;
                 case "-": return left - right;
+                default: return 0;
             }   
         }
+        default: return 0;
     }
 };
 
@@ -138,7 +144,7 @@ const operatorMessage = (operator: ">" | ">=" | "<=" | "<" | "=") => {
 const describeExpression = (expr: Expression): string => {
     switch(expr.type){
         case "value":
-            return expr.value.toString();
+            return String(expr.value ?? 0);
         case "metric":
             return "Total Transactions";
         case "budget_total":
@@ -158,7 +164,9 @@ const buildAlertMessage = (condition: AlertCondition, left: number, right: numbe
 
     const operatorDescription = operatorMessage(condition.operator);
 
-    let leftText, rightText = "";
+    let leftText = "";
+    let rightText = "";
+
     if(condition.left.type === "value"){
         leftText = leftDescription;
     }
