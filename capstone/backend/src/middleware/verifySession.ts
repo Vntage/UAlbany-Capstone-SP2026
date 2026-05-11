@@ -4,7 +4,7 @@ import admin from "../config/firebase"
 export const verifySession = async(req: Request, res: Response, next: NextFunction) => {
     const sessionCookie = req.cookies?.session
     if(!sessionCookie){
-        return res.status(401).json({ message : "No Session" })
+        return res.status(401).json({ message : "No Session" });
     }
 
     try{
