@@ -311,7 +311,7 @@ export default function Alerts() {
           businessID={businessID || ""}
           //get categories and refresh on submit
           categories={[]}
-          onSubmit={() => { }}
+          onSubmit={() => { fetchRules(); fetchAlerts(); }}
           onClose={() => setOpenModal(false)}
         />
       )}
