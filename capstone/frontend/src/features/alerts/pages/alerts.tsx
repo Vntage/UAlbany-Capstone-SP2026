@@ -37,9 +37,17 @@ export default function Alerts() {
       });
 
       const data = await res.json();
+      if (Array.isArray(data)) { 
+        setRules(data);
+        console.log("Fetched rules: ", data);
+      } else { //safely crash if user has no valid session (i.e. auto-logged out)
+        setRules([]);
+        console.error("Incorrect rules response format: ", data);
+        if (data.message === "No Session") { //handled here since rules are fetched first
+          alert("No session found. Please log in again.");
+        }
+      }
 
-      setRules(data);
-      console.log(data)
     }
     catch (error) {
       console.log(error)
@@ -190,7 +198,7 @@ export default function Alerts() {
                   <tbody>
                     {rules.length === 0 ? (
                       <tr>
-                        <td>
+                        <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                           No alert rules yet
                         </td>
                       </tr>
@@ -256,7 +264,7 @@ export default function Alerts() {
               <tbody className="divide-y">
                 {alerts.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                       No alerts yet
                     </td>
                   </tr>
