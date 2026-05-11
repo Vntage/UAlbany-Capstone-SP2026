@@ -23,7 +23,7 @@ app.use(cors({
 //api calls
 app.use("/api", router)
 
-initDB(); //generate missing tables
+initDB(pool); //generate missing tables
 //connect to SQL database afterwards
 pool.connect().then(() => console.log("Connected to SQL database"))
 .catch((err) => console.error("Database connection error: ", err))

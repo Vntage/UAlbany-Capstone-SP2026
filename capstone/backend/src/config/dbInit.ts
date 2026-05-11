@@ -1,6 +1,6 @@
-import pool from "./db";
+import { Pool } from "pg";
 
-export async function initDB() {
+export async function initDB(pool: Pool) {
     try{
         //uuid generation
         await pool.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);

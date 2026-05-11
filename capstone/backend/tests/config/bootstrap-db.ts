@@ -4,7 +4,7 @@ import { initDB } from "../../src/config/dbInit";
 export async function setupTestDB() {
     await pool.query("SELECT 1");
 
-    await initDB();
+    await initDB(pool);
 
     console.log("Test DB initialized");
 }
