@@ -12,7 +12,7 @@ export const getBusiness = async(req: Request<BusinessParams>, res: Response) =>
         return res.status(401).json({ message: "Business not found" });
     }
 
-    return res.status(201).json(business.rows[0])
+    return res.status(200).json(business.rows[0])
 }
 
 export const getUserBusinesses = async(req: Request, res: Response) => {
@@ -26,7 +26,7 @@ export const getUserBusinesses = async(req: Request, res: Response) => {
         AND bm.role <> 'disabled'
         `, [uid]);
 
-    return res.status(201).json(business.rows)
+    return res.status(200).json(business.rows)
 }
 
 export const createBusiness = async(req: Request, res: Response) => {
