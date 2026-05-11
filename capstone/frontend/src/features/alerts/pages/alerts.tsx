@@ -205,7 +205,7 @@ export default function Alerts() {
                     ) : (
                       rules.map((rule: any) => (
                         <tr key={rule.uid}>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 font-semibold">
                             {rule.title}
                           </td>
                           <td className="px-6 py-4">
@@ -214,7 +214,7 @@ export default function Alerts() {
                           <td className="px-6 py-4">
                             {rule.type}
                           </td>
-                          <td>
+                          <td className="px-6 py-4 text-right">
                             <span className={`px-2 py-1 rounded-full text-xs ${rule.is_active
                               ? "bg-green-100 text-green-700"
                               : "bg-gray-100 text-gray-500"
@@ -222,12 +222,12 @@ export default function Alerts() {
                               {rule.is_active ? "Active" : "Inactive"}
                             </span>
                           </td>
-                          <td>
+                          <td className="px-6 py-4 text-right">
                             <button
                               disabled={false}
                               onClick={() => toggleRule(rule.uid)}
                             >
-                              O
+                              [Toggle]
                             </button>
                           </td>
                         </tr>
@@ -289,15 +289,13 @@ export default function Alerts() {
                     </td>
 
                     <td className="px-6 py-4 text-right">
-                      {alert.read_at ? (
-                        <span className="text-green-600">
-                          Read at {alert.read_at}
-                        </span>
-                      ) : (
-                        <span className="text-red-600">
-                          Unread
-                        </span>
-                      )}
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        alert.read_at
+                          ? "bg-green-100 text-green-600"
+                          : "bg-red-100 text-red-600"
+                      }`}>
+                        {alert.read_at ? `Read at ${alert.read_at}` : "Unread"}
+                      </span>
                     </td>
                   </tr>
                 )))}
