@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 type Operator =  "<" | "<=" | ">" | ">=" | "=" ;    
 
@@ -73,16 +74,9 @@ export function CreateAlertModal({
         if(rule.metric === "transaction_total"){
             left = {type: "metric", field: "transaction_total"};
         }
-        else if(rule.metric === "budget_total"){
+        else {
             left = {type: "budget_total"};
-        }
-        else{
-            left = 
-            {
-                type: "category_total",
-                category_id: rule.categoryID || ""
-            };
-        }   
+        }  
 
         return {
             left,
@@ -153,7 +147,6 @@ export function CreateAlertModal({
                     >
                         <option value="transaction_total">Transaction Total</option>
                         <option value="budget_total">Budget Total</option>
-                        <option value="category_total">Category Total</option>
                     </select>
 
                     {rule.metric === "category_total" && (
@@ -188,6 +181,10 @@ export function CreateAlertModal({
                             setRule({ ...rule, value: Number(e.target.value)})
                         }}
                     />
+                    <div>
+                        <label>Need stronger rules?</label>
+                        <Link to={"/advancedAlerts"}>Advanced Rules</Link>
+                    </div>
                     <button 
                         onClick={() => handleCreateAlertRule()}
                         disabled={loading}

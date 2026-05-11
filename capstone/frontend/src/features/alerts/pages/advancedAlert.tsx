@@ -58,13 +58,71 @@ const defaultCondition : Condition = {
 export default function AdvancedAlert() {
     const business = localStorage.getItem("activeBusiness");
     const businessID: string | null = business && business !== "undefined" ? (JSON.parse(business) as Business).uid : null;
+    const [ruleName, setRuleName] = useState("");
     const [condition, setCondition] = useState<Condition>(defaultCondition);
     const [categories, setCategories] = useState<Category[]>([]);
+
+    const [error, setError] = useState("")
     const [loading, setLoading] = useState(false);
 
-    const handleSave = () => {
-        setLoading(false)
+    const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+    function getConditionType(condition: Condition) {
+        if(condition.right.type === "value" || condition.left.type === "value") return "threshold";
+
+        return "comparison"
     }
+    const handleCreateAlertRule = async() => {
+        setLoading(true)
+        try{
+            const type = getConditionType(condition);
+            console.log(condition)
+            const res = await fetch(`${api_url}/api/alert/${businessID}`,{
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: ruleName,
+                    condition,
+                    type: type
+                })
+            });
+
+            const data = await res.json();
+
+            if(!res.ok){
+                setError(data.message || "Failed to create Alert Rule");
+            }
+            
+        }
+        catch(error){
+            console.log(error);
+        }
+        finally{
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        const fetchCategories = async() => {
+            try{
+                const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+                const res = await fetch(api_url + `/api/transaction/${businessID}/category`, {
+                    method: "GET",
+                    credentials: "include",
+                })
+
+                const data = await res.json();
+
+                setCategories(data);
+            }
+            catch(error){
+                console.error(error);
+            }
+        };
+        if(businessID) fetchCategories();
+    }, [businessID]);
 
     return(
         <div className="flex h-screen bg-surface">
@@ -89,12 +147,21 @@ export default function AdvancedAlert() {
                     {businessID && (
                         <div>
                             <div>
+                                <label>Rule Title</label>
+                                <input
+                                    value={ruleName}
+                                    type="text"
+                                    onChange={(e) => setRuleName(e.target.value)}
+                                    placeholder="Enter Rule title"
+                                />
+                            </div>
+                            <div>
                                 <h2>Alert Condition</h2>
                                 <ConditionBuilder value={condition} onChange={setCondition} categories={categories}/>
                             </div>
                             <div>
                                 <button
-                                    onClick={handleSave}
+                                    onClick={handleCreateAlertRule}
                                     disabled={loading}
                                 >
                                     {loading 
