@@ -72,11 +72,11 @@ export default function AdvancedAlert() {
 
         return "comparison"
     }
+
     const handleCreateAlertRule = async() => {
         setLoading(true)
         try{
             const type = getConditionType(condition);
-            console.log(condition)
             const res = await fetch(`${api_url}/api/alert/${businessID}`,{
                 method: "POST",
                 credentials: "include",
