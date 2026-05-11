@@ -28,7 +28,7 @@ export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
-  let businessID: string | null  =null;
+  const businessID = business?.uid;
   const [bInvites, setBInvites] = useState<BusinessInvite[]>([]);
   const [uInvites, setUInvites] = useState<BusinessInvite[]>([]);
 
@@ -77,7 +77,6 @@ export default function Users() {
 
       if (parsed?.uid) {
         fetchUsers(parsed.uid);
-        businessID = parsed.uid;
       }
     } catch (err) {
       console.error("Invalid activeBusiness:", err);
@@ -88,13 +87,17 @@ export default function Users() {
 
   useEffect(() => {
     loadBusiness();
-    getBusinessInvites();
-    getUserInvites();
 
     window.addEventListener("businessChanged", loadBusiness);
     return () =>
       window.removeEventListener("businessChanged", loadBusiness);
   }, []);
+
+  useEffect(() => {
+    if(!businessID) return;
+    getBusinessInvites();
+    getUserInvites();
+  }, [businessID])
 
   const updateUserRole = async (userId: string, newRole: string) => {
     if (!business?.uid) return;
@@ -138,6 +141,7 @@ export default function Users() {
 
   const getBusinessInvites = async() => {
     if(!businessID) return;
+    console.log("running")
     try{
       const res = await fetch(`${api_url}/api/business/${businessID}/invite`, {
         method: "GET",
@@ -176,10 +180,9 @@ export default function Users() {
     }
   }
 
-  //todo
   const updateInvite = async(inviteId: string, newStatus: string) => {
     try{
-      const res = await fetch(`${api_url}/api/business/${inviteId}`,{
+      await fetch(`${api_url}/api/business/${inviteId}`,{
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -189,6 +192,9 @@ export default function Users() {
           status: newStatus
         })
       })
+      
+      getBusinessInvites();
+      getUserInvites();
     }
     catch(err: any){
      console.log(err) 
@@ -516,7 +522,7 @@ export default function Users() {
           businessID={business.uid}
           isOpen = {showInviteModal}
           onClose={() => setShowInviteModal(false)}
-          onSuccess={() => fetchUsers(business.uid)}
+          onSuccess={() => {getUserInvites(); getBusinessInvites()}}
         />
       )}
     </div>

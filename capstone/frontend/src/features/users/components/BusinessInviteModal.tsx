@@ -40,15 +40,6 @@ export default function BusinessInviteModal({
             const selected = EXPIRE_OPTIONS.find((o) => o.value === expire);
             const expiresAt = selected ? new Date(Date.now() + selected.ms).toISOString() : null;
 
-            const checkUser = await fetch(`${api_url}/api/auth/username?username=${encodeURIComponent(username)}`, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-            });
-
-            const user = await checkUser.json();
-
-            if(user.ok) return; 
-
             const res = await fetch(`${api_url}/api/business/${businessID}/invite`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

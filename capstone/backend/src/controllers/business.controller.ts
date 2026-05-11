@@ -187,6 +187,26 @@ export const createBusinessInvite = async(req: Request<BusinessParams>, res: Res
 
         const userID = user.rows[0].firebase_uid;
 
+        const checkMember = await pool.query(`
+            SELECT * FROM business_member
+            WHERE user_id = $1
+            AND business_id = $2`,
+            [userID, business_id]
+        );
+
+        if(checkMember.rows[0]) return res.status(400).json({ message: "Member already Exists" });
+
+        const businessInv = await pool.query(`
+            SELECT * FROM business_invite 
+            WHERE user_id = $1
+            AND business_id =$2  
+            AND bi.status = 'sent'
+            AND bi.expires_at > NOW()`,
+            [userID, business_id]
+        );
+
+        if(businessInv.rows[0]) return res.status(400).json({ message: "Already Invited" });
+
         const result = await pool.query(`
             INSERT INTO business_invite (business_id, user_id, invited_by, role, expires_at)
             VALUES ($1, $2, $3, $4, $5)
@@ -220,7 +240,8 @@ export const getUserInvite = async(req: Request, res: Response) => {
             FROM business_invite bi
             JOIN business b ON bi.business_id = b.uid
             WHERE user_id = $1
-            AND bi.status <> 'declined'
+            AND bi.status = 'sent'
+            AND bi.expires_at > NOW()
             `, [user]);
         return res.status(200).json(result.rows)
     }
