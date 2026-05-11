@@ -98,12 +98,12 @@ export const createBusinessMember = async(req: Request<BusinessParams>, res: Res
     const role = req.body
     const user_id = req.user?.uid
 
-    if(!business_id || !role || user_id){
+    if(!business_id || !role || !user_id){
         return res.status(400).json({ message: "Missing fields" })
     }
 
     try{
-        const business_memberResult = await pool.query<BusinessMember>(`INSERT INTO business_members (business_id, user_id, role)
+        const business_memberResult = await pool.query<BusinessMember>(`INSERT INTO business_member (business_id, user_id, role)
             VALUES($1, $2, $3) RETURNING *`, 
             [business_id, user_id, role])
         
@@ -114,7 +114,7 @@ export const createBusinessMember = async(req: Request<BusinessParams>, res: Res
             return res.status(409).json({ message: "User is already member" })
         }
         console.log(error)
-        res.status(500).json({ message: "Server error" })
+        return res.status(500).json({ message: "Server error" })
     }
 }
 
@@ -128,7 +128,7 @@ export const updateRole = async(req: Request<BusinessParams>, res: Response) => 
         }
         const result = await pool.query(`
             UPDATE business_member
-            SET role = $1,
+            SET role = $1
             WHERE business_id = $2 
             AND user_id = $3
             RETURNING *
