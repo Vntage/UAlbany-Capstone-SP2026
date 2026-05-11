@@ -156,25 +156,6 @@ export function CreateAlertModal({
                                 <option value="budget_total">Budget Total</option>
                                 <option value="category_total">Category Total</option>
                             </select>
-
-                            {rule.metric === "category_total" && (
-                                <>
-                                    <label className={uniformStyle2}>Select Category</label>
-                                    <select
-                                        className={uniformStyle}
-                                        value={rule.categoryID}
-                                        onChange={(e) =>
-                                            setRule({ ...rule, categoryID: e.target.value })
-                                        }
-                                    >
-                                        {categories.map((c) => (
-                                            <option key={c.uid} value={c.uid}>
-                                                {c.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </>
-                            )}
                         </div>
                         <div>
                             <label className={uniformStyle2}>Rule Operator</label>
@@ -193,6 +174,24 @@ export function CreateAlertModal({
                             </select>
                         </div>
                     </div>
+                    {rule.metric === "category_total" && (
+                        <>
+                            <label className={uniformStyle2}>Select Category</label>
+                            <select
+                                className={uniformStyle}
+                                value={rule.categoryID}
+                                onChange={(e) =>
+                                    setRule({ ...rule, categoryID: e.target.value })
+                                }
+                            >
+                                {categories.map((c) => (
+                                    <option key={c.uid} value={c.uid}>
+                                        {c.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </>
+                    )}
                     <label className={uniformStyle2}>Rule Value</label>
                     <input
                         className={uniformStyle}
