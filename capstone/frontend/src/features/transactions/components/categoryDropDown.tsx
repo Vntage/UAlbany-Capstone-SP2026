@@ -12,7 +12,7 @@ type Props = {
   newCategory: string;
   setNewCategory: (v: string) => void;
   businessID: string;
-  refreshCategories: React.Dispatch<React.SetStateAction<TransactionCategory[]>>;
+  refreshCategories: () => void;
 };
 
 
@@ -41,40 +41,24 @@ export function CategoryDropDown({
             name: newCategory,
         };
 
-        refreshCategories((prev: any[]) => [...prev, optimisticCategory]);
+        refreshCategories();
 
         setNewCategory("");
         setCreating(false);
         
 
         try {
-            
-            // 2. Send request
-            const res = await fetch(api_url + `/api/transaction/${businessID}/category`,{
+            await fetch(api_url + `/api/transaction/${businessID}/category`,{
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name: optimisticCategory.name }),
             });
 
-            const data = await res.json();
-
-            if (!res.ok) throw new Error("Failed");
-
-            // 3. Replace temp with real category
-            refreshCategories((prev: any[]) =>
-            prev.map((cat) =>
-                cat.uid === tempId ? data : cat
-            ));
-
+            refreshCategories();
 
         } catch (err) {
-            // 4. Rollback on error
-            refreshCategories((prev: any[]) =>
-            prev.filter((cat) => cat.uid !== tempId)
-            );
-
-            console.error("Category creation failed:", err);
+            console.log("Category creation failed:", err);
         }
         finally{
             setIsSubmitting(false)
