@@ -15,6 +15,7 @@ import Settings from '../features/settings/pages/setting.tsx'
 import Support from '../features/support/pages/support.tsx'
 import Users from '../features/users/pages/users.tsx'
 import TransactionsPage from '../features/transactions/pages/transactions.tsx'
+import AdvancedAlert from '../features/alerts/pages/advancedAlert.tsx'
 
 
 createRoot(document.getElementById('root')!).render(
@@ -33,6 +34,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/settings" element= {<Settings/>}></Route>
           <Route path="/support" element= {<Support/>}></Route>
           <Route path="/users" element= {<Users/>}></Route>
+          <Route path="/advancedAlerts" element= {<AdvancedAlert/>}></Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
