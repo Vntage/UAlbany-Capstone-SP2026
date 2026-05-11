@@ -100,6 +100,7 @@ export default function Alerts() {
 
   const fetchCategories = async () => {
     if (!businessID) return;
+    setLoading(true)
     try {
       const res = await fetch(`${api_url}/api/transaction/${businessID}/category`,
         {
@@ -119,6 +120,9 @@ export default function Alerts() {
       console.error(err);
       alert("Error fetching categories! Did you join any businesses?");
     }
+    finally{
+      setLoading(false)
+    }
   };
   useEffect(() => {
     //fetch rules before alerts
@@ -137,7 +141,12 @@ export default function Alerts() {
     */
   }, []);
 
-  const categoryMap: Record<string, string> = {};
+  const categoryMap: Record<string, string> = Object.fromEntries(
+    categories.map((category) => [
+      category.uid,
+      category.name
+    ])
+  );
 
   function renderCondition(condition: any): string {
     const left = renderExpression(condition.left);
@@ -161,10 +170,10 @@ export default function Alerts() {
         return "Budget Total";
 
       case "category_total":
-        return `Category (${categoryMap[exp.category_id] ?? ""})`;
+        return `Category Total (${categoryMap[exp.category_id] ?? "-"})`;
 
       case "budget_item_allocated":
-        return `Budget (${exp.budget_id ?? "-"})`;
+        return `Budget (${categoryMap[exp.category_id] ?? "-"})`;
 
       case "expression":
         return `(${renderExpression(exp.left)} ${exp.operator} ${renderExpression(exp.right)})`;
@@ -200,7 +209,7 @@ export default function Alerts() {
               + Create Alert Rule
             </button>
           </div>
-          {businessID &&
+          {!loading && businessID &&
             <>
               {/*Change to only seen by owner or admin*/}
               <div className="mt-10 bg-white rounded-xl shadow-sm border overflow-hidden">
