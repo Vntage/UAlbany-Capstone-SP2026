@@ -40,7 +40,7 @@ export default function Alerts() {
       if (Array.isArray(data)) { 
         setRules(data);
         console.log("Fetched rules: ", data);
-      } else { //safely crash if user has no valid session (i.e. auto-logged out)
+      } else { //avoid crash if user has no valid session (i.e. auto-logged out)
         setRules([]);
         console.error("Incorrect rules response format: ", data);
         if (data.message === "No Session") { //handled here since rules are fetched first
