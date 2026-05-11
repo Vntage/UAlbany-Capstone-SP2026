@@ -94,7 +94,6 @@ export default function Alerts() {
       }
     } catch (err) {
       console.error(err);
-      alert("Error fetching alerts! Did you join any businesses?");
     }
   };
 
@@ -117,7 +116,6 @@ export default function Alerts() {
       }
     } catch (err) {
       console.error(err);
-      alert("Error fetching categories! Did you join any businesses?");
     }
   };
   useEffect(() => {
