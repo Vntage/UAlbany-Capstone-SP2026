@@ -59,7 +59,7 @@ export default function AdjustTargetsModal({
                 ([categoryID, amount]) => {
                     if (!amount) return null; // skip empty
 
-                    return fetch(`${api_url}/api/budgets/${businessID}/item`, {
+                    return fetch(`${api_url}/api/budget/${businessID}/item`, {
                         method: "POST",
                         credentials: "include",
                         headers: { "Content-Type": "application/json" },
