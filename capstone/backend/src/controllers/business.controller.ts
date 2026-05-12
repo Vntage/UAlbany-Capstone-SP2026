@@ -122,8 +122,9 @@ export const updateRole = async(req: Request<BusinessParams>, res: Response) => 
     try{
         const businessID = req.params.businessID;
         const { user, role } = req.body;
-
-        if(!user || role !== "admin" || role !== "member" || role !== "disabled"){
+        
+        const updateRolePermitted = ["owner", "admin"];
+        if(!user || !updateRolePermitted.includes(role) || role === "disabled"){
             return res.status(400).json({ message: "Missing Fields" });
         }
         const result = await pool.query(`
