@@ -1,4 +1,4 @@
-import { pool } from "./db";
+import pool from "../../src/config/db";
 import { initDB } from "../../src/config/dbInit";
 
 export async function setupTestDB() {

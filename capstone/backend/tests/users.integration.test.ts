@@ -1,5 +1,6 @@
-import { pool } from "./config/db";
+import pool from "../src/config/db";
 
+//testing test setup
 describe("Users table", () => {
     beforeAll(async() => {
         await pool.query(`
