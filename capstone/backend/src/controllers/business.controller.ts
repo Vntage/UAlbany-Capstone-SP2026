@@ -126,6 +126,16 @@ export const updateRole = async(req: Request<BusinessParams>, res: Response) => 
         if(!user || role !== "admin" || role !== "member" || role !== "disabled"){
             return res.status(400).json({ message: "Missing Fields" });
         }
+
+        const checkOwner = await pool.query(`
+            SELECT role FROM business_member
+            WHERE business_id = $1
+            AND user_id = $2`,
+            [businessID, user]
+        )
+
+        if(checkOwner.rows[0] === "owner") return res.status(400).json({ message: "Cannot change owners role" })
+
         const result = await pool.query(`
             UPDATE business_member
             SET role = $1
