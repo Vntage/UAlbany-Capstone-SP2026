@@ -3,21 +3,21 @@ import pool from "../config/db"
 import { Business, BusinessInvite, BusinessMember } from "../types/business.type";
 import { BusinessParams, InviteParams } from "../types/common.type";
 
-export const getBusiness = async(req: Request<BusinessParams>, res: Response) => {
+export const getBusiness = async (req: Request<BusinessParams>, res: Response) => {
     const business_id = req.params.businessID;
 
     const business = await pool.query<Business>(`SELECT * FROM business WHERE uid = $1`, [business_id]);
 
-    if(!business.rows.length){
-        return res.status(401).json({ message: "Business not found" });
+    if (!business.rows.length) {
+        return res.status(404).json({ message: "Business not found" });
     }
 
     return res.status(200).json(business.rows[0])
 }
 
-export const getUserBusinesses = async(req: Request, res: Response) => {
+export const getUserBusinesses = async (req: Request, res: Response) => {
     const uid = req.user?.uid
-    
+
     const business = await pool.query(`
         SELECT b.uid, b.name
         FROM business_member bm
@@ -29,49 +29,62 @@ export const getUserBusinesses = async(req: Request, res: Response) => {
     return res.status(200).json(business.rows)
 }
 
-export const createBusiness = async(req: Request, res: Response) => {
-    try{
+export const createBusiness = async (req: Request, res: Response) => {
+    try {
         let { name, type, currency, date_month, date_year } = req.body
         const uid = req.user?.uid;
-        if(!name || !type || !currency){
+        if (!uid) {
+            return res.status(401).json({ message: "Unauthorized!" });
+        }
+        if (!name || !type || !currency) {
             return res.status(400).json({ message: "Missing fields" })
         }
 
-        if(!date_month || !date_year ){
+        if (!date_month || !date_year) {
             const date = new Date();
             date_month = date.getMonth() + 1
             date_year = date.getFullYear()
         }
 
-        const businessResult = await pool.query<Business>(`INSERT INTO business
+        const client = await pool.connect();
+        try { //business and member cannot fail independently
+            await client.query('BEGIN');
+
+            const businessResult = await client.query<Business>(`INSERT INTO business
             (name, business_type, currency, created_month, created_year)
-            VALUES ($1, $2, $3, $4, $5) RETURNING *;`, 
-            [name, type, currency, date_month , date_year]);
-        
-        const business = businessResult.rows[0];
+            VALUES ($1, $2, $3, $4, $5) RETURNING *;`,
+                [name, type, currency, date_month, date_year]);
 
-        if(!business){
-            return res.status(500).json({ message: "Database Error" });
-        }
+            const business = businessResult.rows[0];
 
-        const memberResult = await pool.query(`INSERT INTO business_member 
+            if (!business) throw new Error("Business insert failed!");
+
+            const memberResult = await client.query(`INSERT INTO business_member 
             (business_id, user_id, role)
             VALUES($1, $2, 'owner') RETURNING *;`,
-            [business!.uid, uid]);
+                [business!.uid, uid]);
 
-        if(!memberResult.rows[0]){
-            return res.status(500).json({ message: "Database Error" });
+            if (!memberResult.rows[0]) throw new Error("Member insert failed!");
+
+            await client.query("COMMIT");
+            return res.status(201).json({ message: "Successfully created business" })
+        } catch (error) {
+            console.log(error);
+            await client.query('ROLLBACK');
+            throw error;
+            //return res.status(500).json({ message: "Server Error" });
+        } finally {
+            client.release();
         }
-        
-        return res.status(201).json({ message: "Successfully created business" })
+
     }
-    catch(error){
+    catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Server Error" })
     }
 }
 
-export const getBusinessMember = async(req: Request<BusinessParams>, res: Response) => {
+export const getBusinessMember = async (req: Request<BusinessParams>, res: Response) => {
     const business_id = req.params.businessID;
 
     const business_memberResult = await pool.query(
@@ -82,35 +95,35 @@ export const getBusinessMember = async(req: Request<BusinessParams>, res: Respon
         u.last_name
         FROM business_member bm
         JOIN users u ON bm.user_id = u.firebase_uid
-        WHERE business_id = $1`, 
+        WHERE business_id = $1`,
         [business_id]
     );
 
-    if(!business_memberResult.rows.length){
-        res.status(500).json({ message: "Server Error" })
+    if (!business_memberResult.rows.length) {
+        return res.status(500).json({ message: "Server Error" })
     }
 
-    res.status(201).json(business_memberResult.rows)
+    return res.status(201).json(business_memberResult.rows)
 }
 
-export const createBusinessMember = async(req: Request<BusinessParams>, res: Response) => {
+export const createBusinessMember = async (req: Request<BusinessParams>, res: Response) => {
     const business_id = req.params.businessID;
     const role = req.body
     const user_id = req.user?.uid
 
-    if(!business_id || !role || !user_id){
+    if (!business_id || !role || !user_id) {
         return res.status(400).json({ message: "Missing fields" })
     }
 
-    try{
+    try {
         const business_memberResult = await pool.query<BusinessMember>(`INSERT INTO business_member (business_id, user_id, role)
-            VALUES($1, $2, $3) RETURNING *`, 
+            VALUES($1, $2, $3) RETURNING *`,
             [business_id, user_id, role])
-        
+
         res.status(201).json({ message: "Successfully create business member" })
     }
-    catch(error: any){
-        if(error.code === "23505"){
+    catch (error: any) {
+        if (error.code === "23505") {
             return res.status(409).json({ message: "User is already member" })
         }
         console.log(error)
@@ -118,13 +131,13 @@ export const createBusinessMember = async(req: Request<BusinessParams>, res: Res
     }
 }
 
-export const updateRole = async(req: Request<BusinessParams>, res: Response) => {
-    try{
+export const updateRole = async (req: Request<BusinessParams>, res: Response) => {
+    try {
         const businessID = req.params.businessID;
         const { user, role } = req.body;
 
         const validRoleChanges = ["admin", "member", "disabled"];
-        if(!user || !validRoleChanges.includes(role)){
+        if (!user || !validRoleChanges.includes(role)) {
             return res.status(400).json({ message: "Missing Fields" });
         }
 
@@ -144,57 +157,57 @@ export const updateRole = async(req: Request<BusinessParams>, res: Response) => 
             AND user_id = $3
             RETURNING *
             `, [role, businessID, user]);
-        
-        if(!result.rows[0]){
+
+        if (!result.rows[0]) {
             return res.status(500).json({ message: "Database Error" });
         }
 
         return res.status(200).json(result.rows[0]);
     }
-    catch(error){
+    catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Server Error" })
     }
 }
 
-export const getRole = async(req: Request<BusinessParams>, res: Response) => {
-    try{
+export const getRole = async (req: Request<BusinessParams>, res: Response) => {
+    try {
         const businessID = req.params.businessID;
         const user = req.user?.uid;
 
         const result = await pool.query(`SELECT role FROM business_member WHERE business_id = $1 and user_id = $2`, [businessID, user]);
 
-        if(!result.rows[0]){
-            return res.status(500).json({ message: "Database Error" });
+        if (!result.rows[0]) {
+            return res.status(404).json({ message: "Database Error; no roles found" });
         }
         return res.status(200).json(result.rows[0]);
     }
-    catch(error){
+    catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Server Error" })
     }
 }
 
 //create invitation for users to join business
-export const createBusinessInvite = async(req: Request<BusinessParams>, res: Response) => {
-    try{
+export const createBusinessInvite = async (req: Request<BusinessParams>, res: Response) => {
+    try {
         const business_id = req.params.businessID;
         const { username, role = "member", expiresAt } = req.body;
         const invitedBy = req.user?.uid;
 
         const member = req.businessMember;
 
-        if(!member){
+        if (!member) {
             return res.status(401).json({ message: "Unauthorized" });
         }
 
-        if(member.role !== "owner"){
+        if (member.role !== "owner") {
             return res.status(403).json({ message: "Unauthorized" })
         }
 
         const user = await pool.query(`SELECT firebase_uid FROM users WHERE username = $1`, [username]);
 
-        if(!user.rows[0]) return res.status(400).json({ message: "User not found" });
+        if (!user.rows[0]) return res.status(404).json({ message: "User not found" });
 
         const userID = user.rows[0].firebase_uid;
 
@@ -205,7 +218,7 @@ export const createBusinessInvite = async(req: Request<BusinessParams>, res: Res
             [userID, business_id]
         );
 
-        if(checkMember.rows[0]) return res.status(400).json({ message: "Member already Exists" });
+        if (checkMember.rows[0]) return res.status(400).json({ message: "Member already Exists" });
 
         const businessInv = await pool.query(`
             SELECT * FROM business_invite 
@@ -216,7 +229,7 @@ export const createBusinessInvite = async(req: Request<BusinessParams>, res: Res
             [userID, business_id]
         );
 
-        if(businessInv.rows[0]) return res.status(400).json({ message: "Already Invited" });
+        if (businessInv.rows[0]) return res.status(400).json({ message: "Already Invited" });
 
         const result = await pool.query(`
             INSERT INTO business_invite (business_id, user_id, invited_by, role, expires_at)
@@ -225,20 +238,20 @@ export const createBusinessInvite = async(req: Request<BusinessParams>, res: Res
             [business_id, userID, invitedBy, role, expiresAt || null]
         );
 
-        if(!result.rows[0]){
+        if (!result.rows[0]) {
             return res.status(500).json({ message: "Database Error" });
         }
 
         return res.status(201).json({ message: "Created Successfully" });
     }
-    catch(error){
+    catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Server Error" });
     }
 }
 
-export const getUserInvite = async(req: Request, res: Response) => {
-    try{
+export const getUserInvite = async (req: Request, res: Response) => {
+    try {
         const user = req.user?.uid;
 
         const result = await pool.query(`
@@ -256,15 +269,15 @@ export const getUserInvite = async(req: Request, res: Response) => {
             `, [user]);
         return res.status(200).json(result.rows)
     }
-    catch(error){
+    catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Server Error" });
     }
 }
 
 //allow user to see if anyone invited them to join their business
-export const getBusinessInvite = async(req: Request<BusinessParams>, res: Response) => {
-    try{
+export const getBusinessInvite = async (req: Request<BusinessParams>, res: Response) => {
+    try {
         const businessID = req.params.businessID;
 
         const result = await pool.query(`
@@ -279,29 +292,28 @@ export const getBusinessInvite = async(req: Request<BusinessParams>, res: Respon
             WHERE business_id = $1 
             AND bi.status IN ('canceled', 'sent')
             AND (bi.expires_at IS NULL OR bi.expires_at > NOW())
-            ORDER BY bi.status, bi.created_at DESC`, 
+            ORDER BY bi.status, bi.created_at DESC`,
             [businessID]);
 
         return res.status(200).json(result.rows)
     }
-    catch(error){
+    catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Server Error" })
     }
 }
 
 //accept or decline business invite
-export const updateBusinessInvite = async(req: Request<InviteParams>, res: Response) => {
+export const updateBusinessInvite = async (req: Request<InviteParams>, res: Response) => {
     const inviteID = req.params.inviteID;
     const { status } = req.body;
 
-
-    if(!inviteID || ( status !== "accepted" && status !== "declined" && status !== "canceled" && status != "sent")){
+    if (!inviteID || (status !== "accepted" && status !== "declined" && status !== "canceled" && status !== "sent")) {
         return res.status(400).json({ message: "Unacceptable Field" });
     }
 
-    try{
-        if(status == "declined" || status == "canceled"){
+    try {
+        if (status == "declined" || status == "canceled") {
             const result = await pool.query(`
                 UPDATE business_invite 
                 SET status = $1
@@ -309,7 +321,7 @@ export const updateBusinessInvite = async(req: Request<InviteParams>, res: Respo
                 RETURNING *
                 `, [status, inviteID]);
 
-            if(!result.rows[0]){
+            if (!result.rows[0]) {
                 return res.status(500).json({ message: "Database Error" });
             }
             return res.status(200).json(result.rows[0]);
@@ -317,17 +329,17 @@ export const updateBusinessInvite = async(req: Request<InviteParams>, res: Respo
 
         const invResult = await pool.query<BusinessInvite>(`SELECT * from business_invite WHERE uid = $1`, [inviteID]);
 
-        if(!invResult.rows[0]){
+        if (!invResult.rows[0]) {
             return res.status(500).json({ message: "Database Error" });
         }
 
         const invite = invResult.rows[0];
-        
-        if(invite.expires_at && new Date(invite.expires_at) < new Date()){
+
+        if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
             return res.status(400).json({ message: "Invite Expired" })
         }
 
-        if(invite.status !== "sent" && status !== "sent"){
+        if (invite.status !== "sent" && status !== "sent") {
             return res.status(400).json({ message: `Invite already ${invite.status}` })
         }
 
@@ -338,21 +350,21 @@ export const updateBusinessInvite = async(req: Request<InviteParams>, res: Respo
             RETURNING *
             `, [status, inviteID]);
 
-        if(!result.rows[0]){
+        if (!result.rows[0]) {
             return res.status(500).json({ message: "Database Error" });
         }
 
         const newMember = await pool.query<BusinessMember>(`INSERT INTO business_member (business_id, user_id, role)
-            VALUES($1, $2, $3) RETURNING *`, 
+            VALUES($1, $2, $3) RETURNING *`,
             [invite.business_id, invite.user_id, invite.role]);
 
-        if(!newMember.rows[0]){
+        if (!newMember.rows[0]) {
             return res.status(500).json({ message: "Database Error" });
         }
-        
+
         return res.status(200).json(newMember.rows[0]);
     }
-    catch(error){
+    catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Server Error" })
     }
