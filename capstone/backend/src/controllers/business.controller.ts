@@ -123,7 +123,8 @@ export const updateRole = async(req: Request<BusinessParams>, res: Response) => 
         const businessID = req.params.businessID;
         const { user, role } = req.body;
 
-        if(!user || role !== "admin" || role !== "member" || role !== "disabled"){
+        const validRoleChanges = ["admin", "member", "disabled"];
+        if(!user || !validRoleChanges.includes(role)){
             return res.status(400).json({ message: "Missing Fields" });
         }
 
