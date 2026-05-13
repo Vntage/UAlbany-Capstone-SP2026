@@ -26,6 +26,8 @@ export default function Alerts() {
   const [loading, setLoading] = useState(false);
   const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"
 
+  const role = localStorage.getItem("role");
+
   const fetchRules = async () => {
     if (!businessID) return;
 
@@ -199,13 +201,14 @@ export default function Alerts() {
                 Monitor risks, anomalies, and insights in real-time
               </p>
             </div>
-
+            {(role === "owner" || role === "admin") &&
             <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm shadow 
                   hover:bg-purple-700 hover:scale-105 hover:shadow-md transition-all duration-200 cursor-pointer"
               onClick={() => setOpenModal(true)}
             >
               + Create Alert Rule
             </button>
+            }
           </div>
           {!loading && businessID &&
             <>

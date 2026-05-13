@@ -33,7 +33,9 @@ export default function Users() {
   const [uInvites, setUInvites] = useState<BusinessInvite[]>([]);
 
   const [showInviteModal, setShowInviteModal] = useState(false)
-  const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080";
+  const api_url = import.meta.env.VITE_API_URL || "http://localhost:8080"; 
+  const [currentUserRole, setCurrentUserRole] = useState("owner");
+  const canEdit = currentUserRole === "owner";
 
   const fetchUsers = async (businessID: string) => {
     try {
@@ -97,6 +99,7 @@ export default function Users() {
     if(!businessID) return;
     getBusinessInvites();
     getUserInvites();
+    getUserRole(businessID);
   }, [businessID])
 
   const updateUserRole = async (userId: string, newRole: string) => {
@@ -130,9 +133,7 @@ export default function Users() {
     }
   };
 
-  const currentUserRole = "owner";
-  const canEditRoles =
-    currentUserRole === "owner" || currentUserRole === "admin";
+ 
 
   const totalUsers = users.length;
   const admins = users.filter(
@@ -206,6 +207,17 @@ export default function Users() {
         return;
   }
 
+  const getUserRole = async(businessID: string) => {
+    const res = await fetch(`${api_url}/api/business/${businessID}/role`,{
+      method: "GET",
+      credentials: "include", 
+    })
+    const data = await res.json();
+
+    localStorage.setItem("role", data.role);
+    setCurrentUserRole(data.role);
+  }
+
   return (
     <div className="flex h-screen bg-surface">
       <Navbar />
@@ -244,7 +256,7 @@ export default function Users() {
             </div>
           )}
 
-          {business && (
+          {business && canEdit && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
                 <StatCard title="Total Users" value={totalUsers} sub="Members" />
@@ -292,7 +304,7 @@ export default function Users() {
 
                             {/* ROLE */}
                             <td className="px-6 py-4">
-                              {canEditRoles ? (
+                              {canEdit ? (
                                 <select
                                   value={user.role || "member"}
                                   onChange={(e) =>
@@ -335,7 +347,7 @@ export default function Users() {
             </>
           )}
 
-          {business && (
+          {business && canEdit && (
             <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
                   <div className="px-6 py-4 border-b">
                     <span className="text-sm font-semibold">Current Business Invitations</span>
@@ -383,7 +395,7 @@ export default function Users() {
 
                               {/*change to status */}
                               <td className="px-6 py-4">
-                                {canEditRoles ? (
+                                {canEdit ? (
                                   <select
                                     value={invite.status || ""}
                                     onChange={(e) =>

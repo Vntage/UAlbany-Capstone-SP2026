@@ -260,7 +260,8 @@ export const checkAlertRules = async(business_id: string) => {
                 `UPDATE alert
                 SET status = 'resolved',
                 resolved_at = NOW(),
-                message = $2
+                message = $2,
+                severity = 'low'
                 WHERE alert_rule_id = $1
                 AND status = 'active'`,
                 [rule.uid, `${rule.title} resolved.`]
