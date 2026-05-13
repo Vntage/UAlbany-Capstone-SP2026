@@ -229,7 +229,7 @@ export default function Users() {
           <div className="flex justify-between items-center mb-8">
             <BusinessSwitcher onCreateClick={() => setShowCreate(true)} />
             
-            {business && (
+            {business && canEdit && (
             <button 
               className="px-4 py-2 bg-black text-white rounded-lg text-sm shadow hover:bg-gray-800"
               onClick={() => setShowInviteModal(true)}
